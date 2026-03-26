@@ -53,6 +53,14 @@
   box-sizing: border-box;
 }
 
+/* 鼠标移入改变图标 */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 .glass-effect {
   background: rgba(255, 255, 255, 0.416);
   backdrop-filter: blur(12px);

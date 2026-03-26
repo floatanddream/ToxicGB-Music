@@ -117,7 +117,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="home">
+  <div class="home ">
     <!-- 新的布局：左侧用户信息，右侧轮播图 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <!-- 左侧：用户卡片 -->
@@ -187,7 +187,7 @@ onUnmounted(() => {
               <p class="text-sm md:text-base mb-4 drop-shadow">
                 {{ slides[currentSlide].description }}
               </p>
-              <Button size="sm" class="bg-primary hover:bg-primary/90 text-white">
+              <Button class="bg-primary hover:bg-primary/90 text-white">
                 {{ slides[currentSlide].action }}
               </Button>
             </div>
@@ -222,8 +222,8 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="content-grid opacity-90">
-      <div class="card bg-white/60 backdrop-blur-md">
+    <div class="content-grid opacity-90 ">
+      <div class="card  glass-effect">
         <h2>推荐歌单</h2>
         <p>发现热门音乐</p>
       </div>
@@ -261,14 +261,15 @@ onUnmounted(() => {
 }
 
 .card {
-  background-color: #fff;
+  margin-top: 2vh;
   border-radius: 8px;
   padding: 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  transition: 0.3s ease-in-out;
 }
 
 .card:hover {
+  background: rgba(255, 255, 255, 0.673);
   transform: translateY(-5px);
 }
 
