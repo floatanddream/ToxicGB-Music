@@ -5,6 +5,8 @@ import { CircleFadingArrowUpIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon } 
 import UserCard from './components/userCard.vue';
 import Carousel from './components/carousel.vue';
 import PopularSinger from './components/popularSinger.vue';
+import PlaylistSection from './components/PlaylistSectionInline.vue';
+import LatestMusicSection from './components/LatestMusicSectionInline.vue';
 
 </script>
 
@@ -22,18 +24,16 @@ import PopularSinger from './components/popularSinger.vue';
     <!-- 热门歌手图片布局 - 两行十列 -->
     <PopularSinger />
 
+    <!-- 推荐歌单 -->
+    <PlaylistSection />
+
+    <!-- 最新音乐 -->
+    <LatestMusicSection />
+
     <div class="content-grid opacity-90">
-      <div class="card bg-white/60 backdrop-blur-md">
-        <h2>推荐歌单</h2>
-        <p>发现热门音乐</p>
-      </div>
-      <div class="card bg-white/60 backdrop-blur-md">
-        <h2>最新音乐</h2>
-        <p>抢先试听新歌</p>
-      </div>
-      <div class="card bg-white/60 backdrop-blur-md">
-        <h2>热门歌手</h2>
-        <p>关注你的偶像</p>
+      <div class="card bg-white/60 dark:bg-gray-800/60 backdrop-blur-md">
+        <h2 class="dark:text-white">热门歌手</h2>
+        <p class="dark:text-gray-300">关注你的偶像</p>
         <Button variant="outline" size="icon">
           <CircleFadingArrowUpIcon />
         </Button>
@@ -45,6 +45,7 @@ import PopularSinger from './components/popularSinger.vue';
 
 <style scoped>
 .home {
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -58,4 +59,6 @@ import PopularSinger from './components/popularSinger.vue';
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
+
+
 </style>

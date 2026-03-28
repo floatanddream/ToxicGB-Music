@@ -5,4 +5,6 @@ export interface MenuItem {
   route?: string
   children?: MenuItem[]
   permission?: string
+  action?: () => void
+  active?: boolean
 }
