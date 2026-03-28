@@ -108,61 +108,89 @@ onUnmounted(() => {
 </script>
 <template>
     <div class="lg:col-span-2">
-        <div class="relative h-full min-h-75 overflow-hidden rounded-xl opacity-90" @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave">
+        <div
+            class="relative h-full min-h-75 overflow-hidden rounded-xl opacity-90 shadow-lg hover:shadow-2xl transition-shadow duration-500"
+            @mouseenter="handleMouseEnter"
+            @mouseleave="handleMouseLeave"
+        >
             <!-- 图片容器 -->
-            <div class="absolute inset-0 flex transition-transform duration-500 ease-in-out"
+            <div class="absolute inset-0 flex transition-transform duration-1000 cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                 :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
                 <div v-for="(slide, index) in slides" :key="index" class="min-w-full h-full relative">
-                    <img :src="slide.image" :alt="slide.title" class="w-full h-full object-cover">
+                    <img
+                        :src="slide.image"
+                        :alt="slide.title"
+                        class="w-full h-full object-cover transform transition-transform duration-1000 hover:scale-105"
+                    >
                 </div>
             </div>
 
-            <!-- 毛玻璃遮罩层 -->
-            <div class="absolute inset-0 bg-black/20 backdrop-blur-xs" />
-
-            <!-- 渐变遮罩，提升文字可读性 -->
-            <div class="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/20" />
+            <!-- 多层遮罩效果 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-black/30" />
+            <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" />
 
             <!-- 轮播内容 -->
             <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center text-white px-4 max-w-xl">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 drop-shadow">
+                <div
+                    class="text-center text-white px-4 max-w-xl transform transition-all duration-700 hover:scale-105"
+                    :style="{ opacity: slides[currentSlide] ? 1 : 0 }"
+                >
+                    <h2 class="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg text-white transform transition-all duration-500">
                         {{ slides[currentSlide]?.title }}
                     </h2>
-                    <p class="text-sm md:text-base mb-4 drop-shadow">
+                    <p class="text-base md:text-lg mb-6 drop-shadow text-gray-100 transform transition-all duration-500 delay-75">
                         {{ slides[currentSlide]?.description }}
                     </p>
-                    <Button size="sm" class="bg-primary hover:bg-primary/90 text-white">
+                    <Button
+                        size="default"
+                        class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    >
                         {{ slides[currentSlide]?.action }}
                     </Button>
                 </div>
             </div>
 
             <!-- 左侧控制按钮 -->
-            <button @click="prevSlide"
-                class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300 group">
-                <ChevronLeftIcon class="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+            <button
+                @click="prevSlide"
+                class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-3 transition-all duration-300 group z-10"
+            >
+                <ChevronLeftIcon class="w-6 h-6 text-white group-hover:scale-125 transition-transform duration-200" />
             </button>
 
             <!-- 右侧控制按钮 -->
-            <button @click="nextSlide"
-                class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300 group">
-                <ChevronRightIcon class="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+            <button
+                @click="nextSlide"
+                class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-3 transition-all duration-300 group z-10"
+            >
+                <ChevronRightIcon class="w-6 h-6 text-white group-hover:scale-125 transition-transform duration-200" />
             </button>
 
             <!-- 底部指示器 -->
-            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                <button v-for="(slide, index) in slides" :key="`indicator-${index}`" @click="goToSlide(index)"
-                    class="w-2 h-2 rounded-full transition-all duration-300"
-                    :class="currentSlide === index ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/80'"
-                    :aria-label="`跳转到第${index + 1}张`" />
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+                <button
+                    v-for="(slide, index) in slides"
+                    :key="`indicator-${index}`"
+                    @click="goToSlide(index)"
+                    class="w-3 h-3 rounded-full transition-all duration-300 transform hover:scale-125"
+                    :class="currentSlide === index ? 'bg-white scale-150 shadow-lg' : 'bg-white/50 hover:bg-white/80'"
+                    :aria-label="`跳转到第${index + 1}张`"
+                />
             </div>
 
             <!-- 当前页码显示 -->
             <div
-                class="absolute bottom-4 right-4 text-white text-xs font-medium bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full">
+                class="absolute bottom-6 right-6 text-white text-sm font-medium bg-black/40 backdrop-blur-md px-3 py-1 rounded-full z-10"
+            >
                 {{ currentSlide + 1 }} / {{ slides.length }}
+            </div>
+
+            <!-- 加载动画 -->
+            <div
+                v-if="!slides[currentSlide]"
+                class="absolute inset-0 flex items-center justify-center bg-gray-900"
+            >
+                <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
             </div>
         </div>
     </div>

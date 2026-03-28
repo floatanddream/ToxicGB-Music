@@ -96,10 +96,25 @@ const handleVolume = (e: Event) => {
 
 <style scoped>
 .player-footer {
-  background-color: #2c2c2c;
+  background-color: rgba(44, 44, 44, 0.85) !important;
   color: #fff;
   padding: 15px 20px;
-  border-top: 1px solid #444;
+  border-top: 1px solid rgba(68, 68, 68, 0.5) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 99 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.dark .player-footer {
+  background-color: rgba(13, 13, 13, 0.85) !important;
+  border-top-color: rgba(34, 34, 34, 0.5) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 .player-controls {
@@ -140,6 +155,10 @@ const handleVolume = (e: Event) => {
   color: #999;
 }
 
+.dark .song-artist {
+  color: #666;
+}
+
 .playback-controls {
   display: flex;
   align-items: center;
@@ -154,6 +173,10 @@ const handleVolume = (e: Event) => {
   cursor: pointer;
   padding: 5px;
   transition: color 0.3s ease;
+}
+
+.dark .control-btn {
+  color: #e0e0e0;
 }
 
 .control-btn:hover {
@@ -191,6 +214,11 @@ const handleVolume = (e: Event) => {
   min-width: 40px;
 }
 
+.dark .time-current,
+.dark .time-total {
+  color: #666;
+}
+
 .progress-bar {
   flex: 1;
   margin: 0 10px;
@@ -199,6 +227,10 @@ const handleVolume = (e: Event) => {
   border-radius: 2px;
   outline: none;
   -webkit-appearance: none;
+}
+
+.dark .progress-bar {
+  background-color: #333;
 }
 
 .progress-bar::-webkit-slider-thumb {
@@ -229,6 +261,10 @@ const handleVolume = (e: Event) => {
   -webkit-appearance: none;
 }
 
+.dark .volume-bar {
+  background-color: #333;
+}
+
 .volume-bar::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 10px;
@@ -242,5 +278,9 @@ const handleVolume = (e: Event) => {
   font-size: 12px;
   color: #999;
   min-width: 35px;
+}
+
+.dark .volume-text {
+  color: #666;
 }
 </style>
