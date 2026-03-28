@@ -45,7 +45,6 @@ import PopularSinger from './components/popularSinger.vue';
 
 <style scoped>
 .home {
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -59,6 +58,4 @@ import PopularSinger from './components/popularSinger.vue';
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
-
-
 </style>

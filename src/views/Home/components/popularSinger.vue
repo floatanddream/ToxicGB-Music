@@ -44,11 +44,10 @@ const secondRowSingers = ref<Singer[]>([
 ])
 
 //生成一个值区间为20-30vh的随机数
-function getRamdonHeight()
-{
+function getRamdonHeight() {
     return {
-         
-        height: Math.floor(Math.random() * (50 + 1)) + 50 + 'px'
+
+        height: Math.floor(Math.random() * (120 + 1)) + 50 + 'px'
     }
 }
 
@@ -61,7 +60,8 @@ function getRamdonHeight()
 
         <!-- 第一行 -->
         <div class="grid grid-cols-15 gap-0 w-full items-end">
-            <div :style="getRamdonHeight()" class="mt-auto group relative overflow-hidden rounded-lg" v-for="singer in firstRowSingers">
+            <div :style="getRamdonHeight()" class="mt-auto group relative overflow-hidden rounded-lg"
+                v-for="singer in firstRowSingers">
                 <img :src="singer.imageUrl" :alt="singer.name"
                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
                 <div
@@ -77,7 +77,8 @@ function getRamdonHeight()
 
         <!-- 第二行 -->
         <div class="grid grid-cols-15 gap-0 w-full items-start mt-4">
-             <div :style="getRamdonHeight()" class="mt-auto group relative overflow-hidden rounded-lg" v-for="singer in secondRowSingers">
+            <div :style="getRamdonHeight()" class="mt-auto group relative overflow-hidden rounded-lg"
+                v-for="singer in secondRowSingers">
                 <img :src="singer.imageUrl" :alt="singer.name"
                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
                 <div
@@ -87,7 +88,7 @@ function getRamdonHeight()
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </template>
