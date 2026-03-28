@@ -57,17 +57,33 @@ function getRamdonHeight()
 
 <template>
     <div class="mt-8 opacity-90">
-        <h2 class="text-2xl font-bold text-white drop-shadow-md mb-6">热门歌手</h2>
+        <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
 
         <!-- 第一行 -->
         <div class="grid grid-cols-15 gap-0 w-full items-end">
-            <div :style="getRamdonHeight()" class="mt-auto group relative overflow-hidden rounded-lg" v-for="singer in firstRowSingers">
-                <img :src="singer.imageUrl" :alt="singer.name"
-                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+            <div
+                :style="getRamdonHeight()"
+                class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                v-for="singer in firstRowSingers"
+                @mouseenter="handleSingerHover($event, true)"
+                @mouseleave="handleSingerHover($event, false)"
+            >
+                <img
+                    :src="singer.imageUrl"
+                    :alt="singer.name"
+                    class="w-full h-full object-cover"
+                    :style="{ transition: 'all 0.7s ease-out', transform: 'scale(1)', filter: 'brightness(100%)' }"
+                    @mouseenter="e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.filter = 'brightness(110%)' }"
+                    @mouseleave="e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'brightness(100%)' }"
+                >
                 <div
-                    class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div class="absolute bottom-1 left-1 text-white text-xs">
-                        <p class="font-medium">{{ singer.name }}</p>
+                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-500 ease-out"
+                    :style="{ opacity: 0, transform: 'translateY(20px)' }"
+                    @mouseenter="e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.backdropFilter = 'blur(2px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(2px)' }"
+                    @mouseleave="e => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.transform = 'translateY(20px)'; e.currentTarget.style.backdropFilter = 'blur(0px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(0px)' }"
+                >
+                    <div class="absolute bottom-3 left-3 text-white text-sm font-medium drop-shadow-lg transform transition-transform duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <p>{{ singer.name }}</p>
                     </div>
                 </div>
             </div>
@@ -77,17 +93,33 @@ function getRamdonHeight()
 
         <!-- 第二行 -->
         <div class="grid grid-cols-15 gap-0 w-full items-start mt-4">
-             <div :style="getRamdonHeight()" class="mt-auto group relative overflow-hidden rounded-lg" v-for="singer in secondRowSingers">
-                <img :src="singer.imageUrl" :alt="singer.name"
-                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+            <div
+                :style="getRamdonHeight()"
+                class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                v-for="singer in secondRowSingers"
+                @mouseenter="handleSingerHover($event, true)"
+                @mouseleave="handleSingerHover($event, false)"
+            >
+                <img
+                    :src="singer.imageUrl"
+                    :alt="singer.name"
+                    class="w-full h-full object-cover"
+                    :style="{ transition: 'all 0.7s ease-out', transform: 'scale(1)', filter: 'brightness(100%)' }"
+                    @mouseenter="e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.filter = 'brightness(110%)' }"
+                    @mouseleave="e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'brightness(100%)' }"
+                >
                 <div
-                    class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div class="absolute bottom-1 left-1 text-white text-xs">
-                        <p class="font-medium">{{ singer.name }}</p>
+                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-500 ease-out"
+                    :style="{ opacity: 0, transform: 'translateY(20px)' }"
+                    @mouseenter="e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.backdropFilter = 'blur(2px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(2px)' }"
+                    @mouseleave="e => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.transform = 'translateY(20px)'; e.currentTarget.style.backdropFilter = 'blur(0px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(0px)' }"
+                >
+                    <div class="absolute bottom-3 left-3 text-white text-sm font-medium drop-shadow-lg transform transition-transform duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <p>{{ singer.name }}</p>
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </template>

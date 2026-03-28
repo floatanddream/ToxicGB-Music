@@ -11,6 +11,15 @@
           <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
           <span class="menu-label">{{ item.label }}</span>
         </RouterLink>
+        <button
+          v-else-if="item.action"
+          @click="item.action"
+          class="menu-link w-full text-left"
+          :class="{ active: item.active }"
+        >
+          <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
+          <span class="menu-label">{{ item.label }}</span>
+        </button>
         <div v-else class="menu-group">
           <span class="group-label">
             <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
@@ -67,15 +76,30 @@ defineProps<{
   transition: background-color 0.3s ease;
 }
 
+.dark .menu-link,
+.dark .sub-menu-link {
+  color: #e0e0e0;
+}
+
 .menu-link:hover,
 .sub-menu-link:hover {
   background-color: #e9ecef;
+}
+
+.dark .menu-link:hover,
+.dark .sub-menu-link:hover {
+  background-color: #2a2a2a;
 }
 
 .menu-link.active,
 .sub-menu-link.active {
   background-color: #e74c3c;
   color: #fff;
+}
+
+.dark .menu-link.active,
+.dark .sub-menu-link.active {
+  background-color: #c0392b;
 }
 
 .menu-icon {
@@ -88,6 +112,10 @@ defineProps<{
   padding: 12px 20px;
   font-weight: bold;
   color: #666;
+}
+
+.dark .menu-group {
+  color: #999;
 }
 
 .sub-menu {
