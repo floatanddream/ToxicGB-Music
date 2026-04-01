@@ -12,14 +12,13 @@ import {
 </script>
 <template>
     <div class="lg:col-span-1">
-        <Card class="h-full p-5! glass opacity-90 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <Card class="h-full user-card">
           <CardHeader class="items-center text-center pb-6">
             <div class="relative mb-4">
-              <div
-                class="h-24 w-24 rounded-full bg-linear-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 hover:scale-105">
+              <div class="user-avatar">
                 <UserIcon class="w-12 h-12 text-white" />
               </div>
-              <div class="absolute bottom-0 left-16 w-6 h-6 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" />
+              <div class="user-status" />
             </div>
             <CardTitle class="text-xl text-primary">音乐爱好者</CardTitle>
             <CardDescription class="text-secondary">聆听世界的声音</CardDescription>
@@ -34,7 +33,7 @@ import {
                   </div>
                   <div class="flex items-center justify-between">
                     <span class="text-sm text-secondary">收藏歌曲</span>
-                    <span class="font-semibold text-primary">892首</span>
+                    <span class="font-semibibold text-primary">892首</span>
                   </div>
                   <div class="flex items-center justify-between">
                     <span class="text-sm text-secondary">创建歌单</span>
@@ -50,22 +49,55 @@ import {
         </Card>
       </div>
 </template>
+
 <style scoped>
-.home {
-  max-width: 1200px;
-  margin: 0 auto;
+.user-card {
+    padding: 1.25rem !important;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background-color: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
 }
 
-.home h1 {
-  margin-bottom: 30px;
-  color: #2c3e50;
+.user-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+.user-avatar {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
+.user-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
 
+.user-status {
+    position: absolute;
+    bottom: 0;
+    left: 4rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    .user-status {
+        border-color: #1f2937;
+    }
+}
 </style>

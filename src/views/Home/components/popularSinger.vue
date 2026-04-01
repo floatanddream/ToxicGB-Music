@@ -44,10 +44,8 @@ const secondRowSingers = ref<Singer[]>([
 ])
 
 //生成一个值区间为20-30vh的随机数
-function getRamdonHeight()
-{
+function getRamdonHeight() {
     return {
-         
         height: Math.floor(Math.random() * (50 + 1)) + 50 + 'px'
     }
 }
@@ -65,31 +63,20 @@ function getRamdonHeight()
                 :style="getRamdonHeight()"
                 class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
                 v-for="singer in firstRowSingers"
-                @mouseenter="handleSingerHover($event, true)"
-                @mouseleave="handleSingerHover($event, false)"
+                :key="singer.id"
             >
                 <img
                     :src="singer.imageUrl"
                     :alt="singer.name"
-                    class="w-full h-full object-cover"
-                    :style="{ transition: 'all 0.7s ease-out', transform: 'scale(1)', filter: 'brightness(100%)' }"
-                    @mouseenter="e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.filter = 'brightness(110%)' }"
-                    @mouseleave="e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'brightness(100%)' }"
+                    class="w-full h-full object-cover singer-image"
                 >
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-500 ease-out"
-                    :style="{ opacity: 0, transform: 'translateY(20px)' }"
-                    @mouseenter="e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.backdropFilter = 'blur(2px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(2px)' }"
-                    @mouseleave="e => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.transform = 'translateY(20px)'; e.currentTarget.style.backdropFilter = 'blur(0px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(0px)' }"
-                >
-                    <div class="absolute bottom-3 left-3 text-white text-sm font-medium drop-shadow-lg transform transition-transform duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                <div class="singer-overlay">
+                    <div class="singer-name">
                         <p>{{ singer.name }}</p>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- 固定宽度图片 -->
-
 
         <!-- 第二行 -->
         <div class="grid grid-cols-15 gap-0 w-full items-start mt-4">
@@ -97,29 +84,68 @@ function getRamdonHeight()
                 :style="getRamdonHeight()"
                 class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
                 v-for="singer in secondRowSingers"
-                @mouseenter="handleSingerHover($event, true)"
-                @mouseleave="handleSingerHover($event, false)"
+                :key="singer.id"
             >
                 <img
                     :src="singer.imageUrl"
                     :alt="singer.name"
-                    class="w-full h-full object-cover"
-                    :style="{ transition: 'all 0.7s ease-out', transform: 'scale(1)', filter: 'brightness(100%)' }"
-                    @mouseenter="e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.filter = 'brightness(110%)' }"
-                    @mouseleave="e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.filter = 'brightness(100%)' }"
+                    class="w-full h-full object-cover singer-image"
                 >
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-500 ease-out"
-                    :style="{ opacity: 0, transform: 'translateY(20px)' }"
-                    @mouseenter="e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.backdropFilter = 'blur(2px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(2px)' }"
-                    @mouseleave="e => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.transform = 'translateY(20px)'; e.currentTarget.style.backdropFilter = 'blur(0px)'; e.currentTarget.style.webkitBackdropFilter = 'blur(0px)' }"
-                >
-                    <div class="absolute bottom-3 left-3 text-white text-sm font-medium drop-shadow-lg transform transition-transform duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                <div class="singer-overlay">
+                    <div class="singer-name">
                         <p>{{ singer.name }}</p>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </template>
+
+<style scoped>
+.singer-image {
+    transition: all 0.7s ease-out;
+    transform: scale(1);
+    filter: brightness(100%);
+}
+
+.group:hover .singer-image {
+    transform: scale(1.1);
+    filter: brightness(110%);
+}
+
+.singer-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+    transition: all 0.5s ease-out;
+    opacity: 0;
+    transform: translateY(20px);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+}
+
+.group:hover .singer-overlay {
+    opacity: 1;
+    transform: translateY(0);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.singer-name {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    drop-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+
+.group:hover .singer-name {
+    transform: translateY(0);
+    opacity: 1;
+}
+</style>

@@ -5,8 +5,8 @@ import { CircleFadingArrowUpIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon } 
 import UserCard from './components/userCard.vue';
 import Carousel from './components/carousel.vue';
 import PopularSinger from './components/popularSinger.vue';
-import PlaylistSection from './components/PlaylistSectionInline.vue';
-import LatestMusicSection from './components/LatestMusicSectionInline.vue';
+import PlaylistSection from './components/PlaylistSection.vue';
+import LatestMusicSection from './components/LatestMusicSection.vue';
 
 </script>
 

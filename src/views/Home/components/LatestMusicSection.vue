@@ -114,63 +114,65 @@ const formatDate = (dateString: string) => {
       <p class="text-gray-600 dark:text-gray-300 mt-2">抢先试听新歌</p>
     </div>
 
-    <div class="music-list space-y-2">
-      <div
-        v-for="song in songs"
-        :key="song.id"
-        class="song-item group hover:bg-white/70 dark:hover:bg-gray-700/50 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm border border-white/10 dark:border-gray-700/20"
-      >
-        <div class="flex items-center gap-4">
-          <!-- 播放控制 -->
-          <Button
-            variant="ghost"
-            size="icon"
-            @click="togglePlay(song)"
-            class="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity w-10 h-10"
-          >
-            <PauseIcon v-if="song.isPlaying" class="w-5 h-5 text-gray-700 dark:text-gray-200" />
-            <PlayIcon v-else class="w-5 h-5 text-gray-700 dark:text-gray-200" />
-          </Button>
-
-          <!-- 歌曲信息 -->
-          <div class="flex items-center gap-4 flex-1 min-w-0">
-            <img
-              :src="song.coverUrl"
-              :alt="song.title"
-              class="w-14 h-14 rounded-lg object-cover flex-shrink-0 shadow-md"
-            />
-            <div class="min-w-0 flex-1">
-              <h3 class="font-semibold text-base dark:text-white text-gray-800 truncate mb-1">{{ song.title }}</h3>
-              <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-                <span class="truncate hover:text-gray-800 dark:hover:text-gray-100 transition-colors cursor-pointer">{{ song.artist }}</span>
-                <span>•</span>
-                <span class="truncate text-xs">{{ song.album }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 时长和日期 -->
-          <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <span class="font-medium">{{ song.duration }}</span>
-            <span class="hidden sm:inline px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">{{ formatDate(song.releaseDate) }}</span>
-          </div>
-
-          <!-- 操作按钮 -->
-          <div class="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+    <div class="px-4 py-6">
+      <div class="music-list space-y-2">
+        <div
+          v-for="song in songs"
+          :key="song.id"
+          class="song-item group hover:bg-white/70 dark:hover:bg-gray-700/50 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm border border-white/10 dark:border-gray-700/20"
+        >
+          <div class="flex items-center gap-4">
+            <!-- 播放控制 -->
             <Button
               variant="ghost"
               size="icon"
-              @click="toggleLike(song)"
-              class="w-9 h-9 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+              @click="togglePlay(song)"
+              class="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity w-10 h-10"
             >
-              <HeartIcon
-                class="w-4 h-4"
-                :class="{ 'fill-red-500 text-red-500': song.isLiked, 'text-gray-600 dark:text-gray-300': !song.isLiked }"
+              <PauseIcon v-if="song.isPlaying" class="w-5 h-5 text-gray-700 dark:text-gray-200" />
+              <PlayIcon v-else class="w-5 h-5 text-gray-700 dark:text-gray-200" />
+            </Button>
+
+            <!-- 歌曲信息 -->
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+              <img
+                :src="song.coverUrl"
+                :alt="song.title"
+                class="w-14 h-14 rounded-lg object-cover flex-shrink-0 shadow-md"
               />
-            </Button>
-            <Button variant="ghost" size="icon" class="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-              <MoreHorizontalIcon class="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </Button>
+              <div class="min-w-0 flex-1">
+                <h3 class="font-semibold text-base dark:text-white text-gray-800 truncate mb-1">{{ song.title }}</h3>
+                <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                  <span class="truncate hover:text-gray-800 dark:hover:text-gray-100 transition-colors cursor-pointer">{{ song.artist }}</span>
+                  <span>•</span>
+                  <span class="truncate text-xs">{{ song.album }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 时长和日期 -->
+            <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <span class="font-medium">{{ song.duration }}</span>
+              <span class="hidden sm:inline px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">{{ formatDate(song.releaseDate) }}</span>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                @click="toggleLike(song)"
+                class="w-9 h-9 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <HeartIcon
+                  class="w-4 h-4"
+                  :class="{ 'fill-red-500 text-red-500': song.isLiked, 'text-gray-600 dark:text-gray-300': !song.isLiked }"
+                />
+              </Button>
+              <Button variant="ghost" size="icon" class="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                <MoreHorizontalIcon class="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
