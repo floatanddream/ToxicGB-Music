@@ -5,150 +5,161 @@
       <p class="text-secondary mt-2">发现属于你的音乐世界</p>
     </div>
 
-    <div class="px-4 py-6">
-      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6 md:gap-8">
-        <div
-          v-for="playlist in playlists"
-          :key="playlist.id"
-          class="group relative cursor-pointer playlist-item"
-          @mouseenter="hoveredPlaylist = playlist.id"
-          @mouseleave="hoveredPlaylist = null"
-        >
-          <!-- 背景光效 -->
-          <div
-            class="absolute -inset-4 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl playlist-glow"
-            :class="{ 'opacity-100': hoveredPlaylist === playlist.id }"
-          />
+    <div class="playlist-carousel">
+      <!-- 左按钮 -->
+      <button class="carousel-button left-button" @click="scrollLeft" :disabled="isAtStart">
+        <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
 
-          <!-- 主卡片 -->
+      <!-- 滚动容器 -->
+      <div class="playlist-scroll-container" ref="scrollContainer">
+        <div class="playlist-flex-container">
           <div
-            class="relative rounded-2xl bg-card/70 dark:bg-gray-800/50 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden playlist-card"
-            :class="{
-              'scale-105 shadow-2xl': hoveredPlaylist === playlist.id,
-              'ring-2 ring-primary/30': playlist.isPremium
-            }"
+            v-for="playlist in playlists"
+            :key="playlist.id"
+            class="playlist-card-wrapper"
           >
-            <!-- 封面区域 -->
-            <div class="relative aspect-square overflow-hidden">
-              <!-- 封面图片 -->
-              <img
-                :src="playlist.coverUrl"
-                :alt="playlist.name"
-                class="w-full h-full object-cover playlist-cover"
-              />
+            <!-- 背景光效 -->
+            <div class="playlist-glow" :class="{ active: hoveredPlaylist === playlist.id }" />
 
-              <!-- 渐变遮罩 -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-              <!-- 播放按钮 -->
-              <div class="play-button-container">
-                <Button
-                  size="icon"
-                  class="rounded-full bg-primary hover:bg-primary/90 shadow-xl w-12 h-12 play-button-main"
-                  @click.stop="playPlaylist(playlist)"
-                >
-                  <PlayIcon class="w-6 h-6 text-white ml-0.5" />
-                </Button>
-              </div>
-
-              <!-- 喜欢按钮 -->
-              <div class="absolute top-3 right-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="w-8 h-8 rounded-full bg-black/30 hover:bg-black/40 backdrop-blur-sm transition-all duration-300 like-button"
-                  :class="{ 'scale-110': playlist.isLiked }"
-                  @click.stop="toggleLike(playlist)"
-                >
-                  <HeartIcon
-                    class="w-4 h-4 text-white transition-all duration-300"
-                    :class="{ 'fill-red-500 text-red-500 scale-110': playlist.isLiked }"
-                  />
-                </Button>
-              </div>
-
-              <!-- 优质标识 -->
-              <div v-if="playlist.isPremium" class="premium-badge">
-                优质
-              </div>
-
-              <!-- 播放数量 -->
-              <div class="absolute bottom-3 left-3 flex items-center gap-1 text-white text-xs font-medium">
-                <UsersIcon class="w-3 h-3" />
-                <span>{{ formatPlayCount(playlist.playCount) }}</span>
-              </div>
-            </div>
-
-            <!-- 信息区域 -->
-            <div class="playlist-info">
-              <!-- 标题 -->
-              <h3 class="playlist-title">
-                {{ playlist.name }}
-              </h3>
-
-              <!-- 描述 -->
-              <p class="playlist-description">
-                {{ playlist.description }}
-              </p>
-
-              <!-- 统计信息 -->
-              <div class="playlist-stats">
-                <div class="flex items-center gap-2">
-                  <MusicIcon class="w-3 h-3" />
-                  <span>{{ playlist.songCount }} 首歌曲</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <ClockIcon class="w-3 h-3" />
-                  <span>{{ playlist.duration }}</span>
-                </div>
-              </div>
-
-              <!-- 操作按钮 -->
-              <div class="playlist-actions">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  class="play-button"
-                  @click.stop="playPlaylist(playlist)"
-                >
-                  <PlayIcon class="w-3 h-3 mr-1" />
-                  播放
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  class="action-button"
-                  @click.stop="addToLibrary(playlist)"
-                >
-                  <PlusIcon class="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  class="action-button"
-                  @click.stop="sharePlaylist(playlist)"
-                >
-                  <Share2Icon class="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            <!-- 进度条（如果正在播放） -->
+            <!-- 主卡片 -->
             <div
-              v-if="playlist.isPlaying"
-              class="absolute bottom-0 left-0 right-0 h-1 bg-primary/30"
+              class="playlist-card group"
+              @mouseenter="hoveredPlaylist = playlist.id"
+              @mouseleave="hoveredPlaylist = null"
+              :class="{
+                'scale-105 shadow-2xl': hoveredPlaylist === playlist.id,
+                'ring-2 ring-primary/30': playlist.isPremium
+              }"
             >
-              <div class="h-full bg-primary animate-pulse" style="width: 65%" />
+              <!-- 封面区域 -->
+              <div class="cover-wrapper">
+                <!-- 封面图片 -->
+                <img
+                  :src="playlist.coverUrl"
+                  :alt="playlist.name"
+                  class="playlist-cover"
+                />
+
+                <!-- 渐变遮罩 -->
+                <div class="cover-overlay" />
+
+                <!-- 播放按钮 -->
+                <div class="play-button-container">
+                  <Button
+                    size="icon"
+                    class="play-button-main"
+                    @click.stop="playPlaylist(playlist)"
+                  >
+                    <PlayIcon class="w-6 h-6 text-white ml-0.5" />
+                  </Button>
+                </div>
+
+                <!-- 喜欢按钮 -->
+                <div class="like-button-container">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="like-button"
+                    :class="{ 'scale-110': playlist.isLiked }"
+                    @click.stop="toggleLike(playlist)"
+                  >
+                    <HeartIcon
+                      class="w-4 h-4 text-white transition-all duration-300"
+                      :class="{ 'fill-red-500 text-red-500 scale-110': playlist.isLiked }"
+                    />
+                  </Button>
+                </div>
+
+                <!-- 优质标识 -->
+                <div v-if="playlist.isPremium" class="premium-badge">
+                  优质
+                </div>
+
+                <!-- 播放数量 -->
+                <div class="play-count">
+                  <UsersIcon class="w-3 h-3" />
+                  <span>{{ formatPlayCount(playlist.playCount) }}</span>
+                </div>
+              </div>
+
+              <!-- 信息区域 -->
+              <div class="playlist-info">
+                <!-- 标题 -->
+                <h3 class="playlist-title">
+                  {{ playlist.name }}
+                </h3>
+
+                <!-- 描述 -->
+                <p class="playlist-description">
+                  {{ playlist.description }}
+                </p>
+
+                <!-- 统计信息 -->
+                <div class="playlist-stats">
+                  <div class="flex items-center gap-2">
+                    <MusicIcon class="w-3 h-3" />
+                    <span>{{ playlist.songCount }} 首歌曲</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <ClockIcon class="w-3 h-3" />
+                    <span>{{ playlist.duration }}</span>
+                  </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="playlist-actions">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    class="play-button"
+                    @click.stop="playPlaylist(playlist)"
+                  >
+                    <PlayIcon class="w-3 h-3 mr-1" />
+                    播放
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    class="action-button"
+                    @click.stop="addToLibrary(playlist)"
+                  >
+                    <PlusIcon class="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    class="action-button"
+                    @click.stop="sharePlaylist(playlist)"
+                  >
+                    <Share2Icon class="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <!-- 进度条（如果正在播放） -->
+              <div v-if="playlist.isPlaying" class="progress-bar">
+                <div class="progress-fill" />
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- 右按钮 -->
+      <button class="carousel-button right-button" @click="scrollRight" :disabled="isAtEnd">
+        <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import {
   PlayIcon,
   HeartIcon,
@@ -174,6 +185,10 @@ interface Playlist {
 }
 
 const hoveredPlaylist = ref<number | null>(null);
+const scrollContainer = ref<HTMLElement | null>(null);
+const scrollPosition = ref(0);
+const isAtStart = ref(true);
+const isAtEnd = ref(false);
 
 const playlists = ref<Playlist[]>([
   {
@@ -248,7 +263,75 @@ const playlists = ref<Playlist[]>([
     isPremium: false,
     isPlaying: false,
   },
+  {
+    id: 7,
+    name: '流行金曲',
+    description: '流行音乐经典之作',
+    coverUrl: 'https://picsum.photos/200/200?random=16',
+    songCount: 26,
+    duration: '1小时38分',
+    playCount: 178000,
+    isLiked: false,
+    isPremium: false,
+    isPlaying: false,
+  },
+  {
+    id: 8,
+    name: '爵士风情',
+    description: '经典爵士音乐合集',
+    coverUrl: 'https://picsum.photos/200/200?random=17',
+    songCount: 22,
+    duration: '1小时29分',
+    playCount: 95000,
+    isLiked: true,
+    isPremium: true,
+    isPlaying: false,
+  },
 ]);
+
+const cardWidth = 16; // rem
+const gapWidth = 1.5; // rem
+const totalWidth = cardWidth + gapWidth; // rem
+
+const updateButtonState = () => {
+  if (scrollContainer.value) {
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value;
+    scrollPosition.value = scrollLeft;
+    isAtStart.value = scrollLeft <= 0;
+    isAtEnd.value = scrollLeft + clientWidth >= scrollWidth;
+  }
+};
+
+const scrollLeft = () => {
+  if (scrollContainer.value) {
+    const currentScroll = scrollContainer.value.scrollLeft;
+    const targetScroll = Math.max(0, currentScroll - totalWidth * 16);
+    scrollContainer.value.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+    setTimeout(updateButtonState, 100);
+  }
+};
+
+const scrollRight = () => {
+  if (scrollContainer.value) {
+    const currentScroll = scrollContainer.value.scrollLeft;
+    const maxScroll = scrollContainer.value.scrollWidth - scrollContainer.value.clientWidth;
+    const targetScroll = Math.min(maxScroll, currentScroll + totalWidth * 16);
+    scrollContainer.value.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+    setTimeout(updateButtonState, 100);
+  }
+};
+
+onMounted(() => {
+  nextTick(() => {
+    updateButtonState();
+  });
+});
 
 const toggleLike = (playlist: Playlist) => {
   playlist.isLiked = !playlist.isLiked;
@@ -277,6 +360,10 @@ const formatPlayCount = (count: number): string => {
   }
   return count.toString();
 };
+
+onMounted(() => {
+  updateButtonState();
+});
 </script>
 
 <style scoped>
@@ -294,17 +381,256 @@ const formatPlayCount = (count: number): string => {
   background-clip: text;
 }
 
-.playlist-item {
-  margin: 0;
-  padding: 0;
+.playlist-carousel {
+  position: relative;
+  width: 100%;
+  height: 32rem;
+  display: flex;
+  align-items: center;
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 20;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-button:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.left-button {
+  left: -1.5rem;
+}
+
+.right-button {
+  right: -1.5rem;
+}
+
+.button-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--text-primary);
+}
+
+.playlist-scroll-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  position: relative;
+  height: 100%;
+  padding: 2rem 0;
+}
+
+.playlist-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.playlist-flex-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  padding: 0 0.5rem;
+  position: relative;
+}
+
+.playlist-card-wrapper {
+  flex: 0 0 auto;
+  width: 16rem;
+  height: 28rem;
+  position: relative;
+  z-index: 1;
+}
+
+.playlist-card-wrapper:hover {
+  z-index: 2;
 }
 
 .playlist-glow {
+  position: absolute;
+  inset: -1rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, hsl(var(--primary)/0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  filter: blur(1rem);
   z-index: 0;
 }
 
+.playlist-glow.active {
+  opacity: 1;
+}
+
 .playlist-card {
+  position: relative;
+  height: 100%;
+  background-color: var(--bg-card);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   z-index: 1;
+}
+
+.playlist-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.25);
+  border-color: hsl(var(--primary)/0.3);
+  z-index: 2;
+}
+
+.cover-wrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.playlist-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.playlist-card:hover .playlist-cover {
+  transform: scale(1.1);
+}
+
+.cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.playlist-card:hover .cover-overlay {
+  opacity: 1;
+}
+
+.play-button-container {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  transform: translateY(5rem);
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 10;
+}
+
+.playlist-card:hover .play-button-container {
+  transform: translateY(0);
+}
+
+.play-button-main {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.play-button-main:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.like-button-container {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+}
+
+.like-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.like-button:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+}
+
+.premium-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+  z-index: 10;
+  letter-spacing: 0.025em;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: premium-pulse 2s infinite;
+}
+
+@keyframes premium-pulse {
+  0% {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(251, 191, 36, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+  }
+}
+
+.play-count {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  z-index: 10;
 }
 
 .playlist-info {
@@ -312,6 +638,8 @@ const formatPlayCount = (count: number): string => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: calc(100% - 16rem);
+  justify-content: space-between;
 }
 
 .playlist-title {
@@ -364,6 +692,12 @@ const formatPlayCount = (count: number): string => {
   flex: 1;
   background-color: color-mix(in srgb, hsl(var(--primary)) 10%, transparent);
   color: hsl(var(--primary));
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
@@ -374,98 +708,43 @@ const formatPlayCount = (count: number): string => {
 .action-button {
   width: 2rem;
   height: 2rem;
-  border-color: var(--border-secondary);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-secondary);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .action-button:hover {
   background-color: var(--bg-hover);
 }
 
-.playlist-cover {
-  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform: scale(1);
-}
-
-.group:hover .playlist-cover {
-  transform: scale(1.1);
-}
-
-.play-button-container {
+.progress-bar {
   position: absolute;
-  bottom: 0.75rem;
-  right: 0.75rem;
-  transform: translateY(5rem);
-  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.25rem;
+  background-color: hsl(var(--primary)/0.3);
   z-index: 10;
 }
 
-.group:hover .play-button-container {
-  transform: translateY(0);
+.progress-fill {
+  height: 100%;
+  background-color: hsl(var(--primary));
+  width: 65%;
+  animation: pulse 2s infinite;
 }
 
-.play-button-main {
-  transition: all 0.3s ease;
-}
-
-.play-button-main:hover {
-  transform: scale(1.1);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-}
-
-.premium-badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
-  z-index: 10;
-  letter-spacing: 0.025em;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: premium-pulse 2s infinite;
-}
-
-@keyframes premium-pulse {
+@keyframes pulse {
   0% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+    opacity: 1;
   }
   50% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(251, 191, 36, 0.5);
+    opacity: 0.7;
   }
   100% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
-  }
-}
-
-.play-button-container {
-  z-index: 10;
-}
-
-.like-button {
-  z-index: 10;
-}
-
-@media (max-width: 1536px) {
-  .section-header h2 {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 1280px) {
-  .section-header h2 {
-    font-size: 1.875rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .section-header h2 {
-    font-size: 1.75rem;
+    opacity: 1;
   }
 }
 </style>
