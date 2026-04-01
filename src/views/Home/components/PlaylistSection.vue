@@ -420,11 +420,11 @@ onMounted(() => {
 }
 
 .left-button {
-  left: -1.5rem;
+  left: 1rem;
 }
 
 .right-button {
-  right: -1.5rem;
+  right: 1rem;
 }
 
 .button-icon {
