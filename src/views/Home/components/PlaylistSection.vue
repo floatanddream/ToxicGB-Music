@@ -5,9 +5,13 @@
       <p class="text-secondary mt-2">发现属于你的音乐世界</p>
     </div>
 
-    <div class="playlist-carousel">
+    <div class="playlist-carousel" @mouseenter="showButtons = true" @mouseleave="showButtons = false">
       <!-- 左按钮 -->
-      <button class="carousel-button left-button" @click="scrollLeft" :disabled="isAtStart">
+      <button class="carousel-button left-button" @mousedown="handleButtonPress" @mouseup="handleButtonRelease"
+        @click="scrollLeft" :disabled="isAtStart" :class="[
+          { 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered },
+          { 'pressed': isButtonPressed && pressedButton === 'left' }
+        ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false; handleButtonRelease">
         <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
@@ -112,8 +116,10 @@
         </div>
       </div>
 
-      <!-- 右按钮 -->
-      <button class="carousel-button right-button" @click="scrollRight" :disabled="isAtEnd">
+      <button class="carousel-button right-button" @mousedown="handleButtonPress" @mouseup="handleButtonRelease"
+        @click="scrollRight" :disabled="isAtEnd"
+        :class="{ 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered }"
+        @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false; handleButtonRelease">
         <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
@@ -153,6 +159,10 @@ const scrollContainer = ref<HTMLElement | null>(null);
 const viewportContainer = ref<HTMLElement | null>(null);
 const offset = ref(0);
 const currentIndex = ref(0);
+const showButtons = ref(false);
+const isButtonHovered = ref(false);
+const isButtonPressed = ref(false);
+const pressedButton = ref<'left' | 'right' | null>(null);
 
 const playlists = ref<Playlist[]>([
   {
@@ -430,11 +440,45 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 20;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+}
+
+.carousel-button.opacity-0 {
+  opacity: 0;
+}
+
+.carousel-button.opacity-100 {
+  opacity: 1;
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(1);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease, opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 20;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+}
+
+.carousel-button.pressed {
+  transform: translateY(-50%) scale(0.85);
 }
 
 .carousel-button:hover:not(:disabled) {
@@ -448,11 +492,11 @@ onUnmounted(() => {
 }
 
 .left-button {
-  left: 1rem;
+  left: 0.5rem;
 }
 
 .right-button {
-  right: 1rem;
+  right: 0.5rem;
 }
 
 .button-icon {
