@@ -7,11 +7,11 @@
 
     <div class="playlist-carousel" @mouseenter="showButtons = true" @mouseleave="showButtons = false">
       <!-- 左按钮 -->
-      <button class="carousel-button left-button" @mousedown="handleButtonPress" @mouseup="handleButtonRelease"
+      <button class="carousel-button left-button"
         @click="scrollLeft" :disabled="isAtStart" :class="[
           { 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered },
           { 'pressed': isButtonPressed && pressedButton === 'left' }
-        ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false; handleButtonRelease">
+        ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false;">
         <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
@@ -116,10 +116,10 @@
         </div>
       </div>
 
-      <button class="carousel-button right-button" @mousedown="handleButtonPress" @mouseup="handleButtonRelease"
+      <button class="carousel-button right-button"
         @click="scrollRight" :disabled="isAtEnd"
         :class="{ 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered }"
-        @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false; handleButtonRelease">
+        @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false">
         <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
