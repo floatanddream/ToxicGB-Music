@@ -21,7 +21,7 @@ import LatestMusicSection from './components/LatestMusicSection.vue';
       <Carousel />
     </div>
 
-    <!-- 热门歌手图片布局 - 两行十列 -->
+    <!-- 热门歌手图片布局  -->
     <PopularSinger />
 
     <!-- 推荐歌单 -->
@@ -59,6 +59,4 @@ import LatestMusicSection from './components/LatestMusicSection.vue';
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
-
-
 </style>
