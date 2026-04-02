@@ -6,7 +6,7 @@ import UserCard from './components/userCard.vue';
 import Carousel from './components/carousel.vue';
 import PopularSinger from './components/popularSinger.vue';
 import PlaylistSection from './components/PlaylistSection.vue';
-import LatestMusicSection from './components/LatestMusicSection.vue';
+import MusicRankingList from './components/musicRankingList.vue';
 
 </script>
 
@@ -27,8 +27,8 @@ import LatestMusicSection from './components/LatestMusicSection.vue';
     <!-- 推荐歌单 -->
     <PlaylistSection />
 
-    <!-- 最新音乐 -->
-    <LatestMusicSection />
+    <!-- 音乐榜单 -->
+    <MusicRankingList />
 
     <div class="content-grid opacity-90">
       <div class="card bg-white/60 dark:bg-gray-800/60 backdrop-blur-md">

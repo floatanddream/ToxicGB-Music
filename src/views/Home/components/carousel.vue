@@ -107,7 +107,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-    <div class="lg:col-span-2">
+    <div class="lg:col-span-2 h-90">
         <div class="relative h-full min-h-75 overflow-hidden rounded-xl opacity-90 shadow-lg hover:shadow-2xl transition-shadow duration-500"
             @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
             <!-- 图片容器 -->
