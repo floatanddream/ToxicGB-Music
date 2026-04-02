@@ -7,8 +7,8 @@
 
     <div class="playlist-carousel" @mouseenter="showButtons = true" @mouseleave="showButtons = false">
       <!-- 左按钮 -->
-      <button class="carousel-button left-button"
-        @click="scrollLeft" :disabled="isAtStart" :class="[
+      <button class="carousel-button left-button" @click="() => { scrollLeft(); handlePress('left') }"
+        :disabled="isAtStart" :class="[
           { 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered },
           { 'pressed': isButtonPressed && pressedButton === 'left' }
         ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false;">
@@ -116,10 +116,11 @@
         </div>
       </div>
 
-      <button class="carousel-button right-button"
-        @click="scrollRight" :disabled="isAtEnd"
-        :class="{ 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered }"
-        @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false">
+      <button class="carousel-button right-button" @click="() => { scrollRight(); handlePress('right') }"
+        :disabled="isAtEnd" :class="[
+          { 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered },
+          { 'pressed': isButtonPressed && pressedButton === 'right' }
+        ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false">
         <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
@@ -163,6 +164,16 @@ const showButtons = ref(false);
 const isButtonHovered = ref(false);
 const isButtonPressed = ref(false);
 const pressedButton = ref<'left' | 'right' | null>(null);
+
+const handlePress = (type) => {
+  pressedButton.value = type
+  isButtonPressed.value = true
+
+  setTimeout(() => {
+    isButtonPressed.value = false
+    pressedButton.value = null
+  }, 150) // 动画时间
+}
 
 const playlists = ref<Playlist[]>([
   {
@@ -477,8 +488,24 @@ onUnmounted(() => {
   opacity: 1;
 }
 
+/* 点击瞬间 */
 .carousel-button.pressed {
-  transform: translateY(-50%) scale(0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* 左箭头移动 */
+.left-button.pressed .button-icon {
+  transform: translateX(-5px);
+}
+
+/* 右箭头移动 */
+.right-button.pressed .button-icon {
+  transform: translateX(5px);
+}
+
+/* 图标动画 */
+.button-icon {
+  transition: transform 0.2s ease;
 }
 
 .carousel-button:hover:not(:disabled) {
