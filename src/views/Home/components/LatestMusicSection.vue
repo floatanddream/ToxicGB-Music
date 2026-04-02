@@ -108,109 +108,242 @@ const formatDate = (dateString: string) => {
 </script>
 
 <template>
-  <div class="latest-music-section px-4 md:px-6">
-    <div class="section-header mb-8">
-      <h2 class="text-3xl font-bold tracking-tight dark:text-white">最新音乐</h2>
-      <p class="text-gray-600 dark:text-gray-300 mt-2">抢先试听新歌</p>
-    </div>
+  <div class="music-list">
+    <div v-for="song in songs" :key="song.id" class="song-card">
+      <!-- 左：封面 + 播放 -->
+      <div class="cover-wrapper" @click="togglePlay(song)">
+        <img :src="song.coverUrl" class="cover" />
 
-    <div class="px-4 py-6">
-      <div class="music-list space-y-2">
-        <div
-          v-for="song in songs"
-          :key="song.id"
-          class="song-item group hover:bg-white/70 dark:hover:bg-gray-700/50 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm border border-white/10 dark:border-gray-700/20"
-        >
-          <div class="flex items-center gap-4">
-            <!-- 播放控制 -->
-            <Button
-              variant="ghost"
-              size="icon"
-              @click="togglePlay(song)"
-              class="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity w-10 h-10"
-            >
-              <PauseIcon v-if="song.isPlaying" class="w-5 h-5 text-gray-700 dark:text-gray-200" />
-              <PlayIcon v-else class="w-5 h-5 text-gray-700 dark:text-gray-200" />
-            </Button>
-
-            <!-- 歌曲信息 -->
-            <div class="flex items-center gap-4 flex-1 min-w-0">
-              <img
-                :src="song.coverUrl"
-                :alt="song.title"
-                class="w-14 h-14 rounded-lg object-cover flex-shrink-0 shadow-md"
-              />
-              <div class="min-w-0 flex-1">
-                <h3 class="font-semibold text-base dark:text-white text-gray-800 truncate mb-1">{{ song.title }}</h3>
-                <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-                  <span class="truncate hover:text-gray-800 dark:hover:text-gray-100 transition-colors cursor-pointer">{{ song.artist }}</span>
-                  <span>•</span>
-                  <span class="truncate text-xs">{{ song.album }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 时长和日期 -->
-            <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              <span class="font-medium">{{ song.duration }}</span>
-              <span class="hidden sm:inline px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">{{ formatDate(song.releaseDate) }}</span>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="icon"
-                @click="toggleLike(song)"
-                class="w-9 h-9 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                <HeartIcon
-                  class="w-4 h-4"
-                  :class="{ 'fill-red-500 text-red-500': song.isLiked, 'text-gray-600 dark:text-gray-300': !song.isLiked }"
-                />
-              </Button>
-              <Button variant="ghost" size="icon" class="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                <MoreHorizontalIcon class="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </Button>
-            </div>
-          </div>
+        <div class="play-overlay">
+          <PlayIcon v-if="!song.isPlaying" />
+          <PauseIcon v-else />
         </div>
+      </div>
+
+      <!-- 中：信息 -->
+      <div class="info">
+        <div class="title-row">
+          <h3 class="title">{{ song.title }}</h3>
+          <span class="duration">{{ song.duration }}</span>
+        </div>
+
+        <div class="meta">
+          <span class="artist">{{ song.artist }}</span>
+          <span class="dot">•</span>
+          <span class="album">{{ song.album }}</span>
+        </div>
+
+        <div class="date">{{ formatDate(song.releaseDate) }}</div>
+      </div>
+
+      <!-- 右：操作 -->
+      <div class="actions">
+        <button class="icon-btn like" @click="toggleLike(song)">
+          <HeartIcon :class="{ liked: song.isLiked }" />
+        </button>
+
+        <button class="icon-btn more">
+          <MoreHorizontalIcon />
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-.latest-music-section {
-  margin-bottom: 3rem;
-}
-
-.section-header {
-  text-align: left;
-}
-
-.section-header h2 {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
-  letter-spacing: -0.025em;
-}
-
+<style lang="css" scoped>
 .music-list {
-  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.song-item {
-  backdrop-filter: blur(10px);
+/* 卡片整体 */
+.song-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+
+  transition: all 0.25s ease;
+  cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .song-item .hidden-sm {
-    display: none;
-  }
+/* 暗黑模式适配 */
+.dark .song-card {
+  background: rgba(30, 30, 40, 0.6);
+  border-color: var(--glass-border, rgba(255, 255, 255, 0.1));
+}
 
-  .section-header h2 {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-  }
+/* hover 提升 */
+.song-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.dark .song-card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* 封面 */
+.cover-wrapper {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* 播放按钮（悬浮） */
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+
+  opacity: 0;
+  transition: 0.2s;
+}
+
+.cover-wrapper:hover .play-overlay {
+  opacity: 1;
+}
+
+.play-overlay svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+/* 信息区 */
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #222;
+}
+
+.dark .title {
+  color: #f1f5f9;
+}
+
+.duration {
+  font-size: 12px;
+  color: #888;
+}
+
+.dark .duration {
+  color: #94a3b8;
+}
+
+/* 次信息 */
+.meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #666;
+
+  display: flex;
+  gap: 6px;
+}
+
+.dark .meta {
+  color: #cbd5e1;
+}
+
+.artist:hover {
+  color: #000;
+}
+
+.dark .artist:hover {
+  color: #f8fafc;
+}
+
+/* 日期 */
+.date {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.dark .date {
+  color: #64748b;
+}
+
+/* 操作区 */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 按钮 */
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s;
+  background-color: transparent;
+}
+
+/* hover 动效 */
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.dark .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* like 特效 */
+.icon-btn.like svg {
+  transition: all 0.2s;
+  color: #666;
+}
+
+.dark .icon-btn.like svg {
+  color: #cbd5e1;
+}
+
+.icon-btn.like svg.liked {
+  color: #ff4d4f;
+  fill: #ff4d4f;
+  transform: scale(1.2);
+}
+
+/* 更多按钮 */
+.icon-btn.more svg {
+  color: #666;
+}
+
+.dark .icon-btn.more svg {
+  color: #cbd5e1;
 }
 </style>
