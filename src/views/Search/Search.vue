@@ -198,7 +198,8 @@ const handleLikePlaylist = (playlist: Playlist) => {
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
           <span
             class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
-            "{{ searchQuery }}" 的搜索结果
+            <span v-if="searchQuery">{{ searchQuery }} 的搜索结果</span>
+            <span v-else>搜索音乐</span>
           </span>
         </h1>
         <p class="text-secondary mt-5 max-w-2xl">
@@ -208,7 +209,19 @@ const handleLikePlaylist = (playlist: Playlist) => {
       <div class="max-w-4xl mx-auto mb-8">
         <SearchInput @search="handleSearch" />
       </div>
-      <div class="glass-card rounded-2xl p-6">
+
+      <div v-if="!searchQuery" class="search-empty-state">
+        <div class="max-w-2xl mx-auto text-center py-16">
+          <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <SearchIcon class="w-16 h-16 text-gray-400" />
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">输入关键词开始搜索</h2>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">搜索歌曲、歌手、专辑、歌单或用户</p>
+         
+        </div>
+      </div>
+
+      <div v-else class="glass-card rounded-2xl p-6">
         <Tabs v-model="activeTab" class="w-full">
           <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
             <TabsTrigger value="songs">歌曲</TabsTrigger>
