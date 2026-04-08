@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
+
 defineProps<{
   placeholder?: string
 }>()
@@ -11,7 +15,12 @@ const query = defineModel<string>()
 
 const handleSearch = () => {
   if (query.value?.trim()) {
-    emit.search(query.value.trim())
+     router.push({
+    path: '/search',
+    query: {
+      keywords: query.value
+    }
+  })
   }
 }
 

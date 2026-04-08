@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed,watch } from 'vue';
+import { useRoute } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
 import SongResults from './components/SongResults.vue';
 import ArtistResults from './components/ArtistResults.vue';
@@ -44,6 +45,13 @@ interface User {
   songCount: string;
   isFollowing: boolean;
 }
+
+const router = useRoute();
+
+watch( () => router.query.keywords,(newKeywords) =>{
+  searchQuery.value = newKeywords as string;
+})
+
 
 const searchQuery = ref('');
 const activeTab = ref('songs');
@@ -143,7 +151,7 @@ const handleFollowUser = (user: User) => {
       <div class="section-header flex flex-col mb-8 ">
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
           <span class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
-          "xxx"的搜索结果
+          "{{ searchQuery }}"的搜索结果
           </span>
         </h1>
         <p class="text-secondary mt-5 max-w-2xl">
