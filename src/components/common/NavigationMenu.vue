@@ -2,21 +2,12 @@
   <nav class="navigation-menu">
     <ul class="menu-list">
       <li v-for="item in items" :key="item.id" class="menu-item">
-        <RouterLink
-          v-if="item.route"
-          :to="item.route"
-          class="menu-link"
-          active-class="active"
-        >
+        <RouterLink v-if="item.route" :to="item.route" class="menu-link" active-class="active">
           <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
           <span class="menu-label">{{ item.label }}</span>
         </RouterLink>
-        <button
-          v-else-if="item.action"
-          @click="item.action"
-          class="menu-link w-full text-left"
-          :class="{ active: item.active }"
-        >
+        <button v-else-if="item.action" @click="item.action" class="menu-link w-full text-left"
+          :class="{ active: item.active }">
           <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
           <span class="menu-label">{{ item.label }}</span>
         </button>
@@ -27,11 +18,7 @@
           </span>
           <ul v-if="item.children" class="sub-menu">
             <li v-for="child in item.children" :key="child.id">
-              <RouterLink
-                :to="child.route"
-                class="sub-menu-link"
-                active-class="active"
-              >
+              <RouterLink :to="child.route" class="sub-menu-link" active-class="active">
                 <span v-if="child.icon" class="menu-icon">{{ child.icon }}</span>
                 <span class="menu-label">{{ child.label }}</span>
               </RouterLink>
@@ -83,38 +70,47 @@ defineProps<{
 
 .menu-link:hover,
 .sub-menu-link:hover {
-  background: rgba(231, 76, 60, 0.08);
-  backdrop-filter: blur(8px) saturate(180%);
-  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  background: #ff3b30;
+  /* 亮红色 */
   border-radius: 8px;
-  border: 1px solid rgba(231, 76, 60, 0.1);
+  border: 1px solid #ff3b30;
   margin: 0 8px;
   padding: 12px 12px;
+
+
+
+  color: #fff;
+  /* 文字变白更清晰 */
 }
 
 .dark .menu-link:hover,
 .dark .sub-menu-link:hover {
-  background: rgba(192, 57, 43, 0.15);
-  border: 1px solid rgba(192, 57, 43, 0.2);
+  background: #ff453a;
+  /* 暗色稍微提亮 */
+  border: 1px solid #ff453a;
+
+
+  color: #fff;
 }
 
 .menu-link.active,
 .sub-menu-link.active {
-  background: rgba(231, 76, 60, 0.15);
-  backdrop-filter: blur(8px) saturate(180%);
-  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  background: #ff3b30;
   border-radius: 8px;
-  border: 1px solid rgba(231, 76, 60, 0.2);
-  color: #e74c3c;
+  border: 1px solid #ff3b30;
+  color: #fff;
   margin: 0 8px;
   padding: 12px 12px;
+
 }
 
 .dark .menu-link.active,
 .dark .sub-menu-link.active {
-  background: rgba(192, 57, 43, 0.2);
-  border: 1px solid rgba(192, 57, 43, 0.3);
-  color: #e74c3c;
+  background: #ff453a;
+  border: 1px solid #ff453a;
+  color: #fff;
+
+
 }
 
 .menu-icon {
