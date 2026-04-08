@@ -256,13 +256,11 @@ const handleLikePlaylist = (playlist: Playlist) => {
           </TabsContent>
 
           <TabsContent value="playlists">
-            <ScrollArea class="h-[600px]">
-              <PlaylistResults
-                :playlists="filteredPlaylists"
-                @playlist-click="handlePlaylistClick"
-                @like-playlist="handleLikePlaylist"
-              />
-            </ScrollArea>
+            <PlaylistResults
+              :playlists="filteredPlaylists"
+              @playlist-click="handlePlaylistClick"
+              @like-playlist="handleLikePlaylist"
+            />
           </TabsContent>
 
           <TabsContent value="users">
