@@ -224,11 +224,46 @@ const handleLikePlaylist = (playlist: Playlist) => {
       <div v-else class="glass-card rounded-2xl p-6">
         <Tabs v-model="activeTab" class="w-full">
           <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
-            <TabsTrigger value="songs">歌曲</TabsTrigger>
-            <TabsTrigger value="artists">歌手</TabsTrigger>
-            <TabsTrigger value="albums">专辑</TabsTrigger>
-            <TabsTrigger value="playlists">歌单</TabsTrigger>
-            <TabsTrigger value="users">用户</TabsTrigger>
+            <TabsTrigger value="songs">
+              <div class="flex items-center gap-1">
+                <span>歌曲</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  ({{ filteredSongs.length }})
+                </span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="artists">
+              <div class="flex items-center gap-1">
+                <span>歌手</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  ({{ filteredArtists.length }})
+                </span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="albums">
+              <div class="flex items-center gap-1">
+                <span>专辑</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  ({{ filteredAlbums.length }})
+                </span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="playlists">
+              <div class="flex items-center gap-1">
+                <span>歌单</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  ({{ filteredPlaylists.length }})
+                </span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="users">
+              <div class="flex items-center gap-1">
+                <span>用户</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  ({{ filteredUsers.length }})
+                </span>
+              </div>
+            </TabsTrigger>
           </TabsList>
 
           <!-- 添加过渡动画 -->
