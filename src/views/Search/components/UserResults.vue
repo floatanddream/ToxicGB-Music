@@ -29,7 +29,7 @@ defineEmits<{
       <span class="text-sm text-gray-500">{{ users.length }} 位用户</span>
     </div>
 
-    <div class="space-y-3">
+    <div v-if="users.length > 0" class="space-y-3">
       <div
         v-for="user in users"
         :key="user.id"
@@ -71,6 +71,16 @@ defineEmits<{
             {{ user.isFollowing ? '已关注' : '关注' }}
           </Button>
         </div>
+      </div>
+    </div>
+
+    <div v-else class="empty-state">
+      <div class="text-center py-12">
+        <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <UserPlus class="w-12 h-12 text-gray-400" />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">没有找到用户</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">试试其他关键词</p>
       </div>
     </div>
   </div>

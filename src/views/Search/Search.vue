@@ -223,30 +223,32 @@ const handleLikePlaylist = (playlist: Playlist) => {
             <Transition name="fade-scale" mode="out-in">
               <div :key="activeTab">
                 <TabsContent value="songs" v-show="activeTab === 'songs'">
-                  <ScrollArea class="h-[600px]">
+                  <ScrollArea>
                     <SongResults :songs="filteredSongs" :is-playing="isPlaying" @play-song="handlePlaySong" />
                   </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="artists" v-show="activeTab === 'artists'">
-                  <ScrollArea class="h-[600px]">
+                  <ScrollArea>
                     <ArtistResults :artists="filteredArtists" @artist-click="handleArtistClick" />
                   </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="albums" v-show="activeTab === 'albums'">
-                  <ScrollArea class="h-[600px]">
+                  <ScrollArea>
                     <AlbumResults :albums="filteredAlbums" @album-click="handleAlbumClick" />
                   </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="playlists" v-show="activeTab === 'playlists'">
-                  <PlaylistResults :playlists="filteredPlaylists" @playlist-click="handlePlaylistClick"
-                    @like-playlist="handleLikePlaylist" />
+                  <ScrollArea>
+                    <PlaylistResults :playlists="filteredPlaylists" @playlist-click="handlePlaylistClick"
+                      @like-playlist="handleLikePlaylist" />
+                  </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="users" v-show="activeTab === 'users'">
-                  <ScrollArea class="h-[600px]">
+                  <ScrollArea>
                     <UserResults :users="filteredUsers" @user-click="handleUserClick" @follow-user="handleFollowUser" />
                   </ScrollArea>
                 </TabsContent>

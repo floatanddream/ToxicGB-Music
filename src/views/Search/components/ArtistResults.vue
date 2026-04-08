@@ -28,7 +28,7 @@ defineEmits<{
       <span class="text-sm text-gray-500">{{ artists.length }} 位歌手</span>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+    <div v-if="artists.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       <div
         v-for="artist in artists"
         :key="artist.id"
@@ -56,6 +56,16 @@ defineEmits<{
           <span>•</span>
           <span>{{ artist.songCount }} 歌曲</span>
         </div>
+      </div>
+    </div>
+
+    <div v-else class="empty-state">
+      <div class="text-center py-12">
+        <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <User class="w-12 h-12 text-gray-400" />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">没有找到歌手</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">试试其他关键词</p>
       </div>
     </div>
   </div>
