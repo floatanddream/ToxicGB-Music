@@ -29,17 +29,6 @@ import MusicRankingList from './components/musicRankingList.vue';
 
     <!-- 音乐榜单 -->
     <MusicRankingList />
-
-    <div class="content-grid opacity-90">
-      <div class="card bg-white/60 dark:bg-gray-800/60 backdrop-blur-md">
-        <h2 class="dark:text-white">热门歌手</h2>
-        <p class="dark:text-gray-300">关注你的偶像</p>
-        <Button variant="outline" size="icon">
-          <CircleFadingArrowUpIcon />
-        </Button>
-        <Button class="bg-sky-500">657567</Button>
-      </div>
-    </div>
   </div>
 </template>
 
