@@ -83,23 +83,38 @@ defineProps<{
 
 .menu-link:hover,
 .sub-menu-link:hover {
-  background-color: #e9ecef;
+  background: rgba(231, 76, 60, 0.08);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border-radius: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.1);
+  margin: 0 8px;
+  padding: 12px 12px;
 }
 
 .dark .menu-link:hover,
 .dark .sub-menu-link:hover {
-  background-color: #2a2a2a;
+  background: rgba(192, 57, 43, 0.15);
+  border: 1px solid rgba(192, 57, 43, 0.2);
 }
 
 .menu-link.active,
 .sub-menu-link.active {
-  background-color: #e74c3c;
-  color: #fff;
+  background: rgba(231, 76, 60, 0.15);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border-radius: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  margin: 0 8px;
+  padding: 12px 12px;
 }
 
 .dark .menu-link.active,
 .dark .sub-menu-link.active {
-  background-color: #c0392b;
+  background: rgba(192, 57, 43, 0.2);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  color: #e74c3c;
 }
 
 .menu-icon {
