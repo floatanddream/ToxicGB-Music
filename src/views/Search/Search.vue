@@ -75,9 +75,9 @@ const isPlaying = ref(false);
 const mockSongs: Song[] = [
   { id: '1', title: 'Lose Yourself', artist: 'Eminem', album: '8 Mile Soundtrack', duration: '5:26', cover: 'https://picsum.photos/60/60?random=1' },
   { id: '2', title: 'Bohemian Rhapsody', artist: 'Queen', album: 'A Night at the Opera', duration: '5:55', cover: 'https://picsum.photos/60/60?random=2' },
-  { id: '3', title: 'Shape of You', artist: 'Ed Sheeran', album: '÷', duration: '3:53', cover: 'https://picsum.photos/60/60?random=3' },
+  { id: '3', title: 'Shape 1of You', artist: 'Ed Sheeran', album: '÷', duration: '3:53', cover: 'https://picsum.photos/60/60?random=3' },
   { id: '4', title: 'Rolling in the Deep', artist: 'Adele', album: '21', duration: '3:48', cover: 'https://picsum.photos/60/60?random=4' },
-  { id: '5', title: 'Billie Jean', artist: 'Michael Jackson', album: 'Thriller', duration: '4:54', cover: 'https://picsum.photos/60/60?random=5' },
+  { id: '5', title: 'Billie1 Jean', artist: 'Michael Jackson', album: 'Thriller', duration: '4:54', cover: 'https://picsum.photos/60/60?random=5' },
 ];
 
 const mockArtists: Artist[] = [
@@ -212,12 +212,13 @@ const handleLikePlaylist = (playlist: Playlist) => {
 
       <div v-if="!searchQuery" class="search-empty-state">
         <div class="max-w-2xl mx-auto text-center py-16">
-          <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <div
+            class="w-32 h-32 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <SearchIcon class="w-16 h-16 text-gray-400" />
           </div>
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">输入关键词开始搜索</h2>
           <p class="text-gray-600 dark:text-gray-400 mb-6">搜索歌曲、歌手、专辑、歌单或用户</p>
-         
+
         </div>
       </div>
 
