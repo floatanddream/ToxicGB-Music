@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed,watch } from 'vue';
-import { useRoute,useRouter } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
 import SongResults from './components/SongResults.vue';
 import ArtistResults from './components/ArtistResults.vue';
@@ -63,7 +63,7 @@ interface Playlist {
 const route = useRoute();
 const router = useRouter();
 
-watch( () => route.query.keywords,(newKeywords) =>{
+watch(() => route.query.keywords, (newKeywords) => {
   searchQuery.value = newKeywords as string;
 })
 
@@ -152,12 +152,12 @@ const filteredPlaylists = computed(() => {
 
 const handleSearch = (query: string) => {
   if (query.trim()) {
-     router.push({
-    path: '/search',
-    query: {
-      keywords: query
-    }
-  })
+    router.push({
+      path: '/search',
+      query: {
+        keywords: query
+      }
+    })
   }
 };
 
@@ -196,8 +196,9 @@ const handleLikePlaylist = (playlist: Playlist) => {
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
       <div class="section-header flex flex-col mb-8 ">
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
-          <span class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
-          "{{ searchQuery }}" 的搜索结果
+          <span
+            class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
+            "{{ searchQuery }}" 的搜索结果
           </span>
         </h1>
         <p class="text-secondary mt-5 max-w-2xl">
@@ -210,68 +211,48 @@ const handleLikePlaylist = (playlist: Playlist) => {
       <div class="glass-card rounded-2xl p-6">
         <Tabs v-model="activeTab" class="w-full">
           <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
-            <TabsTrigger value="songs">
-              歌曲
-            </TabsTrigger>
-            <TabsTrigger value="artists">
-              歌手
-            </TabsTrigger>
-            <TabsTrigger value="albums">
-              专辑
-            </TabsTrigger>
-            <TabsTrigger value="playlists">
-              歌单
-            </TabsTrigger>
-            <TabsTrigger value="users">
-              用户
-            </TabsTrigger>
+            <TabsTrigger value="songs">歌曲</TabsTrigger>
+            <TabsTrigger value="artists">歌手</TabsTrigger>
+            <TabsTrigger value="albums">专辑</TabsTrigger>
+            <TabsTrigger value="playlists">歌单</TabsTrigger>
+            <TabsTrigger value="users">用户</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="songs">
-            <ScrollArea class="h-[600px]">
-              <SongResults
-                :songs="filteredSongs"
-                :is-playing="isPlaying"
-                @play-song="handlePlaySong"
-              />
-            </ScrollArea>
-          </TabsContent>
+          <!-- 添加过渡动画 -->
+          <div class="relative">
+            <Transition name="fade-scale" mode="out-in">
+              <div :key="activeTab">
+                <TabsContent value="songs" v-show="activeTab === 'songs'">
+                  <ScrollArea class="h-[600px]">
+                    <SongResults :songs="filteredSongs" :is-playing="isPlaying" @play-song="handlePlaySong" />
+                  </ScrollArea>
+                </TabsContent>
 
-          <TabsContent value="artists">
-            <ScrollArea class="h-[600px]">
-              <ArtistResults
-                :artists="filteredArtists"
-                @artist-click="handleArtistClick"
-              />
-            </ScrollArea>
-          </TabsContent>
+                <TabsContent value="artists" v-show="activeTab === 'artists'">
+                  <ScrollArea class="h-[600px]">
+                    <ArtistResults :artists="filteredArtists" @artist-click="handleArtistClick" />
+                  </ScrollArea>
+                </TabsContent>
 
-          <TabsContent value="albums">
-            <ScrollArea class="h-[600px]">
-              <AlbumResults
-                :albums="filteredAlbums"
-                @album-click="handleAlbumClick"
-              />
-            </ScrollArea>
-          </TabsContent>
+                <TabsContent value="albums" v-show="activeTab === 'albums'">
+                  <ScrollArea class="h-[600px]">
+                    <AlbumResults :albums="filteredAlbums" @album-click="handleAlbumClick" />
+                  </ScrollArea>
+                </TabsContent>
 
-          <TabsContent value="playlists">
-            <PlaylistResults
-              :playlists="filteredPlaylists"
-              @playlist-click="handlePlaylistClick"
-              @like-playlist="handleLikePlaylist"
-            />
-          </TabsContent>
+                <TabsContent value="playlists" v-show="activeTab === 'playlists'">
+                  <PlaylistResults :playlists="filteredPlaylists" @playlist-click="handlePlaylistClick"
+                    @like-playlist="handleLikePlaylist" />
+                </TabsContent>
 
-          <TabsContent value="users">
-            <ScrollArea class="h-[600px]">
-              <UserResults
-                :users="filteredUsers"
-                @user-click="handleUserClick"
-                @follow-user="handleFollowUser"
-              />
-            </ScrollArea>
-          </TabsContent>
+                <TabsContent value="users" v-show="activeTab === 'users'">
+                  <ScrollArea class="h-[600px]">
+                    <UserResults :users="filteredUsers" @user-click="handleUserClick" @follow-user="handleFollowUser" />
+                  </ScrollArea>
+                </TabsContent>
+              </div>
+            </Transition>
+          </div>
         </Tabs>
       </div>
     </div>
@@ -279,6 +260,28 @@ const handleLikePlaylist = (playlist: Playlist) => {
 </template>
 
 <style scoped>
+.fade-scale-enter-active {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+}
+
+.fade-scale-leave-active {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fade-scale-enter-from {
+  opacity: 0;
+  transform: perspective(800px) rotateX(8deg) scale(0.96);
+  transform-origin: top center;
+}
+
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: perspective(800px) rotateX(-5deg) scale(0.98);
+  transform-origin: bottom center;
+}
+
+
 .search-container {
   padding: 1.25rem;
   opacity: 0.9;
@@ -372,12 +375,16 @@ const handleLikePlaylist = (playlist: Playlist) => {
 
 /* 动画 */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   33% {
     transform: translate(30px, -30px) scale(1.05);
   }
+
   66% {
     transform: translate(-30px, 30px) scale(0.95);
   }
@@ -385,7 +392,10 @@ const handleLikePlaylist = (playlist: Playlist) => {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .bg-circle-1, .bg-circle-2, .bg-circle-3 {
+
+  .bg-circle-1,
+  .bg-circle-2,
+  .bg-circle-3 {
     filter: blur(40px);
   }
 }
