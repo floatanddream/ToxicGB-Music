@@ -6,6 +6,7 @@ import SongResults from './components/SongResults.vue';
 import ArtistResults from './components/ArtistResults.vue';
 import AlbumResults from './components/AlbumResults.vue';
 import UserResults from './components/UserResults.vue';
+import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
@@ -44,6 +45,19 @@ interface User {
   fanCount: string;
   songCount: string;
   isFollowing: boolean;
+}
+
+interface Playlist {
+  id: string;
+  title: string;
+  creator: string;
+  cover: string;
+  songCount: string;
+  playCount: string;
+  likeCount: string;
+  isLiked: boolean;
+  description: string;
+  updateTime: string;
 }
 
 const route = useRoute();
@@ -90,6 +104,14 @@ const mockUsers: User[] = [
   { id: '5', name: 'DJ小张', avatar: 'https://picsum.photos/200/200?random=20', fanCount: '5.6千', songCount: '342', isFollowing: false },
 ];
 
+const mockPlaylists: Playlist[] = [
+  { id: '1', title: '今日热门', creator: '系统推荐', cover: 'https://picsum.photos/200/200?random=21', songCount: '32', playCount: '12.3万', likeCount: '892', isLiked: false, description: '今日最热门的歌曲集合', updateTime: '2小时前' },
+  { id: '2', title: '华语经典', creator: '音乐达人', cover: 'https://picsum.photos/200/200?random=22', songCount: '45', playCount: '8.9万', likeCount: '567', isLiked: true, description: '经典华语歌曲，回忆满满', updateTime: '1天前' },
+  { id: '3', title: '电音节奏', creator: 'DJ小王', cover: 'https://picsum.photos/200/200?random=23', songCount: '28', playCount: '6.7万', likeCount: '432', isLiked: false, description: '动感电音，让你嗨翻天', updateTime: '3小时前' },
+  { id: '4', title: '治愈系音乐', creator: '心灵音乐', cover: 'https://picsum.photos/200/200?random=24', songCount: '52', playCount: '9.8万', likeCount: '723', isLiked: true, description: '放松心情，治愈心灵', updateTime: '5小时前' },
+  { id: '5', title: '摇滚力量', creator: '摇滚乐迷', cover: 'https://picsum.photos/200/200?random=25', songCount: '38', playCount: '7.6万', likeCount: '654', isLiked: false, description: '摇滚精神，永不灭', updateTime: '1天前' },
+];
+
 const filteredSongs = computed(() => {
   if (!searchQuery.value) return mockSongs;
   return mockSongs.filter(song =>
@@ -117,6 +139,14 @@ const filteredUsers = computed(() => {
   if (!searchQuery.value) return mockUsers;
   return mockUsers.filter(user =>
     user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const filteredPlaylists = computed(() => {
+  if (!searchQuery.value) return mockPlaylists;
+  return mockPlaylists.filter(playlist =>
+    playlist.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    playlist.creator.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -151,6 +181,14 @@ const handleUserClick = (user: User) => {
 const handleFollowUser = (user: User) => {
   console.log('Follow user:', user.name);
 };
+
+const handlePlaylistClick = (playlist: Playlist) => {
+  console.log('Playlist clicked:', playlist.title);
+};
+
+const handleLikePlaylist = (playlist: Playlist) => {
+  console.log('Like playlist:', playlist.title);
+};
 </script>
 
 <template>
@@ -171,7 +209,7 @@ const handleFollowUser = (user: User) => {
       </div>
       <div class="glass-card rounded-2xl p-6">
         <Tabs v-model="activeTab" class="w-full">
-          <TabsList class="grid grid-cols-4 lg:w-[600px] mx-auto mb-8">
+          <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
             <TabsTrigger value="songs">
               歌曲
             </TabsTrigger>
@@ -180,6 +218,9 @@ const handleFollowUser = (user: User) => {
             </TabsTrigger>
             <TabsTrigger value="albums">
               专辑
+            </TabsTrigger>
+            <TabsTrigger value="playlists">
+              歌单
             </TabsTrigger>
             <TabsTrigger value="users">
               用户
@@ -210,6 +251,16 @@ const handleFollowUser = (user: User) => {
               <AlbumResults
                 :albums="filteredAlbums"
                 @album-click="handleAlbumClick"
+              />
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="playlists">
+            <ScrollArea class="h-[600px]">
+              <PlaylistResults
+                :playlists="filteredPlaylists"
+                @playlist-click="handlePlaylistClick"
+                @like-playlist="handleLikePlaylist"
               />
             </ScrollArea>
           </TabsContent>
