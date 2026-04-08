@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+* {
+  font-family:'PingFang SC'
+}
+
 /* 全局样式变量 */
 :root {
   --primary-color: #e74c3c;
