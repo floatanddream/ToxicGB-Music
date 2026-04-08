@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed,watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute,useRouter } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
 import SongResults from './components/SongResults.vue';
 import ArtistResults from './components/ArtistResults.vue';
@@ -46,9 +46,10 @@ interface User {
   isFollowing: boolean;
 }
 
-const router = useRoute();
+const route = useRoute();
+const router = useRouter();
 
-watch( () => router.query.keywords,(newKeywords) =>{
+watch( () => route.query.keywords,(newKeywords) =>{
   searchQuery.value = newKeywords as string;
 })
 
@@ -120,7 +121,14 @@ const filteredUsers = computed(() => {
 });
 
 const handleSearch = (query: string) => {
-  searchQuery.value = query;
+  if (query.trim()) {
+     router.push({
+    path: '/search',
+    query: {
+      keywords: query
+    }
+  })
+  }
 };
 
 const handlePlaySong = (song: Song) => {
@@ -151,12 +159,15 @@ const handleFollowUser = (user: User) => {
       <div class="section-header flex flex-col mb-8 ">
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
           <span class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
-          "{{ searchQuery }}"的搜索结果
+          "{{ searchQuery }}" 的搜索结果
           </span>
         </h1>
         <p class="text-secondary mt-5 max-w-2xl">
           发现你喜欢的音乐、歌手和专辑
         </p>
+      </div>
+      <div class="max-w-4xl mx-auto mb-8">
+        <SearchInput @search="handleSearch" />
       </div>
       <div class="glass-card rounded-2xl p-6">
         <Tabs v-model="activeTab" class="w-full">

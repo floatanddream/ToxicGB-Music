@@ -14,6 +14,7 @@ const emit = defineEmits<{
 const query = defineModel<string>()
 
 const handleSearch = () => {
+  
   if (query.value?.trim()) {
      router.push({
     path: '/search',
