@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 * {
-  font-family:'PingFang SC'
+  font-family:'PingFang' !important
 }
 
 /* 全局样式变量 */

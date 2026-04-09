@@ -3,23 +3,43 @@
     <ul class="menu-list">
       <li v-for="item in items" :key="item.id" class="menu-item">
         <RouterLink v-if="item.route" :to="item.route" class="menu-link" active-class="active">
-          <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
+          <div class="menu-icon-container">
+            <PaletteIcon v-if="item.icon === '🎨'" class="h-5 w-5" />
+            <HomeIcon v-else-if="item.icon === '🏠'" class="h-5 w-5" />
+            <SearchIcon v-else-if="item.icon === '🔍'" class="h-5 w-5" />
+            <ListIcon v-else-if="item.icon === '📋'" class="h-5 w-5" />
+          </div>
           <span class="menu-label">{{ item.label }}</span>
         </RouterLink>
         <button v-else-if="item.action" @click="item.action" class="menu-link w-full text-left"
           :class="{ active: item.active }">
-          <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
+          <div class="menu-icon-container">
+            <PaletteIcon v-if="item.icon === '🎨'" class="h-5 w-5" />
+            <HomeIcon v-else-if="item.icon === '🏠'" class="h-5 w-5" />
+            <SearchIcon v-else-if="item.icon === '🔍'" class="h-5 w-5" />
+            <ListIcon v-else-if="item.icon === '📋'" class="h-5 w-5" />
+          </div>
           <span class="menu-label">{{ item.label }}</span>
         </button>
         <div v-else class="menu-group">
           <span class="group-label">
-            <span v-if="item.icon" class="menu-icon">{{ item.icon }}</span>
+            <div class="menu-icon-container">
+              <PaletteIcon v-if="item.icon === '🎨'" class="h-5 w-5" />
+              <HomeIcon v-else-if="item.icon === '🏠'" class="h-5 w-5" />
+              <SearchIcon v-else-if="item.icon === '🔍'" class="h-5 w-5" />
+              <ListIcon v-else-if="item.icon === '📋'" class="h-5 w-5" />
+            </div>
             <span class="menu-label">{{ item.label }}</span>
           </span>
           <ul v-if="item.children" class="sub-menu">
             <li v-for="child in item.children" :key="child.id">
               <RouterLink :to="child.route" class="sub-menu-link" active-class="active">
-                <span v-if="child.icon" class="menu-icon">{{ child.icon }}</span>
+                <div class="menu-icon-container">
+                  <PaletteIcon v-if="child.icon === '🎨'" class="h-5 w-5" />
+                  <HomeIcon v-else-if="child.icon === '🏠'" class="h-5 w-5" />
+                  <SearchIcon v-else-if="child.icon === '🔍'" class="h-5 w-5" />
+                  <ListIcon v-else-if="child.icon === '📋'" class="h-5 w-5" />
+                </div>
                 <span class="menu-label">{{ child.label }}</span>
               </RouterLink>
             </li>
@@ -32,13 +52,17 @@
 
 <script setup lang="ts">
 import type { MenuItem } from '@/types/menu'
-
+import { PaletteIcon, HomeIcon, SearchIcon, ListIcon } from 'lucide-vue-next'
 defineProps<{
   items: MenuItem[]
 }>()
 </script>
 
 <style scoped>
+.group-label{
+  display: flex ;
+  flex-wrap: nowrap ;
+}
 .navigation-menu {
   padding: 20px 0;
 }
@@ -113,6 +137,14 @@ defineProps<{
 
 }
 
+.menu-icon-container {
+  margin-right: 10px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .menu-icon {
   margin-right: 10px;
   width: 20px;
@@ -133,6 +165,7 @@ defineProps<{
   list-style: none;
   padding-left: 30px;
   margin-top: 5px;
+  white-space: nowrap;
 }
 
 .sub-menu .menu-link {
