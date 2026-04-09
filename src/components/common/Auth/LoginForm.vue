@@ -156,7 +156,7 @@ defineExpose({
     </div>
 
     <!-- 登录按钮 -->
-    <Button type="submit" class="w-full glass-card" :disabled="isLoading">
+    <Button type="submit" class="w-full btn-gradient-primary" :disabled="isLoading">
       <template v-if="isLoading">
         <span class="mr-2">登录中</span>
         <span class="animate-spin">⏳</span>

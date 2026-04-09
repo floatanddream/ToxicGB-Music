@@ -210,3 +210,29 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+/* 统一按钮样式定义 */
+.btn-gradient-primary {
+  background-image: linear-gradient(to right, var(--primary-color, #3b82f6), var(--primary-color, #3b82f6) / 0.8);
+  color: rgb(0, 0, 0);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+.dark .btn-gradient-primary{
+  color: #ffffff;
+}
+.btn-gradient-primary:hover {
+  background-image: linear-gradient(to right, var(--primary-color, #3b82f6) / 0.9, var(--primary-color, #3b82f6));
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  transform: scale(1.05);
+}
+.btn-gradient-primary:active {
+  transform: scale(0.98);
+}
+.btn-gradient-primary:focus {
+  outline: none;
+  ring: 2px solid var(--primary-color, #3b82f6);
+  ring-offset: 2px;
+}

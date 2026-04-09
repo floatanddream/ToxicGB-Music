@@ -17,11 +17,6 @@ const LoginForm = defineAsyncComponent(() => import('./Auth/LoginForm.vue'));
 const RegisterForm = defineAsyncComponent(() => import('./Auth/RegisterForm.vue'));
 const ForgotPasswordForm = defineAsyncComponent(() => import('./Auth/ForgotPasswordForm.vue'));
 
-const containerRef = ref<HTMLElement>()
-let previousHeight = 0
-
-
-// Watch for mode changes to track transitions
 watch(authMode, (newMode, oldMode) => {
   if (oldMode !== newMode) {
     previousAuthMode.value = oldMode;

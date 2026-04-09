@@ -136,7 +136,7 @@ onUnmounted(() => {
                         {{ slides[currentSlide]?.description }}
                     </p>
                     <Button size="default"
-                        class="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        class="btn-gradient-primary">
                         {{ slides[currentSlide]?.action }}
                     </Button>
                 </div>
