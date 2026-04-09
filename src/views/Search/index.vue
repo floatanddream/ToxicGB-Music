@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import request from '@/utils/request';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
 import SongResults from './components/SongResults.vue';
@@ -62,9 +63,11 @@ interface Playlist {
 
 const route = useRoute();
 const router = useRouter();
+const searchData = ref({});
 
-watch(() => route.query.keywords, (newKeywords) => {
-  searchQuery.value = newKeywords as string;
+watch(() => route.query.keywords, async (newKeywords) => {
+  searchData.value = await request.get(`/search/suggest?keywords=${newKeywords}`);
+  console.log(searchData.value);
 })
 
 
