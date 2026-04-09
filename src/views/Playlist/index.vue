@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { UserIcon, MusicIcon, PlayIcon, HeartIcon, ShuffleIcon } from 'lucide-vue-next';
 import PlaylistHeader from './components/PlaylistHeader.vue';
 import SongList from '@/components/common/SongList.vue';
 

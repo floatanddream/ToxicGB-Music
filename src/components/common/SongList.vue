@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlayIcon, HeartIcon, DownloadIcon, MoreVerticalIcon } from 'lucide-vue-next';
+import { PlayIcon, HeartIcon, ListPlusIcon, MoreVerticalIcon } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -66,7 +66,7 @@ const playSong = (song: Song) => {
                 <HeartIcon class="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon">
-                <DownloadIcon class="h-4 w-4" />
+                <ListPlusIcon class="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon">
                 <MoreVerticalIcon class="h-4 w-4" />
