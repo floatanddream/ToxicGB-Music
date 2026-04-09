@@ -42,7 +42,7 @@
                   <!-- 播放按钮 -->
                   <div class="play-button-container">
                     <Button size="icon" class="play-button-main" @click.stop="playPlaylist(playlist)">
-                      <PlayIcon class="w-6 h-6 text-white ml-0.5" />
+                      <PlayIcon class="w-6 h-6  ml-0.5" />
                     </Button>
                   </div>
 
@@ -649,6 +649,7 @@ onUnmounted(() => {
 }
 
 .play-button-main {
+  color: black;
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
@@ -659,6 +660,9 @@ onUnmounted(() => {
   justify-content: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+}
+.dark .play-button-main{
+  color: #fff;
 }
 
 .play-button-main:hover {
