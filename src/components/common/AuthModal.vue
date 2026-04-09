@@ -1,25 +1,97 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, defineAsyncComponent, computed, watch } from 'vue';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { MailIcon, LockIcon, UserIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next';
+import { ArrowLeftIcon } from 'lucide-vue-next';
+
+
+type AuthMode = 'login' | 'register' | 'forgot-password';
 
 const isOpen = ref(false);
-const isLogin = ref(true);
-const showPassword = ref(false);
+const authMode = ref<AuthMode>('login');
+const previousAuthMode = ref<AuthMode | null>(null);
+const isTransitioning = ref(false);
 
-const toggleAuthMode = () => {
-  isLogin.value = !isLogin.value;
+// Async component loading for better performance
+const LoginForm = defineAsyncComponent(() => import('./LoginForm.vue'));
+const RegisterForm = defineAsyncComponent(() => import('./RegisterForm.vue'));
+const ForgotPasswordForm = defineAsyncComponent(() => import('./ForgotPasswordForm.vue'));
+
+const containerRef = ref<HTMLElement>()
+let previousHeight = 0
+
+
+// Watch for mode changes to track transitions
+watch(authMode, (newMode, oldMode) => {
+  if (oldMode !== newMode) {
+    previousAuthMode.value = oldMode;
+    isTransitioning.value = true;
+  }
+});
+
+const setAuthMode = (mode: AuthMode) => {
+  if (mode !== authMode.value && !isTransitioning.value) {
+    authMode.value = mode;
+  }
 };
 
 const openAuthModal = () => {
   isOpen.value = true;
+  authMode.value = 'login';
+  previousAuthMode.value = null;
 };
 
 const closeAuthModal = () => {
   isOpen.value = false;
+  // Reset child forms when modal closes
+  resetCurrentForm();
+};
+
+const resetCurrentForm = () => {
+  // This will be called on child components to reset their forms
+  // Implementation depends on how we want to handle form resets
+};
+
+const beforeEnter = () => {
+  // Preparation before enter transition
+};
+
+const afterLeave = () => {
+  // Cleanup after leave transition
+  isTransitioning.value = false;
+};
+
+const handleLogin = async (data: { email: string; password: string; remember: boolean }) => {
+  try {
+    // 模拟登录请求
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('登录数据:', data);
+    closeAuthModal();
+  } catch (error) {
+    console.error('登录失败:', error);
+  }
+};
+
+const handleRegister = async (data: { email: string; password: string; username: string }) => {
+  try {
+    // 模拟注册请求
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('注册数据:', data);
+    closeAuthModal();
+  } catch (error) {
+    console.error('注册失败:', error);
+  }
+};
+
+const handleForgotPassword = async (email: string) => {
+  try {
+    // 模拟发送重置邮件
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('重置密码邮件已发送至:', email);
+    setAuthMode('login');
+  } catch (error) {
+    console.error('发送重置邮件失败:', error);
+  }
 };
 
 defineExpose({
@@ -29,109 +101,99 @@ defineExpose({
 </script>
 
 <template>
-  <Dialog :style="{'z-index': 15000}" v-model:open="isOpen">
-    <DialogContent class="glass-container max-w-md p-8 rounded-2xl z-500">
-      <DialogHeader>
-        <DialogTitle class="text-2xl font-bold text-center">
-          {{ isLogin ? '登录' : '注册' }}
-        </DialogTitle>
-        <DialogDescription class="text-center mt-2">
-          {{ isLogin ? '登录您的账号以继续' : '创建新账号以开始' }}
-        </DialogDescription>
-      </DialogHeader>
-
-      <form class="space-y-6">
-        <!-- 用户名/邮箱 -->
-        <div class="space-y-2">
-          <Label for="email">邮箱</Label>
-          <div class="relative">
-            <Input
-              id="email"
-              type="email"
-              placeholder="请输入邮箱"
-              class="pl-10 glass-card"
-            />
-            <MailIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </div>
-        </div>
-
-        <!-- 密码 -->
-        <div class="space-y-2">
-          <Label for="password">密码</Label>
-          <div class="relative">
-            <Input
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="请输入密码"
-              class="pl-10 pr-10 glass-card"
-            />
-            <LockIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <button
-              type="button"
-              @click="showPassword = !showPassword"
-              class="absolute right-3 top-1/2 transform -translate-y-1/2"
-            >
-              <EyeIcon v-if="!showPassword" class="h-4 w-4 text-gray-400" />
-              <EyeOffIcon v-else class="h-4 w-4 text-gray-400" />
-            </button>
-          </div>
-        </div>
-
-        <!-- 确认密码（注册时显示） -->
-        <div v-if="!isLogin" class="space-y-2">
-          <Label for="confirm-password">确认密码</Label>
-          <div class="relative">
-            <Input
-              id="confirm-password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="请再次输入密码"
-              class="pl-10 glass-card"
-            />
-            <LockIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </div>
-        </div>
-
-        <!-- 用户名（注册时显示） -->
-        <div v-if="!isLogin" class="space-y-2">
-          <Label for="username">用户名</Label>
-          <div class="relative">
-            <Input
-              id="username"
-              type="text"
-              placeholder="请输入用户名"
-              class="pl-10 glass-card"
-            />
-            <UserIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </div>
-        </div>
-
-        <!-- 记住我（登录时显示） -->
-        <div v-if="isLogin" class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <input type="checkbox" id="remember" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
-            <Label for="remember" class="text-sm font-normal">记住我</Label>
-          </div>
-          <Button variant="link" class="text-sm text-primary hover:underline">
-            忘记密码？
-          </Button>
-        </div>
-
-        <!-- 提交按钮 -->
-        <Button type="submit" class="w-full glass-card">
-          {{ isLogin ? '登录' : '注册' }}
+  <Dialog :style="{ 'z-index': 15000 }" v-model:open="isOpen">
+    <DialogContent :class="{
+      'login-mode': authMode === 'login',
+      'register-mode': authMode === 'register',
+      'forgot-mode': authMode === 'forgot-password'
+    }" class="change-container glass-container max-w-md p-8 rounded-2xl z-500 overflow-hidden ">
+      <!-- 头部 -->
+      <DialogHeader class="relative">
+        <!-- 返回按钮 -->
+        <Button v-if="authMode !== 'login'" variant="ghost" size="icon" class="absolute left-0 top-0 rounded-full"
+          @click="setAuthMode('login')">
+          <ArrowLeftIcon class="h-4 w-4" />
         </Button>
 
-        <!-- 切换登录/注册 -->
-        <div class="text-center">
-          <Button
-            variant="link"
-            class="text-sm text-primary hover:underline"
-            @click="toggleAuthMode"
-          >
-            {{ isLogin ? '还没有账号？立即注册' : '已有账号？立即登录' }}
+        <transition name="scale" mode="out-in">
+          <DialogTitle :key="authMode" class="text-2xl font-bold text-center">
+            <template v-if="authMode === 'login'">登录</template>
+            <template v-else-if="authMode === 'register'">注册</template>
+            <template v-else-if="authMode === 'forgot-password'">重置密码</template>
+          </DialogTitle>
+        </transition>
+
+        <transition name="scale" mode="out-in">
+          <DialogDescription :key="authMode" class="text-center mt-2">
+            <template v-if="authMode === 'login'">登录您的账号以继续</template>
+            <template v-else-if="authMode === 'register'">创建新账号以开始</template>
+            <template v-else-if="authMode === 'forgot-password'">输入您的邮箱以重置密码</template>
+          </DialogDescription>
+        </transition>
+      </DialogHeader>
+
+      <div class="form-container relative min-h-75">
+        <!-- Dynamic component with smooth transitions -->
+        <transition name="scale" mode="out-in" @before-enter="beforeEnter" @after-leave="afterLeave">
+          <component :key="authMode"
+            :is="authMode === 'login' ? LoginForm : (authMode === 'register' ? RegisterForm : ForgotPasswordForm)"
+            @submit="authMode === 'login' ? handleLogin($event) : (authMode === 'register' ? handleRegister($event) : handleForgotPassword($event))"
+            @forgot-password="setAuthMode('forgot-password')" />
+        </transition>
+      </div>
+
+      <!-- 登录/注册切换 -->
+      <transition name="fade" mode="out-in">
+        <div v-if="authMode === 'login' || authMode === 'register'" class="text-center mt-6">
+          <Button variant="link" class="text-sm text-primary hover:underline"
+            @click="setAuthMode(authMode === 'login' ? 'register' : 'login')">
+            {{ authMode === 'login' ? '还没有账号？立即注册' : '已有账号？立即登录' }}
           </Button>
         </div>
-      </form>
+      </transition>
     </DialogContent>
   </Dialog>
 </template>
+
+<style scoped>
+.change-container {
+  overflow: hidden;
+  max-height: 0px !important;
+  transition: max-height 0.3s ease;
+}
+.change-container.login-mode{
+  max-height: 461.764px;
+}
+.change-container.register-mode{
+  max-height: 565.764px
+}
+.change-container.forgot-mode{
+  max-height: 325.764px
+}
+
+
+.form-container {
+  position: relative;
+  min-height: 200px;
+}
+
+.form-container>* {
+  width: 100%;
+}
+
+/* 缩放 + 淡入淡出动画 */
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.4s ease;
+}
+
+.scale-enter-from {
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+.scale-leave-to {
+  transform: scale(0.95);
+  opacity: 0;
+}
+</style>
