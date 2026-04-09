@@ -139,6 +139,7 @@ const menuItems: MenuItem[] = [
     left: -240px;
     z-index: 99;
     height: calc(100vh - 60px);
+    width: 0;
   }
 
   .sidebar.open {
