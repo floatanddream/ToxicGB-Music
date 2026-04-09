@@ -13,9 +13,9 @@ const previousAuthMode = ref<AuthMode | null>(null);
 const isTransitioning = ref(false);
 
 // Async component loading for better performance
-const LoginForm = defineAsyncComponent(() => import('./LoginForm.vue'));
-const RegisterForm = defineAsyncComponent(() => import('./RegisterForm.vue'));
-const ForgotPasswordForm = defineAsyncComponent(() => import('./ForgotPasswordForm.vue'));
+const LoginForm = defineAsyncComponent(() => import('./Auth/LoginForm.vue'));
+const RegisterForm = defineAsyncComponent(() => import('./Auth/RegisterForm.vue'));
+const ForgotPasswordForm = defineAsyncComponent(() => import('./Auth/ForgotPasswordForm.vue'));
 
 const containerRef = ref<HTMLElement>()
 let previousHeight = 0
