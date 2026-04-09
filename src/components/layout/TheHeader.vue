@@ -2,17 +2,26 @@
 import AppLogo from '../common/AppLogo.vue'
 import SearchBar from '../common/SearchBar.vue'
 import UserAvatar from '../common/UserAvatar.vue'
+import AuthModal from '../common/AuthModal.vue'
 import { ref, onMounted } from 'vue'
 import { MoonIcon, SunIcon } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 
 const isDarkMode = ref(false)
+const authModalRef = ref<InstanceType<typeof AuthModal> | null>(null)
 
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
   document.documentElement.classList.toggle('dark', isDarkMode.value)
   localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
 }
+
+const openAuthModal = () => {
+  console.log('11111111111111111')
+  if (authModalRef.value) {
+    authModalRef.value.openAuthModal();
+  }
+};
 
 const initTheme = () => {
   const savedTheme = localStorage.getItem('theme')
@@ -50,9 +59,16 @@ onMounted(() => {
           <SunIcon v-if="isDarkMode" class="h-5 w-5 text-yellow-500" />
           <MoonIcon v-else class="h-5 w-5 text-gray-700" />
         </Button>
-        <UserAvatar src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" alt="用户头像" size="small" />
+        <UserAvatar
+          src="https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+          alt="用户头像"
+          size="small"
+          @click="openAuthModal"
+          class="cursor-pointer"
+        />
       </div>
     </div>
+    <AuthModal ref="authModalRef" />
   </header>
 </template>
 

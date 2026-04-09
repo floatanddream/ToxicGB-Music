@@ -17,7 +17,7 @@ const sizeClasses = {
 </script>
 
 <template>
-  <img :src="src" :alt="alt" :class="['user-avatar', sizeClasses[size || 'small']]" @click="emit.click" />
+  <img :src="src" :alt="alt" :class="['user-avatar', sizeClasses[size || 'small']]" @click="emit('click')" />
 </template>
 
 <style scoped>
