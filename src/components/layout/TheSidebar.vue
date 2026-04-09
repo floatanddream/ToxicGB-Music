@@ -65,7 +65,7 @@ const menuItems: MenuItem[] = [
       {
         id: 'my-playlists',
         label: '我的歌单',
-        route: '/playlists/my'
+        route: '/playlist?id=1'
       },
     ]
   },

@@ -192,7 +192,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
 </script>
 
 <template>
-  <div class="search-container min-h-screen">
+  <div class="glass-container min-h-screen">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
       <div class="section-header flex flex-col mb-8 ">
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
@@ -330,31 +330,6 @@ const handleLikePlaylist = (playlist: Playlist) => {
   opacity: 0;
   transform: perspective(800px) rotateX(-5deg) scale(0.98);
   transform-origin: bottom center;
-}
-
-
-.search-container {
-  padding: 1.25rem;
-  opacity: 0.9;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  background-color: var(--glass-bg);
-  border-radius: 1%;
-}
-
-/* 毛玻璃效果卡片 */
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.dark .glass-card {
-  background: rgba(17, 25, 40, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* 背景装饰 */
