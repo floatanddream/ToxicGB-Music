@@ -66,6 +66,7 @@ const router = useRouter();
 const searchData = ref({});
 
 watch(() => route.query.keywords, async (newKeywords) => {
+  searchQuery.value = newKeywords;
   searchData.value = await request.get(`/search/suggest?keywords=${newKeywords}`);
   console.log(searchData.value);
 })
