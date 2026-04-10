@@ -211,6 +211,21 @@ body {
   }
 }
 
+.bg-gradient-red-custom {
+  background: linear-gradient(135deg, #ff3b30 50%, #da3535 100%);
+  transition: all 0.3s ease;
+}
+.bg-gradient-red-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+}
+
+.font-text-primary {
+  color: var(--text-primary);
+}
+.dark .font-text-primary {
+  color: var(--text-primary);
+}
 
 /* 统一按钮样式定义 */
 .btn-gradient-primary {

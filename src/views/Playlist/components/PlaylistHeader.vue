@@ -73,10 +73,10 @@ const formatPlayCount = (count: string) => {
         </div>
 
         <div class="flex gap-3 justify-center md:justify-start">
-          <Button size="lg" class="play-all-btn" @click="$emit('play-all')">
-            <PlayIcon v-if="!isPlayingAll" class="h-5 w-5 mr-2" />
-            <PauseIcon v-else class="h-5 w-5 mr-2" />
-            {{ isPlayingAll ? '暂停播放' : '播放全部' }}
+          <Button size="lg" class="bg-gradient-red-custom" @click="$emit('play-all')">
+            <PlayIcon  v-if="!isPlayingAll" class="h-5 w-5 mr-2 font-text-primary" />
+            <PauseIcon v-else class="h-5 w-5 mr-2 font-text-primary" />
+            <span class="font-text-primary">{{ isPlayingAll ? '暂停播放' : '播放全部' }}</span>
           </Button>
           <Button variant="outline" size="lg" @click="$emit('toggle-like')">
             <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': playlist.isLiked }" />
@@ -135,16 +135,6 @@ const formatPlayCount = (count: string) => {
   background: rgba(255, 255, 255, 0.9);
   color: #0ea5e9;
 }
-
-.play-all-btn {
-  background: linear-gradient(135deg, #ff3b30 50%, #da3535 100%);
-}
-
-.play-all-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
-}
-
 @media (max-width: 768px) {
   .cover-container {
     width: 200px;
