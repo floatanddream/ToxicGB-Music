@@ -127,11 +127,6 @@ const clearCheckInterval = () => {
   }
 };
 
-const handleSwitchToPassword = () => {
-  clearCheckInterval();
-  emit('switch-to-password');
-};
-
 // 组件卸载时清理
 onUnmounted(() => {
   clearCheckInterval();
@@ -152,12 +147,7 @@ generateQRCode();
       <!-- 二维码展示区域 -->
       <div class="qrcode-display flex flex-col items-center justify-center mb-6">
         <div class="qrcode-wrapper bg-white p-4 rounded-xl shadow-lg">
-          <img
-            v-if="qrCodeData?.qrimg"
-            :src="qrCodeData.qrimg"
-            alt="登录二维码"
-            class="qrcode-image w-48 h-48"
-          />
+          <img v-if="qrCodeData?.qrimg" :src="qrCodeData.qrimg" alt="登录二维码" class="qrcode-image w-48 h-48" />
           <div v-else class="w-48 h-48 flex items-center justify-center">
             <div v-if="qrCodeStatus === 'loading'" class="text-center">
               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -192,19 +182,7 @@ generateQRCode();
 
       <!-- 操作按钮 -->
       <div class="action-buttons space-y-3">
-        <Button
-          variant="outline"
-          class="w-full"
-          @click="handleSwitchToPassword"
-        >
-          使用密码登录
-        </Button>
-
-        <Button
-          v-if="qrCodeStatus === 'expired'"
-          class="w-full"
-          @click="generateQRCode"
-        >
+        <Button v-if="qrCodeStatus === 'expired'" class="w-full" @click="generateQRCode">
           重新生成二维码
         </Button>
       </div>
@@ -246,9 +224,12 @@ generateQRCode();
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.7;
   }
