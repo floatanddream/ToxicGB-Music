@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon } from 'lucide-vue-next';
 
 
-type AuthMode = 'login' | 'register' | 'forgot-password';
+type AuthMode = 'login' | 'register' | 'forgot-password' | 'qrcode';
 
 const isOpen = ref(false);
 const authMode = ref<AuthMode>('login');
@@ -16,6 +16,7 @@ const isTransitioning = ref(false);
 const LoginForm = defineAsyncComponent(() => import('./Auth/LoginForm.vue'));
 const RegisterForm = defineAsyncComponent(() => import('./Auth/RegisterForm.vue'));
 const ForgotPasswordForm = defineAsyncComponent(() => import('./Auth/ForgotPasswordForm.vue'));
+const QRCodeLoginForm = defineAsyncComponent(() => import('./Auth/QRCodeLoginForm.vue'));
 
 watch(authMode, (newMode, oldMode) => {
   if (oldMode !== newMode) {
@@ -89,6 +90,16 @@ const handleForgotPassword = async (email: string) => {
   }
 };
 
+const handleQRCodeLoginSuccess = (cookie: string) => {
+  try {
+    console.log('二维码登录成功，cookie:', cookie);
+    // 可以在这里保存cookie到localStorage等
+    closeAuthModal();
+  } catch (error) {
+    console.error('二维码登录成功处理失败:', error);
+  }
+};
+
 defineExpose({
   openAuthModal,
   closeAuthModal
@@ -130,19 +141,49 @@ defineExpose({
       <div class="form-container relative min-h-75">
         <!-- Dynamic component with smooth transitions -->
         <transition name="scale" mode="out-in" @before-enter="beforeEnter" @after-leave="afterLeave">
-          <component :key="authMode"
-            :is="authMode === 'login' ? LoginForm : (authMode === 'register' ? RegisterForm : ForgotPasswordForm)"
-            @submit="authMode === 'login' ? handleLogin($event) : (authMode === 'register' ? handleRegister($event) : handleForgotPassword($event))"
-            @forgot-password="setAuthMode('forgot-password')" />
+          <component
+            :key="authMode"
+            :is="authMode === 'login' ? LoginForm : (
+              authMode === 'register' ? RegisterForm : (
+                authMode === 'qrcode' ? QRCodeLoginForm : ForgotPasswordForm
+              )
+            )"
+            @submit="authMode === 'login' ? handleLogin($event) : (
+              authMode === 'register' ? handleRegister($event) : handleForgotPassword($event)
+            )"
+            @forgot-password="setAuthMode('forgot-password')"
+            @login-success="handleQRCodeLoginSuccess"
+            @switch-to-password="setAuthMode('login')"
+          />
         </transition>
       </div>
 
-      <!-- 登录/注册切换 -->
+      <!-- 登录方式切换 -->
       <transition name="fade" mode="out-in">
-        <div v-if="authMode === 'login' || authMode === 'register'" class="text-center mt-6">
+        <div v-if="authMode === 'login'" class="text-center mt-6 space-y-3">
+          <!-- 二维码登录按钮 -->
+          <Button variant="outline" class="w-full" @click="setAuthMode('qrcode')">
+            扫码登录
+          </Button>
+
+          <!-- 登录/注册切换 -->
           <Button variant="link" class="text-sm text-primary hover:underline"
-            @click="setAuthMode(authMode === 'login' ? 'register' : 'login')">
-            {{ authMode === 'login' ? '还没有账号？立即注册' : '已有账号？立即登录' }}
+            @click="setAuthMode('register')">
+            还没有账号？立即注册
+          </Button>
+        </div>
+
+        <div v-else-if="authMode === 'register'" class="text-center mt-6">
+          <Button variant="link" class="text-sm text-primary hover:underline"
+            @click="setAuthMode('login')">
+            已有账号？立即登录
+          </Button>
+        </div>
+
+        <div v-else-if="authMode === 'qrcode'" class="text-center mt-6">
+          <Button variant="link" class="text-sm text-primary hover:underline"
+            @click="setAuthMode('login')">
+            返回密码登录
           </Button>
         </div>
       </transition>
