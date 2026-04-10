@@ -11,6 +11,7 @@ import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
+import { searchByKeyword } from '@/api/search';
 
 interface Song {
   id: string;
@@ -65,9 +66,11 @@ const route = useRoute();
 const router = useRouter();
 const searchData = ref({});
 
+
+
 watch(() => route.query.keywords, async (newKeywords) => {
   searchQuery.value = newKeywords;
-  searchData.value = await request.get(`/search/suggest?keywords=${newKeywords}`);
+  searchData.value = searchByKeyword(newKeywords as string);
   console.log(searchData.value);
 })
 
@@ -155,14 +158,9 @@ const filteredPlaylists = computed(() => {
 });
 
 const handleSearch = (query: string) => {
-  if (query.trim()) {
-    router.push({
-      path: '/search',
-      query: {
-        keywords: query
-      }
-    })
-  }
+  searchQuery.value = query;
+  searchData.value = searchByKeyword(query as string);
+  console.log(searchData.value);
 };
 
 const handlePlaySong = (song: Song) => {
