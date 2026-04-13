@@ -10,7 +10,7 @@ import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
-import { searchBySinger, searchByKeyword } from '@/api/search';
+import { searchBySinger, searchByAlbum } from '@/api/search';
 
 interface Song {
   id: string;
@@ -33,10 +33,19 @@ interface Artist {
 interface Album {
   id: string;
   title: string;
-  artist: string;
+  artist: Array<Artist>;
   cover: string;
   releaseDate: string;
   songCount: string;
+}
+
+interface RawAlbum {
+  id: number;
+  name: string;
+  artists: Array<{ name: string }>;
+  picUrl: string;
+  publishTime: number;
+  size: number;
 }
 
 interface User {
@@ -63,9 +72,9 @@ interface Playlist {
 
 const route = useRoute();
 const searchArtistData = ref([]);
+const searchAlbumData = ref([]);
 
-const searchArtist = async (keywords: string) => {
-  const transformToArtist = (rawArtist: any): Artist => {
+const transformToArtist = (rawArtist: any): Artist => {
   return {
     id: String(rawArtist.id),
     name: rawArtist.name,
@@ -74,23 +83,44 @@ const searchArtist = async (keywords: string) => {
     songCount: String(rawArtist.musicSize),
     verified: !!rawArtist.identityIconUrl, // 有认证图标即为认证歌手
   };
+};
+const transformAlbums = (rawAlbums: RawAlbum[], formatDate: boolean = false): Array<Album> => {
+  return {
+    id: String(rawAlbums.id),
+    title: rawAlbums.name,
+    artist: rawAlbums.artists.map(transformToArtist),
+    cover: rawAlbums.picUrl,
+    releaseDate: formatDate ? formatTimestampToDate(rawAlbums.publishTime) : String(rawAlbums.publishTime),
+    songCount: String(rawAlbums.size)
+  };
 }
+const formatTimestampToDate = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+const searchArtist = async (keywords: string) => {
   const data = await searchBySinger(keywords as string);
   searchArtistData.value = data.result.artists.map(transformToArtist);
-  
+};
+
+const searchAlbum = async (keywords: string) => {
+  const data = await searchByAlbum(keywords as string);
+  searchAlbumData.value = data.result.albums.map(transformAlbums);
 }
 
 const searchAllType = async () => {
   searchArtist(searchQuery.value);
+  searchAlbum(searchQuery.value);
 }
-
-
 
 watch(() => route.query.keywords, async (newKeywords) => {
   searchQuery.value = newKeywords;
   searchAllType();
 })
-
 
 const searchQuery = ref('');
 const activeTab = ref('songs');
@@ -110,14 +140,6 @@ const mockArtists: Artist[] = [
   { id: '3', name: 'Ed Sheeran', avatar: 'https://picsum.photos/200/200?random=8', fanCount: '67.1万', songCount: '45', verified: true },
   { id: '4', name: 'Adele', avatar: 'https://picsum.photos/200/200?random=9', fanCount: '54.3万', songCount: '23', verified: true },
   { id: '5', name: 'The Weeknd', avatar: 'https://picsum.photos/200/200?random=10', fanCount: '43.2万', songCount: '67', verified: true },
-];
-
-const mockAlbums: Album[] = [
-  { id: '1', title: 'Midnights', artist: 'Taylor Swift', cover: 'https://picsum.photos/200/200?random=11', releaseDate: '2022', songCount: '13' },
-  { id: '2', title: '1989', artist: 'Taylor Swift', cover: 'https://picsum.photos/200/200?random=12', releaseDate: '2014', songCount: '16' },
-  { id: '3', title: '÷ (Divide)', artist: 'Ed Sheeran', cover: 'https://picsum.photos/200/200?random=13', releaseDate: '2017', songCount: '16' },
-  { id: '4', title: '21', artist: 'Adele', cover: 'https://picsum.photos/200/200?random=14', releaseDate: '2011', songCount: '12' },
-  { id: '5', title: 'Thriller', artist: 'Michael Jackson', cover: 'https://picsum.photos/200/200?random=15', releaseDate: '1982', songCount: '9' },
 ];
 
 const mockUsers: User[] = [
@@ -148,14 +170,6 @@ const filteredArtists = computed(() => {
   if (!searchQuery.value) return mockArtists;
   return mockArtists.filter(artist =>
     artist.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-const filteredAlbums = computed(() => {
-  if (!searchQuery.value) return mockAlbums;
-  return mockAlbums.filter(album =>
-    album.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    album.artist.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -263,7 +277,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
               <div class="flex items-center gap-1">
                 <span>专辑</span>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ filteredAlbums.length }})
+                  ({{ searchAlbumData.length }})
                 </span>
               </div>
             </TabsTrigger>
@@ -303,7 +317,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
 
                 <TabsContent value="albums" v-show="activeTab === 'albums'">
                   <ScrollArea>
-                    <AlbumResults :albums="filteredAlbums" @album-click="handleAlbumClick" />
+                    <AlbumResults :albums="searchAlbumData" @album-click="handleAlbumClick" />
                   </ScrollArea>
                 </TabsContent>
 
