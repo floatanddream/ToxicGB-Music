@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import request from '@/utils/request';
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
 import SongResults from './components/SongResults.vue';
 import ArtistResults from './components/ArtistResults.vue';
@@ -11,7 +10,7 @@ import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
-import { searchByKeyword } from '@/api/search';
+import { searchBySinger, searchByKeyword } from '@/api/search';
 
 interface Song {
   id: string;
@@ -63,15 +62,33 @@ interface Playlist {
 }
 
 const route = useRoute();
-const router = useRouter();
-const searchData = ref({});
+const searchArtistData = ref([]);
+
+const searchArtist = async (keywords: string) => {
+  const transformToArtist = (rawArtist: any): Artist => {
+  return {
+    id: String(rawArtist.id),
+    name: rawArtist.name,
+    avatar: rawArtist.picUrl,
+    fanCount: String(rawArtist.fansSize),
+    songCount: String(rawArtist.musicSize),
+    verified: !!rawArtist.identityIconUrl, // 有认证图标即为认证歌手
+  };
+}
+  const data = await searchBySinger(keywords as string);
+  searchArtistData.value = data.result.artists.map(transformToArtist);
+  
+}
+
+const searchAllType = async () => {
+  searchArtist(searchQuery.value);
+}
 
 
 
 watch(() => route.query.keywords, async (newKeywords) => {
   searchQuery.value = newKeywords;
-  searchData.value = searchByKeyword(newKeywords as string);
-  console.log(searchData.value);
+  searchAllType();
 })
 
 
@@ -159,8 +176,7 @@ const filteredPlaylists = computed(() => {
 
 const handleSearch = (query: string) => {
   searchQuery.value = query;
-  searchData.value = searchByKeyword(query as string);
-  console.log(searchData.value);
+  searchAllType();
 };
 
 const handlePlaySong = (song: Song) => {
@@ -239,7 +255,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
               <div class="flex items-center gap-1">
                 <span>歌手</span>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ filteredArtists.length }})
+                  ({{ searchArtistData.length }})
                 </span>
               </div>
             </TabsTrigger>
@@ -281,7 +297,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
 
                 <TabsContent value="artists" v-show="activeTab === 'artists'">
                   <ScrollArea>
-                    <ArtistResults :artists="filteredArtists" @artist-click="handleArtistClick" />
+                    <ArtistResults :artists="searchArtistData" @artist-click="handleArtistClick" />
                   </ScrollArea>
                 </TabsContent>
 
