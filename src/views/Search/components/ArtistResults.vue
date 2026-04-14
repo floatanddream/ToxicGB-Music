@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { User, Music2, Play } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
+import { formatNumber } from '@/utils/format';
 
 interface Artist {
   id: string;
@@ -46,7 +47,7 @@ defineEmits<{
         </h3>
 
         <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
-          <span>{{ artist.fanCount }} 粉丝</span>
+          <span>{{ formatNumber(Number(artist.fanCount)) }} 粉丝</span>
           <span>•</span>
           <span>{{ artist.songCount }} 歌曲</span>
         </div>

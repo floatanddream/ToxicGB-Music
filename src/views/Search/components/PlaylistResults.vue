@@ -2,19 +2,8 @@
 import { ref } from 'vue';
 import { Disc3, Music2, User, Clock, Play, Heart } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-
-interface Playlist {
-  id: string;
-  title: string;
-  creator: string;
-  cover: string;
-  songCount: string;
-  playCount: string;
-  likeCount: string;
-  isLiked: boolean;
-  description: string;
-  updateTime: string;
-}
+import type { Playlist, User as Users } from '@/types/musicTypes';
+import { formatNumber } from '@/utils/format';
 
 defineProps<{
   playlists: Playlist[];
@@ -78,7 +67,7 @@ defineEmits<{
         <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
           <div class="flex items-center gap-1">
             <User class="w-2.5 h-2.5" />
-            <span class="text-xs">{{ playlist.creator }}</span>
+            <span class="text-xs">{{ playlist.creator.name }}</span>
           </div>
           <span>•</span>
           <div class="flex items-center gap-1">
@@ -90,7 +79,7 @@ defineEmits<{
         <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
           <div class="flex items-center gap-1">
             <Play class="w-2.5 h-2.5" />
-            <span>{{ playlist.playCount }} 播放</span>
+            <span>{{ formatNumber(Number(playlist.playCount)) }} 播放</span>
           </div>
           <span>•</span>
           <div class="flex items-center gap-1">

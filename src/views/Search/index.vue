@@ -10,71 +10,15 @@ import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
-import { searchBySinger, searchByAlbum } from '@/api/search';
-
-interface Song {
-  id: string;
-  title: string;
-  artist: string;
-  album: string;
-  duration: string;
-  cover: string;
-}
-
-interface Artist {
-  id: string;
-  name: string;
-  avatar: string;
-  fanCount: string;
-  songCount: string;
-  verified: boolean;
-}
-
-interface Album {
-  id: string;
-  title: string;
-  artist: Array<Artist>;
-  cover: string;
-  releaseDate: string;
-  songCount: string;
-}
-
-interface RawAlbum {
-  id: number;
-  name: string;
-  artists: Array<{ name: string }>;
-  picUrl: string;
-  publishTime: number;
-  size: number;
-}
-
-interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  fanCount: string;
-  songCount: string;
-  isFollowing: boolean;
-}
-
-interface Playlist {
-  id: string;
-  title: string;
-  creator: string;
-  cover: string;
-  songCount: string;
-  playCount: string;
-  likeCount: string;
-  isLiked: boolean;
-  description: string;
-  updateTime: string;
-}
+import { searchBySinger, searchByAlbum, searchByPlaylist } from '@/api/search';
+import * as MusicTypes from '@/types/musicTypes'
 
 const route = useRoute();
 const searchArtistData = ref([]);
 const searchAlbumData = ref([]);
+const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([]);
 
-const transformToArtist = (rawArtist: any): Artist => {
+const transformToArtist = (rawArtist: any): MusicTypes.Artist => {
   return {
     id: String(rawArtist.id),
     name: rawArtist.name,
@@ -84,7 +28,7 @@ const transformToArtist = (rawArtist: any): Artist => {
     verified: !!rawArtist.identityIconUrl, // 有认证图标即为认证歌手
   };
 };
-const transformAlbums = (rawAlbums: RawAlbum[], formatDate: boolean = false): Array<Album> => {
+const transformAlbums = (rawAlbums: MusicTypes.RawAlbum[], formatDate: boolean = false): Array<MusicTypes.Album> => {
   return {
     id: String(rawAlbums.id),
     title: rawAlbums.name,
@@ -102,6 +46,32 @@ const formatTimestampToDate = (timestamp: number): string => {
   return `${year}-${month}-${day}`;
 }
 
+// 转换函数
+const transformToPlaylist = (rawPlaylist: any): MusicTypes.Playlist => {
+  // 先处理嵌套的 User 对象
+  const creator: User = {
+    id: String(rawPlaylist.creator.userId),
+    name: rawPlaylist.creator.nickname,
+    avatar: rawPlaylist.creator.avatarUrl,
+    fanCount: '0', // API 未返回粉丝数，需要额外获取或设默认值
+    songCount: '0', // API 未返回歌曲数，需要额外获取或设默认值
+    isFollowing: false, // API 未返回关注状态
+  };
+  // 转换 Playlist 主体
+  return {
+    id: String(rawPlaylist.id),
+    title: rawPlaylist.name,
+    creator,
+    cover: rawPlaylist.coverImgUrl,
+    songCount: String(rawPlaylist.trackCount),
+    playCount: rawPlaylist.playCount, // 格式化播放量
+    likeCount: String(rawPlaylist.bookCount), // bookCount 对应收藏数
+    isLiked: rawPlaylist.subscribed, // subscribed 是收藏状态
+    description: rawPlaylist.description || '',
+    updateTime: '', // API 未返回更新时间，需要额外获取
+  };
+};
+
 const searchArtist = async (keywords: string) => {
   const data = await searchBySinger(keywords as string);
   searchArtistData.value = data.result.artists.map(transformToArtist);
@@ -112,9 +82,15 @@ const searchAlbum = async (keywords: string) => {
   searchAlbumData.value = data.result.albums.map(transformAlbums);
 }
 
+const searchPlaylist = async (keywords: string) => {
+  const data = await searchByPlaylist(keywords as string);
+  searchPlaylistData.value = data.result.playlists.map(transformToPlaylist);
+}
+
 const searchAllType = async () => {
   searchArtist(searchQuery.value);
   searchAlbum(searchQuery.value);
+  searchPlaylist(searchQuery.value);
 }
 
 watch(() => route.query.keywords, async (newKeywords) => {
@@ -126,7 +102,7 @@ const searchQuery = ref('');
 const activeTab = ref('songs');
 const isPlaying = ref(false);
 
-const mockSongs: Song[] = [
+const mockSongs: MusicTypes.Song[] = [
   { id: '1', title: 'Lose Yourself', artist: 'Eminem', album: '8 Mile Soundtrack', duration: '5:26', cover: 'https://picsum.photos/60/60?random=1' },
   { id: '2', title: 'Bohemian Rhapsody', artist: 'Queen', album: 'A Night at the Opera', duration: '5:55', cover: 'https://picsum.photos/60/60?random=2' },
   { id: '3', title: 'Shape 1of You', artist: 'Ed Sheeran', album: '÷', duration: '3:53', cover: 'https://picsum.photos/60/60?random=3' },
@@ -135,20 +111,12 @@ const mockSongs: Song[] = [
 ];
 
 
-const mockUsers: User[] = [
+const mockUsers: MusicTypes.User[] = [
   { id: '1', name: '音乐爱好者', avatar: 'https://picsum.photos/200/200?random=16', fanCount: '1.2万', songCount: '234', isFollowing: false },
   { id: '2', name: '深夜音乐人', avatar: 'https://picsum.photos/200/200?random=17', fanCount: '8.9千', songCount: '156', isFollowing: true },
   { id: '3', name: '旋律分享者', avatar: 'https://picsum.photos/200/200?random=18', fanCount: '3.4千', songCount: '89', isFollowing: false },
   { id: '4', name: '音乐制作人', avatar: 'https://picsum.photos/200/200?random=19', fanCount: '12.5万', songCount: '45', isFollowing: true },
   { id: '5', name: 'DJ小张', avatar: 'https://picsum.photos/200/200?random=20', fanCount: '5.6千', songCount: '342', isFollowing: false },
-];
-
-const mockPlaylists: Playlist[] = [
-  { id: '1', title: '今日热门', creator: '系统推荐', cover: 'https://picsum.photos/200/200?random=21', songCount: '32', playCount: '12.3万', likeCount: '892', isLiked: false, description: '今日最热门的歌曲集合', updateTime: '2小时前' },
-  { id: '2', title: '华语经典', creator: '音乐达人', cover: 'https://picsum.photos/200/200?random=22', songCount: '45', playCount: '8.9万', likeCount: '567', isLiked: true, description: '经典华语歌曲，回忆满满', updateTime: '1天前' },
-  { id: '3', title: '电音节奏', creator: 'DJ小王', cover: 'https://picsum.photos/200/200?random=23', songCount: '28', playCount: '6.7万', likeCount: '432', isLiked: false, description: '动感电音，让你嗨翻天', updateTime: '3小时前' },
-  { id: '4', title: '治愈系音乐', creator: '心灵音乐', cover: 'https://picsum.photos/200/200?random=24', songCount: '52', playCount: '9.8万', likeCount: '723', isLiked: true, description: '放松心情，治愈心灵', updateTime: '5小时前' },
-  { id: '5', title: '摇滚力量', creator: '摇滚乐迷', cover: 'https://picsum.photos/200/200?random=25', songCount: '38', playCount: '7.6万', likeCount: '654', isLiked: false, description: '摇滚精神，永不灭', updateTime: '1天前' },
 ];
 
 const filteredSongs = computed(() => {
@@ -166,45 +134,37 @@ const filteredUsers = computed(() => {
   );
 });
 
-const filteredPlaylists = computed(() => {
-  if (!searchQuery.value) return mockPlaylists;
-  return mockPlaylists.filter(playlist =>
-    playlist.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    playlist.creator.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
 const handleSearch = (query: string) => {
   searchQuery.value = query;
   searchAllType();
 };
 
-const handlePlaySong = (song: Song) => {
+const handlePlaySong = (song: MusicTypes.Song) => {
   isPlaying.value = !isPlaying.value;
   console.log('Playing song:', song.title);
 };
 
-const handleArtistClick = (artist: Artist) => {
+const handleArtistClick = (artist: MusicTypes.Artist) => {
   console.log('Artist clicked:', artist.name);
 };
 
-const handleAlbumClick = (album: Album) => {
+const handleAlbumClick = (album: MusicTypes.Album) => {
   console.log('Album clicked:', album.title);
 };
 
-const handleUserClick = (user: User) => {
+const handleUserClick = (user: MusicTypes.User) => {
   console.log('User clicked:', user.name);
 };
 
-const handleFollowUser = (user: User) => {
+const handleFollowUser = (user: MusicTypes.User) => {
   console.log('Follow user:', user.name);
 };
 
-const handlePlaylistClick = (playlist: Playlist) => {
+const handlePlaylistClick = (playlist: MusicTypes.Playlist) => {
   console.log('Playlist clicked:', playlist.title);
 };
 
-const handleLikePlaylist = (playlist: Playlist) => {
+const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
   console.log('Like playlist:', playlist.title);
 };
 </script>
@@ -271,7 +231,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
               <div class="flex items-center gap-1">
                 <span>歌单</span>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ filteredPlaylists.length }})
+                  ({{ searchPlaylistData.length }})
                 </span>
               </div>
             </TabsTrigger>
@@ -309,7 +269,7 @@ const handleLikePlaylist = (playlist: Playlist) => {
 
                 <TabsContent value="playlists" v-show="activeTab === 'playlists'">
                   <ScrollArea>
-                    <PlaylistResults :playlists="filteredPlaylists" @playlist-click="handlePlaylistClick"
+                    <PlaylistResults :playlists="searchPlaylistData" @playlist-click="handlePlaylistClick"
                       @like-playlist="handleLikePlaylist" />
                   </ScrollArea>
                 </TabsContent>
