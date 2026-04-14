@@ -202,7 +202,7 @@ export function createClient(options?: any) {
  * 默认实例
  */
 const request = createClient({
-  baseURL: 'http://192.168.31.100:3000',
+  baseURL: 'http://127.0.0.1:3000',
   timeout: 10000,
   retry: 2,
 })
