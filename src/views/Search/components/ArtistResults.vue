@@ -29,21 +29,15 @@ defineEmits<{
     </div>
 
     <div v-if="artists.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      <div
-        v-for="artist in artists"
-        :key="artist.id"
-        class="artist-card group cursor-pointer"
-        @click="$emit('artist-click', artist)"
-      >
+      <div v-for="artist in artists" :key="artist.id" class="artist-card group cursor-pointer"
+        @click="$emit('artist-click', artist)">
         <div class="relative">
-          <div class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all">
+          <div
+            class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all">
             <img :src="artist.avatar" :alt="artist.name" class="w-full h-full object-cover" />
           </div>
-          <div
-            v-if="artist.verified"
-            class="absolute bottom-3 right-0 bg-sky-500 rounded-full p-1"
-          >
-            <User class="w-3 h-3 text-white" />
+          <div v-if="artist.verified" class="absolute bottom-2 right-5  bg-red-500 rounded-full p-1">
+            <User class="w-5 h-5 text-white" />
           </div>
         </div>
 
@@ -71,16 +65,16 @@ defineEmits<{
   </div>
 </template>
 
-  <style scoped>
-  .artist-card {
-    transition: all 0.2s ease;
-  }
+<style scoped>
+.artist-card {
+  transition: all 0.2s ease;
+}
 
-  .artist-card:hover {
-    transform: translateY(-4px);
-  }
+.artist-card:hover {
+  transform: translateY(-4px);
+}
 
-  .artist-card:hover h3 {
-    color: #0ea5e9;
-  }
-  </style>
+.artist-card:hover h3 {
+  color: #0ea5e9;
+}
+</style>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 interface Album {
   id: string;
   title: string;
-  artist: string;
+  artist: Array<any>;
   cover: string;
   releaseDate: string;
   songCount: string;
@@ -18,6 +18,7 @@ defineProps<{
 
 defineEmits<{
   'album-click': [album: Album];
+  'artist-click': [artist: Artist];
 }>();
 </script>
 
@@ -29,12 +30,8 @@ defineEmits<{
     </div>
 
     <div v-if="albums.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      <div
-        v-for="album in albums"
-        :key="album.id"
-        class="album-card group cursor-pointer"
-        @click="$emit('album-click', album)"
-      >
+      <div v-for="album in albums" :key="album.id" class="album-card group cursor-pointer"
+        @click="$emit('album-click', album)">
         <div class="aspect-square rounded-lg overflow-hidden mb-3 shadow-lg group-hover:shadow-xl transition-all">
           <img :src="album.cover" :alt="album.title" class="w-full h-full object-cover" />
         </div>
@@ -44,7 +41,14 @@ defineEmits<{
         </h3>
 
         <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-          <span class="truncate">{{ album.artist }}</span>
+          <span class="truncate">
+            <template v-for="(artist, index) in album.artist" :key="artist.id">
+              <span class="hover:text-red-500 cursor-pointer" @click.stop="$emit('artist-click', artist)">
+                {{ artist.name }}
+              </span>
+              <span v-if="index !== album.artist.length - 1"> / </span>
+            </template>
+          </span>
           <span>•</span>
           <span class="flex-shrink-0">{{ album.songCount }} 首</span>
         </div>
@@ -68,16 +72,16 @@ defineEmits<{
   </div>
 </template>
 
-  <style scoped>
-  .album-card {
-    transition: all 0.2s ease;
-  }
+<style scoped>
+.album-card {
+  transition: all 0.2s ease;
+}
 
-  .album-card:hover {
-    transform: translateY(-4px);
-  }
+.album-card:hover {
+  transform: translateY(-4px);
+}
 
-  .album-card:hover h3 {
-    color: #0ea5e9;
-  }
-  </style>
+.album-card:hover h3 {
+  color: #fb2c36;
+}
+</style>
