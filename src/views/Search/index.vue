@@ -104,14 +104,6 @@ const mockSongs: Song[] = [
   { id: '5', title: 'Billie1 Jean', artist: 'Michael Jackson', album: 'Thriller', duration: '4:54', cover: 'https://picsum.photos/60/60?random=5' },
 ];
 
-const mockArtists: Artist[] = [
-  { id: '1', name: 'Taylor Swift', avatar: 'https://picsum.photos/200/200?random=6', fanCount: '123.4万', songCount: '89', verified: true },
-  { id: '2', name: '周杰伦', avatar: 'https://picsum.photos/200/200?random=7', fanCount: '89.2万', songCount: '156', verified: true },
-  { id: '3', name: 'Ed Sheeran', avatar: 'https://picsum.photos/200/200?random=8', fanCount: '67.1万', songCount: '45', verified: true },
-  { id: '4', name: 'Adele', avatar: 'https://picsum.photos/200/200?random=9', fanCount: '54.3万', songCount: '23', verified: true },
-  { id: '5', name: 'The Weeknd', avatar: 'https://picsum.photos/200/200?random=10', fanCount: '43.2万', songCount: '67', verified: true },
-];
-
 const mockAlbums: Album[] = [
   { id: '1', title: 'Midnights', artist: 'Taylor Swift', cover: 'https://picsum.photos/200/200?random=11', releaseDate: '2022', songCount: '13' },
   { id: '2', title: '1989', artist: 'Taylor Swift', cover: 'https://picsum.photos/200/200?random=12', releaseDate: '2014', songCount: '16' },
@@ -141,13 +133,6 @@ const filteredSongs = computed(() => {
   return mockSongs.filter(song =>
     song.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
     song.artist.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-const filteredArtists = computed(() => {
-  if (!searchQuery.value) return mockArtists;
-  return mockArtists.filter(artist =>
-    artist.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
