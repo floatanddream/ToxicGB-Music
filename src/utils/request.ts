@@ -169,10 +169,6 @@ class HttpClient {
     }
   }
 }
-
-/**
- * create（模拟 axios.create）
- */
 export function createClient(options?: any) {
   const client = new HttpClient(options)
 
