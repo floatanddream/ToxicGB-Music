@@ -9,7 +9,6 @@ import type { Artist } from './types/musicTypes'
 const router = useRouter()
 
 const handleArtistClick = ( e:Artist ) => {
-  //跳转到歌手详情页
   router.push({
     name: 'artist',
     query: {
