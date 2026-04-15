@@ -2,6 +2,8 @@
 import { PlayIcon, HeartIcon, ListPlusIcon, MoreVerticalIcon } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import type { Song, Artist, Album } from '@/types/musicTypes';
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
 
 const props = defineProps<{
   songs: Song[];
@@ -41,14 +43,16 @@ const playSong = (song: Song) => {
             <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
               <span class="truncate">
                 <template v-for="(artist, index) in song.artist" :key="artist.id">
-                  <span class="hover:text-red-500 cursor-pointer" @click.stop="$emit('artist-click', artist)">
+                  <span class="hover:text-red-500 cursor-pointer"
+                    @click.stop="emitter.emit(EVENTS.ARTIST_CLICK, artist)">
                     {{ artist.name }}
                   </span>
                   <span v-if="index !== song.artist.length - 1"> / </span>
                 </template>
               </span>
               <span>•</span>
-              <span class="truncate hover:text-red-500" @click.stop="$emit('album-click', song.album)">{{ song.album.title }}</span>
+              <span class="truncate hover:text-red-500" @click.stop="$emit('album-click', song.album)">{{
+                song.album.title }}</span>
               <span>•</span>
               <span>{{ song.duration }}</span>
             </div>
