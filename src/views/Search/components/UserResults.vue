@@ -21,7 +21,7 @@ defineEmits<{
       <span class="text-sm text-gray-500">{{ users.length }} 位用户</span>
     </div>
 
-    <div v-if="users.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+    <div v-if="users.length > 0" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
       <div v-for="user in users" :key="user.id" class="artist-card group cursor-pointer"
         @click="$emit('user-click', user)">
         <div class="relative">

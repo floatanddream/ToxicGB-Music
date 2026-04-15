@@ -10,7 +10,7 @@ import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
-import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser } from '@/api/search';
+import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser, searchBySong } from '@/api/search';
 import * as MusicTypes from '@/types/musicTypes'
 
 const route = useRoute();
@@ -18,6 +18,7 @@ const searchArtistData = ref<Array<MusicTypes.Artist>>([]);
 const searchAlbumData = ref<Array<MusicTypes.Album>>([]);
 const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([]);
 const searchUserData = ref<Array<MusicTypes.User>>([]);
+const searchSongData = ref<Array<MusicTypes.Song>>([]);
 
   // 转换函数
 const transformToArtist = (rawArtist: any): MusicTypes.Artist => {
@@ -80,6 +81,47 @@ const transformToUser = (rawUser: MusicTypes.RawUserProfile): MusicTypes.User =>
     isFollowing: rawUser.followed,
   };
 };
+function transformToSong(rawData: any): MusicTypes.Song {
+  // 转换艺术家信息（从 ar 数组）
+  const artists: MusicTypes.Artist[] = rawData.ar?.map((artist: any) => ({
+    id: String(artist.id),
+    name: artist.name,
+    avatar: '', // 原数据中没有艺术家头像，可后续获取或留空
+    fanCount: '0', // 原数据中没有粉丝数，可后续获取
+    songCount: '0', // 原数据中没有歌曲数，可后续获取
+    verified: false // 原数据中没有认证信息，默认 false
+  })) || [];
+
+  // 转换专辑信息
+  const album: MusicTypes.Album = {
+    id: String(rawData.al?.id || ''),
+    title: rawData.al?.name || '',
+    artist: artists, // 专辑的艺术家通常与歌曲相同
+    cover: rawData.al?.picUrl || '',
+    releaseDate: formatTimestampToDate(rawData.publishTime),
+    songCount: '0' // 原数据中没有专辑歌曲数，可后续获取
+  };
+
+  // 格式化时长（毫秒转 mm:ss 格式）
+  const formatDuration = (ms: number): string => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // 构建 Song 对象
+  const song: MusicTypes.Song = {
+    id: String(rawData.id),
+    title: rawData.name || '',
+    aliasTitle: rawData.alias?.join(', ') || rawData.alia?.join(', ') || '', // 优先用 alias，其次 alia
+    artist: artists,
+    album: album,
+    duration: formatDuration(rawData.dt || 0),
+    cover: rawData.al?.picUrl || '' // 使用专辑封面
+  };
+
+  return song;
+}
 
 const searchArtist = async (keywords: string) => {
   const data = await searchBySinger(keywords as string);
@@ -97,7 +139,12 @@ const searchUser = async (keywords: string) => {
   const data = await searchByUser(keywords as string);
   searchUserData.value = data.result.userprofiles.map(transformToUser);
 };
+const searchSong = async (keywords: string) => {
+  const data = await searchBySong(keywords as string);
+  searchSongData.value = data.result.songs.map(transformToSong);
+};
 const searchAllType = async () => {
+  searchSong(searchQuery.value)
   searchArtist(searchQuery.value);
   searchAlbum(searchQuery.value);
   searchPlaylist(searchQuery.value);
@@ -112,22 +159,6 @@ watch(() => route.query.keywords, async (newKeywords) => {
 const searchQuery = ref('');
 const activeTab = ref('songs');
 const isPlaying = ref(false);
-
-const mockSongs: MusicTypes.Song[] = [
-  { id: '1', title: 'Lose Yourself', artist: 'Eminem', album: '8 Mile Soundtrack', duration: '5:26', cover: 'https://picsum.photos/60/60?random=1' },
-  { id: '2', title: 'Bohemian Rhapsody', artist: 'Queen', album: 'A Night at the Opera', duration: '5:55', cover: 'https://picsum.photos/60/60?random=2' },
-  { id: '3', title: 'Shape 1of You', artist: 'Ed Sheeran', album: '÷', duration: '3:53', cover: 'https://picsum.photos/60/60?random=3' },
-  { id: '4', title: 'Rolling in the Deep', artist: 'Adele', album: '21', duration: '3:48', cover: 'https://picsum.photos/60/60?random=4' },
-  { id: '5', title: 'Billie1 Jean', artist: 'Michael Jackson', album: 'Thriller', duration: '4:54', cover: 'https://picsum.photos/60/60?random=5' },
-];
-
-const filteredSongs = computed(() => {
-  if (!searchQuery.value) return mockSongs;
-  return mockSongs.filter(song =>
-    song.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    song.artist.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
 
 const handleSearch = (query: string) => {
   searchQuery.value = query;
@@ -202,7 +233,7 @@ const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
               <div class="flex items-center gap-1">
                 <span>歌曲</span>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ filteredSongs.length }})
+                  ({{ searchSongData.length }})
                 </span>
               </div>
             </TabsTrigger>
@@ -246,7 +277,7 @@ const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
               <div :key="activeTab">
                 <TabsContent value="songs" v-show="activeTab === 'songs'">
                   <ScrollArea>
-                    <SongResults :songs="filteredSongs" :is-playing="isPlaying" @play-song="handlePlaySong" />
+                    <SongResults :songs="searchSongData" :is-playing="isPlaying" @play-song="handlePlaySong" />
                   </ScrollArea>
                 </TabsContent>
 

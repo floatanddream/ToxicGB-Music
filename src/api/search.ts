@@ -6,7 +6,7 @@ export async function searchByKeyword(keyword: string) {
   return await request.get(`/search?keywords=${keyword}&type=1018&limit=100`)
 }
 export async function searchBySong(keyword: string) {
-  return await request.get(`/search?keywords=${keyword}&type=1&limit=100`)
+  return await request.get(`/cloudsearch?keywords=${keyword}&type=1&limit=100`)
 }
 export async function searchByAlbum(keyword: string) {
   return await request.get(`/search?keywords=${keyword}&type=10&limit=100`)
