@@ -4,6 +4,9 @@ import { User, Music2, Play } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/format';
 
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
+
 interface Artist {
   id: string;
   name: string;
@@ -31,7 +34,7 @@ defineEmits<{
 
     <div v-if="artists.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       <div v-for="artist in artists" :key="artist.id" class="artist-card group cursor-pointer"
-        @click="$emit('artist-click', artist)">
+        @click="emitter.emit(EVENTS.ARTIST_CLICK, artist)">
         <div class="relative">
           <div
             class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all">
