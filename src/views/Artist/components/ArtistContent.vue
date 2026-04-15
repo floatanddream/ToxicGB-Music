@@ -3,40 +3,17 @@ import { Play } from 'lucide-vue-next';
 import SongList from '@/components/common/SongList.vue';
 import { computed, ref } from 'vue';
 import ArtistTabs from './ArtistTabs.vue';
-
+import type { Song } from '@/types/musicTypes';
 const activeTab = ref<'songs' | 'albums' | 'videos' | 'activities'>('songs');
 
-interface ArtistSong {
-  id: string;
-  title: string;
-  duration: string;
-  playCount: string;
-  publishTime: string;
-  album: string;
-  isPlaying: boolean;
-}
-
 const props = defineProps<{
-  songs: ArtistSong[];
+  songs: Song[];
   artistName: string;
 }>();
 
 defineEmits<{
-  'play-song': [song: ArtistSong];
+  'play-song': [song: Song];
 }>();
-
-// 转换数据格式，适配SongList组件
-const adaptedSongs = computed(() => {
-  return props.songs.map(song => ({
-    id: song.id,
-    title: song.title,
-    artist: song.artist || '未知歌手', // 从父组件传入歌手信息
-    album: song.album,
-    duration: song.duration,
-    cover: `https://picsum.photos/60/60?random=${song.id}`,
-    isPlaying: song.isPlaying
-  }));
-});
 
 const formatPlayCount = (count: string) => {
   if (count.includes('万')) {
@@ -49,13 +26,6 @@ const formatPlayCount = (count: string) => {
   return count;
 };
 
-const handlePlaySong = (song: any) => {
-  // 找到原始歌曲数据
-  const originalSong = songs.find(s => s.id === song.id);
-  if (originalSong) {
-    emit('play-song', originalSong);
-  }
-};
 </script>
 
 <template>
@@ -71,13 +41,13 @@ const handlePlaySong = (song: any) => {
       <div class="text-right">
         <p class="text-sm text-gray-500 dark:text-gray-400">最高播放量</p>
         <p class="text-lg font-semibold text-red-500">
-          {{ formatPlayCount(songs[0]?.playCount || '0') }}
+          123
         </p>
       </div>
     </div>
 
     <!-- 使用SongList组件 -->
-    <SongList :songs="adaptedSongs" @play-song="handlePlaySong" />
+    <SongList :songs="props.songs" />
 
     <!-- 额外信息 -->
     <div class="songs-footer mt-6 text-center">

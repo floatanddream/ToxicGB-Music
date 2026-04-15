@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import { Play, Heart, Users, Music, Disc, Award } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { Play, Heart, Users, Music, Disc, Award, Info } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-
-interface Artist {
-  id: string;
-  name: string;
-  cover: string;
-  backgroundImage: string;
-  fanCount: string;
-  songCount: string;
-  albumCount: string;
-  isSubscribed: boolean;
-  description: string;
-  verified: boolean;
-}
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import type { Artist, ArtistData } from '@/types/artist';
+import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 
 defineProps<{
-  artist: Artist;
+  artist: ArtistData;
 }>();
 
 defineEmits<{
@@ -31,6 +29,17 @@ const formatFanCount = (count: string) => {
   }
   return count;
 };
+
+// 判断简介是否需要缩略（超过100字符）
+const shouldTruncate = (text: string) => {
+  return text && text.length > 100;
+};
+
+// 获取缩略后的简介
+const getTruncatedDesc = (text: string) => {
+  if (!text) return '';
+  return shouldTruncate(text) ? text.slice(0, 100) + '...' : text;
+};
 </script>
 
 <template>
@@ -41,13 +50,12 @@ const formatFanCount = (count: string) => {
       <div class="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
         <!-- 歌手头像 -->
         <div class="avatar-container relative">
-          <div class="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
-            <img :src="artist.cover" :alt="artist.name" class="w-full h-full object-cover" />
-          </div>
           <div
-            v-if="artist.verified"
-            class="verified-badge absolute bottom-2 right-2 bg-red-500 rounded-full p-2 shadow-lg"
-          >
+            class="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
+            <img :src="artist?.artist?.cover" :alt="artist?.artist?.name" class="w-full h-full object-cover" />
+          </div>
+          <div v-if="artist?.user?.followed"
+            class="verified-badge absolute bottom-2 right-2 bg-red-500 rounded-full p-2 shadow-lg">
             <Award class="w-5 h-5 text-white" />
           </div>
         </div>
@@ -55,46 +63,51 @@ const formatFanCount = (count: string) => {
         <!-- 歌手信息 -->
         <div class="flex-1 text-center md:text-left ">
           <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-3  drop-shadow-lg">
-            {{ artist.name }}
+            {{ artist?.artist?.name }}
           </h1>
-          <p class=" mb-4 max-w-2xl text-sm md:text-base">
-            {{ artist.description }}
-          </p>
+          <div class="flex items-start gap-2 mb-4 max-w-2xl">
+            <p class="text-sm md:text-base">
+              {{ getTruncatedDesc(artist?.artist?.briefDesc || '') }}
+            </p>
+            <Dialog v-if="shouldTruncate(artist?.artist?.briefDesc || '')">
+              <DialogTrigger as-child>
+                <Button variant="ghost" size="sm" class="h-6 text-xs">
+                  详细
+                </Button>
+              </DialogTrigger>
+              <DialogContent class="max-w-2xl max-h-[80vh] z-500 overflow-hidden">
+                <DialogHeader>
+                  <DialogTitle>歌手简介</DialogTitle>
+                </DialogHeader>
+                <ScrollArea class="h-[calc(80vh-120px)]">
+                  <DialogDescription class="whitespace-pre-wrap break-words pr-4">
+                    {{ artist?.artist?.briefDesc }}
+                  </DialogDescription>
+                </ScrollArea>
+              </DialogContent>
+
+            </Dialog>
+          </div>
 
           <!-- 统计数据 -->
           <div class="flex flex-wrap gap-4 md:gap-6 justify-center md:justify-start mb-6">
-            <div class="flex items-center gap-2 text-sm ">
+            <!-- <div class="flex items-center gap-2 text-sm ">
               <Users class="w-4 h-4" />
-              <span>{{ formatFanCount(artist.fanCount) }} 粉丝</span>
-            </div>
+              <span> {{artist.user}}粉丝</span>
+            </div> -->
             <div class="flex items-center gap-2 text-sm ">
               <Music class="w-4 h-4" />
-              <span>{{ artist.songCount }} 首歌曲</span>
+              <span>{{ artist?.artist?.musicSize }} 首歌曲</span>
             </div>
             <div class="flex items-center gap-2 text-sm ">
               <Disc class="w-4 h-4" />
-              <span>{{ artist.albumCount }} 张专辑</span>
+              <span>{{ artist?.artist?.albumSize }} 张专辑</span>
             </div>
           </div>
 
           <!-- 操作按钮 -->
           <div class="flex gap-3 justify-center md:justify-start">
-            <Button
-              size="lg"
-              class="bg-gradient-red-custom text-white"
-              @click="$emit('subscribe')"
-            >
-              <Heart
-                class="w-5 h-5 mr-2 transition-all"
-                :class="{ 'fill-current': artist.isSubscribed }"
-              />
-              {{ artist.isSubscribed ? '已关注' : '关注' }}
-            </Button>
-            <Button
-              size="lg"
-              class="play-all-btn btn-gradient-primary"
-              @click="$emit('play-all')"
-            >
+            <Button size="lg" class="play-all-btn btn-gradient-primary" @click="$emit('play-all')">
               <Play class="w-5 h-5 mr-2 fill-current" />
               播放全部
             </Button>
@@ -144,10 +157,13 @@ const formatFanCount = (count: string) => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
+
   50% {
     transform: scale(1.05);
     box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
