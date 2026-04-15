@@ -43,6 +43,16 @@ export interface User {
   isFollowing: boolean;
 }
 
+// 原始数据接口（根据 JSON 结构定义）
+export interface RawUserProfile {
+  userId: number;
+  nickname: string;
+  avatarUrl: string;
+  followed: boolean;
+  // 注意：原始数据中没有直接的 fanCount 和 songCount
+  // 需要从其他字段获取或设置默认值
+}
+
 export interface Playlist {
   id: string;
   title: string;

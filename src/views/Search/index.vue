@@ -10,14 +10,16 @@ import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
-import { searchBySinger, searchByAlbum, searchByPlaylist } from '@/api/search';
+import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser } from '@/api/search';
 import * as MusicTypes from '@/types/musicTypes'
 
 const route = useRoute();
-const searchArtistData = ref([]);
-const searchAlbumData = ref([]);
+const searchArtistData = ref<Array<MusicTypes.Artist>>([]);
+const searchAlbumData = ref<Array<MusicTypes.Album>>([]);
 const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([]);
+const searchUserData = ref<Array<MusicTypes.User>>([]);
 
+  // 转换函数
 const transformToArtist = (rawArtist: any): MusicTypes.Artist => {
   return {
     id: String(rawArtist.id),
@@ -28,7 +30,14 @@ const transformToArtist = (rawArtist: any): MusicTypes.Artist => {
     verified: !!rawArtist.identityIconUrl, // 有认证图标即为认证歌手
   };
 };
-const transformAlbums = (rawAlbums: MusicTypes.RawAlbum[], formatDate: boolean = false): Array<MusicTypes.Album> => {
+const formatTimestampToDate = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+const transformAlbums = (rawAlbums: MusicTypes.RawAlbum, formatDate: boolean = false): MusicTypes.Album => {
   return {
     id: String(rawAlbums.id),
     title: rawAlbums.name,
@@ -38,18 +47,8 @@ const transformAlbums = (rawAlbums: MusicTypes.RawAlbum[], formatDate: boolean =
     songCount: String(rawAlbums.size)
   };
 }
-const formatTimestampToDate = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-// 转换函数
 const transformToPlaylist = (rawPlaylist: any): MusicTypes.Playlist => {
-  // 先处理嵌套的 User 对象
-  const creator: User = {
+  const creator: MusicTypes.User = {
     id: String(rawPlaylist.creator.userId),
     name: rawPlaylist.creator.nickname,
     avatar: rawPlaylist.creator.avatarUrl,
@@ -71,32 +70,44 @@ const transformToPlaylist = (rawPlaylist: any): MusicTypes.Playlist => {
     updateTime: '', // API 未返回更新时间，需要额外获取
   };
 };
+const transformToUser = (rawUser: MusicTypes.RawUserProfile): MusicTypes.User => {
+  return {
+    id: String(rawUser.userId),
+    name: rawUser.nickname,
+    avatar: rawUser.avatarUrl,
+    fanCount: '0', // 原始数据中没有粉丝数，需从其他接口获取
+    songCount: '0', // 原始数据中没有歌曲数，需从其他接口获取
+    isFollowing: rawUser.followed,
+  };
+};
 
 const searchArtist = async (keywords: string) => {
   const data = await searchBySinger(keywords as string);
   searchArtistData.value = data.result.artists.map(transformToArtist);
 };
-
 const searchAlbum = async (keywords: string) => {
   const data = await searchByAlbum(keywords as string);
-  searchAlbumData.value = data.result.albums.map(transformAlbums);
-}
-
+  searchAlbumData.value = data.result.albums.map((item: MusicTypes.RawAlbum) => transformAlbums(item, true));
+};
 const searchPlaylist = async (keywords: string) => {
   const data = await searchByPlaylist(keywords as string);
   searchPlaylistData.value = data.result.playlists.map(transformToPlaylist);
-}
-
+};
+const searchUser = async (keywords: string) => {
+  const data = await searchByUser(keywords as string);
+  searchUserData.value = data.result.userprofiles.map(transformToUser);
+};
 const searchAllType = async () => {
   searchArtist(searchQuery.value);
   searchAlbum(searchQuery.value);
   searchPlaylist(searchQuery.value);
-}
+  searchUser(searchQuery.value);
+};
 
 watch(() => route.query.keywords, async (newKeywords) => {
   searchQuery.value = newKeywords;
   searchAllType();
-})
+});
 
 const searchQuery = ref('');
 const activeTab = ref('songs');
@@ -110,27 +121,11 @@ const mockSongs: MusicTypes.Song[] = [
   { id: '5', title: 'Billie1 Jean', artist: 'Michael Jackson', album: 'Thriller', duration: '4:54', cover: 'https://picsum.photos/60/60?random=5' },
 ];
 
-
-const mockUsers: MusicTypes.User[] = [
-  { id: '1', name: '音乐爱好者', avatar: 'https://picsum.photos/200/200?random=16', fanCount: '1.2万', songCount: '234', isFollowing: false },
-  { id: '2', name: '深夜音乐人', avatar: 'https://picsum.photos/200/200?random=17', fanCount: '8.9千', songCount: '156', isFollowing: true },
-  { id: '3', name: '旋律分享者', avatar: 'https://picsum.photos/200/200?random=18', fanCount: '3.4千', songCount: '89', isFollowing: false },
-  { id: '4', name: '音乐制作人', avatar: 'https://picsum.photos/200/200?random=19', fanCount: '12.5万', songCount: '45', isFollowing: true },
-  { id: '5', name: 'DJ小张', avatar: 'https://picsum.photos/200/200?random=20', fanCount: '5.6千', songCount: '342', isFollowing: false },
-];
-
 const filteredSongs = computed(() => {
   if (!searchQuery.value) return mockSongs;
   return mockSongs.filter(song =>
     song.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
     song.artist.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-const filteredUsers = computed(() => {
-  if (!searchQuery.value) return mockUsers;
-  return mockUsers.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -239,7 +234,7 @@ const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
               <div class="flex items-center gap-1">
                 <span>用户</span>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ filteredUsers.length }})
+                  ({{ searchUserData.length }})
                 </span>
               </div>
             </TabsTrigger>
@@ -276,7 +271,7 @@ const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
 
                 <TabsContent value="users" v-show="activeTab === 'users'">
                   <ScrollArea>
-                    <UserResults :users="filteredUsers" @user-click="handleUserClick" @follow-user="handleFollowUser" />
+                    <UserResults :users="searchUserData" @user-click="handleUserClick" @follow-user="handleFollowUser" />
                   </ScrollArea>
                 </TabsContent>
               </div>

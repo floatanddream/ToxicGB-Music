@@ -2,23 +2,15 @@
 import { ref } from 'vue';
 import { User, UserPlus, Music2, Heart } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-
-interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  fanCount: string;
-  songCount: string;
-  isFollowing: boolean;
-}
+import type {User as UserStru} from '@/types/musicTypes'
 
 defineProps<{
-  users: User[];
+  users: UserStru[];
 }>();
 
 defineEmits<{
-  'follow-user': [user: User];
-  'user-click': [user: User];
+  'follow-user': [user: UserStru];
+  'user-click': [user: UserStru];
 }>();
 </script>
 
@@ -29,48 +21,19 @@ defineEmits<{
       <span class="text-sm text-gray-500">{{ users.length }} 位用户</span>
     </div>
 
-    <div v-if="users.length > 0" class="space-y-3">
-      <div
-        v-for="user in users"
-        :key="user.id"
-        class="user-item group"
-      >
-        <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+    <div v-if="users.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div v-for="user in users" :key="user.id" class="artist-card group cursor-pointer"
+        @click="$emit('user-click', user)">
+        <div class="relative">
           <div
-            class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
-            @click="$emit('user-click', user)"
-          >
+            class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all">
             <img :src="user.avatar" :alt="user.name" class="w-full h-full object-cover" />
           </div>
-
-          <div
-            class="flex-1 min-w-0 cursor-pointer"
-            @click="$emit('user-click', user)"
-          >
-            <div class="flex items-center gap-2">
-              <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ user.name }}</h3>
-            </div>
-            <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-1">
-              <div class="flex items-center gap-1">
-                <Music2 class="w-3 h-3" />
-                <span>{{ user.songCount }} 歌曲</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <Heart class="w-3 h-3" />
-                <span>{{ user.fanCount }} 粉丝</span>
-              </div>
-            </div>
-          </div>
-
-          <Button
-            :variant="user.isFollowing ? 'outline' : 'default'"
-            size="sm"
-            @click="$emit('follow-user', user)"
-          >
-            <UserPlus class="w-4 h-4 mr-1" />
-            {{ user.isFollowing ? '已关注' : '关注' }}
-          </Button>
         </div>
+
+        <h3 class="font-medium text-gray-900 dark:text-white text-center truncate">
+          {{ user.name }}
+        </h3>
       </div>
     </div>
 
