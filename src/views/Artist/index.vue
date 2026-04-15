@@ -3,32 +3,26 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import ArtistHeader from './components/ArtistHeader.vue';
 import ArtistContent from './components/ArtistContent.vue';
-
-interface Artist {
-  id: string;
-  name: string;
-  cover: string;
-  backgroundImage: string;
-  fanCount: string;
-  songCount: string;
-  albumCount: string;
-  isSubscribed: boolean;
-  description: string;
-  verified: boolean;
-}
-
-interface ArtistSong {
-  id: string;
-  title: string;
-  duration: string;
-  playCount: string;
-  publishTime: string;
-  album: string;
-  isPlaying: boolean;
-}
+import type { ArtistData } from '@/types/artist';
+import type { Song } from '@/types/musicTypes';
+import { getArtistTop50,getArtistDetail } from '@/api/artistPage';
+import { transformToSong } from '@/utils/dataTransformer';
 
 const route = useRoute();
 const artistId = computed(() => route.query.id as string);
+
+const artistData = ref<ArtistData>();
+const Songs = ref<Song[]>([]);
+
+const fetchArtistData = async () => {
+  const artistRes = await getArtistDetail(artistId.value);
+  const songRes = await getArtistTop50(artistId.value);
+  artistData.value = artistRes.data as ArtistData;
+  Songs.value = songRes.songs.map(transformToSong);
+}
+
+
+
 
 // 模拟歌手数据
 const mockArtist: Artist = {
@@ -59,15 +53,6 @@ const mockSongs: ArtistSong[] = [
 const artist = ref<Artist>(mockArtist);
 const songs = ref<ArtistSong[]>(mockSongs);
 
-// 格式化粉丝数
-const formatFanCount = (count: string) => {
-  const num = parseInt(count);
-  if (num >= 10000) {
-    return (num / 10000).toFixed(0) + '万';
-  }
-  return count;
-};
-
 // 播放歌曲
 const playSong = (song: ArtistSong) => {
   songs.value.forEach(s => s.isPlaying = s.id === song.id);
@@ -89,7 +74,8 @@ const handleSubscribe = () => {
 
 onMounted(() => {
   console.log('歌手ID:', artistId.value);
-  // 这里可以加载实际的歌手数据
+  fetchArtistData();
+  
 });
 </script>
 
