@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { User, Music2, Play } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
+import { User } from 'lucide-vue-next';
 import { formatNumber } from '@/utils/format';
-
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 

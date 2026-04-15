@@ -5,6 +5,9 @@ import App from './App.vue'
 import router from './router'
 import './style.css'
 import './styles/dark-mode.css'
+import { registerEvents } from '@/utils/eventBusHandler'
+
+registerEvents(router)
 
 const app = createApp(App)
 
