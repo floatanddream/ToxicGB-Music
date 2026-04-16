@@ -50,7 +50,7 @@ const getTruncatedDesc = (text: string) => {
         <!-- 歌手头像 -->
         <div class="avatar-container relative">
           <div
-            class="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
+            class="w-32 h-32 md:w-40 md:h-40 lg:w-60 lg:h-60 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
             <img :src="artist?.artist?.cover" :alt="artist?.artist?.name" class="w-full h-full object-cover" />
           </div>
           <div v-if="artist?.user?.followed"
@@ -60,7 +60,7 @@ const getTruncatedDesc = (text: string) => {
         </div>
 
         <!-- 歌手信息 -->
-        <div class="flex-1 text-center md:text-left ">
+        <div class="flex-1 text-center md:text-left pl-10 ">
           <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-3  drop-shadow-lg">
             {{ artist?.artist?.name }}
           </h1>
