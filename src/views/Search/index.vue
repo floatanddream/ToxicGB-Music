@@ -13,6 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon } from 'lucide-vue-next';
 import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser, searchBySong } from '@/api/search';
 import * as MusicTypes from '@/types/musicTypes'
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 import {transformAlbums,transformToArtist,transformToPlaylist,transformToSong,transformToUser} from '@/utils/dataTransformer'
 const route = useRoute();
 const searchArtistData = ref<Array<MusicTypes.Artist>>([]);
@@ -41,7 +43,8 @@ const searchSong = async (keywords: string) => {
   const data = await searchBySong(keywords as string);
   searchSongData.value = data.result.songs.map(transformToSong);
 };
-const searchAllType = async () => {
+const handelSearchAllType = async () => {
+  emitter.emit(EVENTS.SCROOL_TOP);
   searchSong(searchQuery.value)
   searchArtist(searchQuery.value);
   searchAlbum(searchQuery.value);
@@ -51,7 +54,7 @@ const searchAllType = async () => {
 
 watch(() => route.query.keywords, async (newKeywords) => {
   searchQuery.value = newKeywords;
-  searchAllType();
+  handelSearchAllType();
 });
 
 const searchQuery = ref('');
@@ -60,7 +63,7 @@ const isPlaying = ref(false);
 
 const handleSearch = (query: string) => {
   searchQuery.value = query;
-  searchAllType();
+  handelSearchAllType();
 };
 
 const handlePlaySong = (song: MusicTypes.Song) => {
@@ -95,7 +98,7 @@ const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
 onMounted(()=>{
   if(route.query.keywords){
     searchQuery.value = route.query.keywords as string;
-    searchAllType();
+    handelSearchAllType();
   }
 })
 </script>
