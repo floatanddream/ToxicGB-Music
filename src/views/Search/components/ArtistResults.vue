@@ -36,8 +36,8 @@ const handleArtistClick = (artist : Artist) =>{
         @click="handleArtistClick(artist)">
         <div class="relative">
           <div
-            class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all">
-            <img :src="artist.avatar" :alt="artist.name" class="w-full h-full object-cover" />
+            class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all relative">
+            <img :src="artist.avatar" :alt="artist.name" class="w-full h-full object-cover artist-image" />
           </div>
           <div v-if="artist.verified" class="absolute bottom-2 right-5  bg-red-500 rounded-full p-1">
             <User class="w-5 h-5 text-white" />
@@ -79,5 +79,13 @@ const handleArtistClick = (artist : Artist) =>{
 
 .artist-card:hover h3 {
   color: #0ea5e9;
+}
+
+.artist-image {
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.artist-card:hover .artist-image {
+  transform: scale(1.1);
 }
 </style>

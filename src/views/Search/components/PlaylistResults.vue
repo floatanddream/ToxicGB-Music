@@ -32,8 +32,8 @@ defineEmits<{
       <div v-for="playlist in playlists" :key="playlist.id" class="playlist-card group cursor-pointer"
         @click="$emit('playlist-click', playlist)">
         <div class="relative">
-          <div class="aspect-square rounded-lg overflow-hidden mb-3 shadow-lg group-hover:shadow-xl transition-all">
-            <img :src="playlist.cover" :alt="playlist.title" class="w-full h-full object-cover" />
+          <div class="aspect-square rounded-lg overflow-hidden mb-3 shadow-lg group-hover:shadow-xl transition-all relative">
+            <img :src="playlist.cover" :alt="playlist.title" class="w-full h-full object-cover playlist-image" />
           </div>
 
           <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -125,5 +125,13 @@ defineEmits<{
 
 .playlist-card:hover h3 {
   color: #fb2c36;
+}
+
+.playlist-image {
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.playlist-card:hover .playlist-image {
+  transform: scale(1.1);
 }
 </style>

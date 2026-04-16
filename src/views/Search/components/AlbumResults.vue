@@ -32,8 +32,8 @@ defineEmits<{
     <div v-if="albums.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       <div v-for="album in albums" :key="album.id" class="album-card group cursor-pointer"
         @click="$emit('album-click', album)">
-        <div class="aspect-square rounded-lg overflow-hidden mb-3 shadow-lg group-hover:shadow-xl transition-all">
-          <img :src="album.cover" :alt="album.title" class="w-full h-full object-cover" />
+        <div class="aspect-square rounded-lg overflow-hidden mb-3 shadow-lg group-hover:shadow-xl transition-all relative">
+          <img :src="album.cover" :alt="album.title" class="w-full h-full object-cover album-image" />
         </div>
 
         <h3 class="font-medium text-gray-900 dark:text-white truncate">
@@ -83,5 +83,13 @@ defineEmits<{
 
 .album-card:hover h3 {
   color: #fb2c36;
+}
+
+.album-image {
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.album-card:hover .album-image {
+  transform: scale(1.1);
 }
 </style>
