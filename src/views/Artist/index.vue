@@ -7,30 +7,38 @@ import type { ArtistData } from '@/types/artist';
 import type { Song } from '@/types/musicTypes';
 import { getArtistTop50,getArtistDetail } from '@/api/artistPage';
 import { transformToSong } from '@/utils/dataTransformer';
+import { Loader2 } from 'lucide-vue-next';
 
 const route = useRoute();
 const artistId = computed(() => route.query.id as string);
 
 const artistData = ref<ArtistData>();
 const Songs = ref<Song[]>([]);
+const loading = ref(false);
 
 const fetchArtistData = async () => {
-  const artistRes = await getArtistDetail(artistId.value);
-  const songRes = await getArtistTop50(artistId.value);
-  artistData.value = artistRes.data as ArtistData;
-  Songs.value = songRes.songs.map(transformToSong);
+  loading.value = true;
+  try {
+    const artistRes = await getArtistDetail(artistId.value);
+    const songRes = await getArtistTop50(artistId.value);
+    artistData.value = artistRes.data as ArtistData;
+    Songs.value = songRes.songs.map(transformToSong);
+  } catch (error) {
+    console.error('获取歌手数据失败:', error);
+  } finally {
+    loading.value = false;
+  }
 }
 
 // 播放歌曲
-const playSong = (song: ArtistSong) => {
-  songs.value.forEach(s => s.isPlaying = s.id === song.id);
-  console.log('播放歌曲:', song.title);
+const playSong = () => {
+  console.log('播放全部歌曲:', Songs);
 };
 
 // 播放全部
 const playAllSongs = () => {
-  if (songs.value.length > 0) {
-    playSong(songs.value[0]);
+  if (Songs.value.length > 0) {
+    playSong();
   }
 };
 
@@ -49,10 +57,16 @@ onMounted(() => {
 
 <template>
   <div class="artist-page glass-container min-h-screen">
-    <ArtistHeader :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
-    <div class="artist-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-      <ArtistContent :songs="Songs" :artist-name="artistData?.artist.name" @play-song="playSong" />
+    <div v-if="loading" class="flex items-center justify-center h-screen">
+      <Loader2 class="w-12 h-12 animate-spin text-gray-500" />
     </div>
+
+    <template v-else>
+      <ArtistHeader :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
+      <div class="artist-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
+        <ArtistContent :songs="Songs"/>
+      </div>
+    </template>
   </div>
 </template>
 

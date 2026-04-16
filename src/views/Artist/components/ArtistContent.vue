@@ -8,11 +8,6 @@ const activeTab = ref<'songs' | 'albums' | 'videos' | 'activities'>('songs');
 
 const props = defineProps<{
   songs: Song[];
-  artistName: string;
-}>();
-
-defineEmits<{
-  'play-song': [song: Song];
 }>();
 
 const formatPlayCount = (count: string) => {

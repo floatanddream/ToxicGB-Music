@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "WebSearch",
+      "WebFetch(domain:www.shadcn-vue.com)",
+      "Bash(F:ToxicGBToxicGB-Music list:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm info:*)"
     ]
   }
 }

@@ -14,6 +14,7 @@ ToxicGB-Music 是一个基于 Vue 3 的现代音乐播放器 Web 应用，采用
 - **UI组件**: Reka UI
 - **特殊效果**: @applemusic-like-lyrics（苹果风格歌词和背景渲染）
 - **图标**: Lucide Vue Next
+- **UI库**: Shadcn-vue
 
 ## 项目结构
 ```
@@ -59,6 +60,7 @@ npm run preview
 - 使用 `<script setup lang="ts">` 语法
 - Tailwind CSS 用于样式，支持深色模式
 - 组件间通信主要使用 Props 和 Events
+-组件通信同时可以使用mitt
 - 全局状态使用 Pinia 管理
 
 ## 注意事项

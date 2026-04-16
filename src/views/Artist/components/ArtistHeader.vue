@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import type { Artist, ArtistData } from '@/types/artist';
+import type { ArtistData } from '@/types/artist';
 import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 
 defineProps<{
@@ -30,7 +30,6 @@ const formatFanCount = (count: string) => {
   return count;
 };
 
-// 判断简介是否需要缩略（超过100字符）
 const shouldTruncate = (text: string) => {
   return text && text.length > 100;
 };
@@ -68,25 +67,24 @@ const getTruncatedDesc = (text: string) => {
           <div class="flex items-start gap-2 mb-4 max-w-2xl">
             <p class="text-sm md:text-base">
               {{ getTruncatedDesc(artist?.artist?.briefDesc || '') }}
+              <Dialog v-if="shouldTruncate(artist?.artist?.briefDesc || '')">
+                <DialogTrigger as-child>
+                  <Button variant="ghost" size="sm" class="h-6 text-xs">
+                    详细
+                  </Button>
+                </DialogTrigger>
+                <DialogContent class="max-w-2xl max-h-[80vh] z-500 overflow-hidden">
+                  <DialogHeader>
+                    <DialogTitle>歌手简介</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea class="h-[calc(80vh-120px)]">
+                    <DialogDescription class="whitespace-pre-wrap break-words pr-4">
+                      {{ artist?.artist?.briefDesc }}
+                    </DialogDescription>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
             </p>
-            <Dialog v-if="shouldTruncate(artist?.artist?.briefDesc || '')">
-              <DialogTrigger as-child>
-                <Button variant="ghost" size="sm" class="h-6 text-xs">
-                  详细
-                </Button>
-              </DialogTrigger>
-              <DialogContent class="max-w-2xl max-h-[80vh] z-500 overflow-hidden">
-                <DialogHeader>
-                  <DialogTitle>歌手简介</DialogTitle>
-                </DialogHeader>
-                <ScrollArea class="h-[calc(80vh-120px)]">
-                  <DialogDescription class="whitespace-pre-wrap break-words pr-4">
-                    {{ artist?.artist?.briefDesc }}
-                  </DialogDescription>
-                </ScrollArea>
-              </DialogContent>
-
-            </Dialog>
           </div>
 
           <!-- 统计数据 -->
