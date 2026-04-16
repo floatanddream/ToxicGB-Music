@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
 import SongResults from './components/SongResults.vue';
@@ -20,8 +20,6 @@ const searchAlbumData = ref<Array<MusicTypes.Album>>([]);
 const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([]);
 const searchUserData = ref<Array<MusicTypes.User>>([]);
 const searchSongData = ref<Array<MusicTypes.Song>>([]);
-
-
 
 const searchArtist = async (keywords: string) => {
   const data = await searchBySinger(keywords as string);
@@ -93,6 +91,13 @@ const handlePlaylistClick = (playlist: MusicTypes.Playlist) => {
 const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
   console.log('Like playlist:', playlist.title);
 };
+
+onMounted(()=>{
+  if(route.query.keywords){
+    searchQuery.value = route.query.keywords as string;
+    searchAllType();
+  }
+})
 </script>
 
 <template>
