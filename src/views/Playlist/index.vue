@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import PlaylistHeader from './components/PlaylistHeader.vue';
-import SongList from '@/components/common/SongList.vue';
+import SongList from '@/components/common/musicComponents/SongList.vue';
 
 interface Song {
   id: string;

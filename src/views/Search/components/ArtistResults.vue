@@ -1,19 +1,11 @@
 <script setup lang="ts">
+import type { Artist } from '@/types/musicTypes';
+import ArtistCard from '@/components/common/musicComponents/ArtistCard.vue';
 import { User } from 'lucide-vue-next';
-import { formatNumber } from '@/utils/format';
-import emitter from '@/utils/eventBus'
-import { EVENTS } from '@/constants/events'
-import type{ Artist } from '@/types/musicTypes';
 
 defineProps<{
   artists: Artist[];
 }>();
-
-const handleArtistClick = (artist : Artist) =>{
-  emitter.emit(EVENTS.ARTIST_CLICK, artist);
-  emitter.emit(EVENTS.SCROOL_TOP);
-};
-
 </script>
 
 <template>
@@ -24,28 +16,7 @@ const handleArtistClick = (artist : Artist) =>{
     </div>
 
     <div v-if="artists.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      <div v-for="artist in artists" :key="artist.id" class="artist-card group cursor-pointer"
-        @click="handleArtistClick(artist)">
-        <div class="relative">
-          <div
-            class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all relative">
-            <img :src="artist.avatar" :alt="artist.name" class="w-full h-full object-cover artist-image" />
-          </div>
-          <div v-if="artist.verified" class="absolute bottom-2 right-5  bg-red-500 rounded-full p-1">
-            <User class="w-5 h-5 text-white" />
-          </div>
-        </div>
-
-        <h3 class="font-medium text-gray-900 dark:text-white text-center truncate">
-          {{ artist.name }}
-        </h3>
-
-        <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
-          <span>{{ formatNumber(Number(artist.fanCount)) }} 粉丝</span>
-          <span>•</span>
-          <span>{{ artist.songCount }} 歌曲</span>
-        </div>
-      </div>
+      <ArtistCard v-for="artist in artists" :key="artist.id" :artist="artist" />
     </div>
 
     <div v-else class="empty-state">

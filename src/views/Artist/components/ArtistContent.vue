@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Play } from 'lucide-vue-next';
-import SongList from '@/components/common/SongList.vue';
+import SongList from '@/components/common/musicComponents/SongList.vue';
 import { computed, ref } from 'vue';
 import ArtistTabs from './ArtistTabs.vue';
 import type { Song } from '@/types/musicTypes';

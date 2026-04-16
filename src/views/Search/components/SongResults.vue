@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Music2, Play, Pause } from 'lucide-vue-next';
-import SongList from '@/components/common/SongList.vue';
+import SongList from '@/components/common/musicComponents/SongList.vue';
 import type { Song } from '@/types/musicTypes';
 
 const props = defineProps<{

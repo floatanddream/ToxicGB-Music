@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { User, UserPlus, Music2, Heart } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-vue-next';
 import type {User as UserStru} from '@/types/musicTypes'
-
+import UserCard from '@/components/common/musicComponents/UserCard.vue';
 defineProps<{
   users: UserStru[];
 }>();
@@ -22,18 +20,8 @@ defineEmits<{
     </div>
 
     <div v-if="users.length > 0" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-      <div v-for="user in users" :key="user.id" class="artist-card group cursor-pointer"
-        @click="$emit('user-click', user)">
-        <div class="relative">
-          <div
-            class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all relative">
-            <img :src="user.avatar" :alt="user.name" class="w-full h-full object-cover user-image" />
-          </div>
-        </div>
-
-        <h3 class="font-medium text-gray-900 dark:text-white text-center truncate">
-          {{ user.name }}
-        </h3>
+      <div v-for="user in users" :key="user.id" class="artist-card group cursor-pointer">
+        <UserCard :user="user" />
       </div>
     </div>
 
