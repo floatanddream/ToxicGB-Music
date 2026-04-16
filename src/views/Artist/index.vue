@@ -63,16 +63,18 @@ onMounted(() => {
 
 <template>
   <div class="artist-page glass-container min-h-screen">
-    <div v-if="loading" class="flex items-center justify-center h-screen">
-      <Loader2 class="w-12 h-12 animate-spin text-gray-500" />
-    </div>
-
-    <template v-else>
-      <ArtistHeader :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
-      <div class="artist-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-        <ArtistContent :songs="Songs"/>
+    <Transition name="fade-slide" mode="out-in">
+      <div v-if="loading" key="loading" class="flex items-center justify-center h-screen">
+        <Loader2 class="w-12 h-12 animate-spin text-gray-500" />
       </div>
-    </template>
+
+      <div v-else :key="artistId">
+        <ArtistHeader :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
+        <div class="artist-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
+          <ArtistContent :songs="Songs"/>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -112,5 +114,21 @@ onMounted(() => {
   66% {
     transform: translate(-30px, 30px) scale(0.95);
   }
+}
+
+/* 新增淡入淡出+滑动动画 */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
 }
 </style>
