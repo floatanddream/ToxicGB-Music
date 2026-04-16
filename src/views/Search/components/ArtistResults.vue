@@ -17,9 +17,11 @@ defineProps<{
   artists: Artist[];
 }>();
 
-defineEmits<{
-  'artist-click': [artist: Artist];
-}>();
+const handleArtistClick = (artist : Artist) =>{
+  emitter.emit(EVENTS.ARTIST_CLICK, artist);
+  emitter.emit(EVENTS.SCROOL_TOP);
+};
+
 </script>
 
 <template>
@@ -31,7 +33,7 @@ defineEmits<{
 
     <div v-if="artists.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       <div v-for="artist in artists" :key="artist.id" class="artist-card group cursor-pointer"
-        @click="emitter.emit(EVENTS.ARTIST_CLICK, artist)">
+        @click="handleArtistClick(artist)">
         <div class="relative">
           <div
             class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all">

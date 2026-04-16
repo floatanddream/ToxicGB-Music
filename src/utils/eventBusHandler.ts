@@ -30,10 +30,9 @@ export function registerEvents(router: Router) {
 
     [EVENTS.SONG_CLICK]: (e: { id: number }) => {
       console.log('播放歌曲:', e.id)
-    }
-  }
+    },
+  };
 
-  // ⭐ 一次性注册全部事件
   Object.entries(handlerMap).forEach(([event, handler]) => {
     emitter.on(event, handler)
   })

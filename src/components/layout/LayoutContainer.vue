@@ -3,14 +3,30 @@ import TheHeader from './TheHeader.vue'
 import TheSidebar from './TheSidebar.vue'
 import TheFooter from './TheFooter.vue'
 import { BackgroundRender } from '@applemusic-like-lyrics/vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
+import emitter from '@/utils/eventBus';
+import {EVENTS} from '@/constants/events'
 //随机图片
 const randomImage = Math.floor(Math.random() * 3) + 1;
 const imageUrl = ref(`https://picsum.photos/1920/1080?random=${randomImage}`);
 
+//拿到main元素ref
+const mainRef = ref<HTMLElement | null>(null);
+
+//滚到top
+const handleScrollTop: () => void = () => {
+  if(mainRef.value){
+    mainRef.value.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
+}
+
 // Dark mode initialization
 onMounted(() => {
+  emitter.on(EVENTS.SCROOL_TOP,handleScrollTop);
   const savedTheme = localStorage.getItem('theme');
   const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -19,6 +35,9 @@ onMounted(() => {
   } else {
     document.documentElement.classList.remove('dark');
   }
+});
+onUnmounted(()=>{
+  emitter.off(EVENTS.SCROOL_TOP);
 });
 </script>
 
@@ -29,7 +48,7 @@ onMounted(() => {
     </div>
     <TheHeader class="header" />
     <TheSidebar class="sidebar" />
-    <main class="main">
+    <main ref="mainRef" class="main">
       <slot />
     </main>
     <TheFooter class="footer" />

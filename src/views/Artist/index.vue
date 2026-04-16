@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ArtistHeader from './components/ArtistHeader.vue';
 import ArtistContent from './components/ArtistContent.vue';
@@ -8,6 +8,8 @@ import type { Song } from '@/types/musicTypes';
 import { getArtistTop50,getArtistDetail } from '@/api/artistPage';
 import { transformToSong } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
+import { EVENTS } from '@/constants/events';
+import emitter from '@/utils/eventBus'
 
 const route = useRoute();
 const artistId = computed(() => route.query.id as string);
@@ -16,7 +18,8 @@ const artistData = ref<ArtistData>();
 const Songs = ref<Song[]>([]);
 const loading = ref(false);
 
-const fetchArtistData = async () => {
+const fetchArtistData = async () => { 
+  emitter.emit(EVENTS.SCROOL_TOP);
   loading.value = true;
   try {
     const artistRes = await getArtistDetail(artistId.value);
@@ -48,10 +51,13 @@ const handleSubscribe = () => {
   console.log('关注状态:', artist.value.isSubscribed);
 };
 
-onMounted(() => {
-  console.log('歌手ID:', artistId.value);
+//歌手切换时自动更新歌手
+watch(()=> route.query.id,()=>{
   fetchArtistData();
-  
+});
+
+onMounted(() => {
+  fetchArtistData();
 });
 </script>
 
