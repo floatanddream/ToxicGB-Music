@@ -5,7 +5,7 @@ import LayoutContainer from '@/components/layout/LayoutContainer.vue'
 <template>
   <LayoutContainer>
     <Transition name="scale" mode="out-in">
-      <RouterView />
+        <RouterView />
     </Transition>
   </LayoutContainer>
 </template>

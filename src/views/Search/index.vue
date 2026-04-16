@@ -258,34 +258,24 @@ onMounted(()=>{
             <Transition name="fade-scale" mode="out-in">
               <div :key="activeTab">
                 <TabsContent value="songs" v-show="activeTab === 'songs'">
-                  <ScrollArea>
                     <SongResults :songs="searchSongData" :is-playing="isPlaying" @play-song="handlePlaySong" />
-                  </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="artists" v-show="activeTab === 'artists'">
-                  <ScrollArea>
                     <ArtistResults :artists="searchArtistData" @artist-click="handleArtistClick" />
-                  </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="albums" v-show="activeTab === 'albums'">
-                  <ScrollArea>
                     <AlbumResults :albums="searchAlbumData" @album-click="handleAlbumClick" />
-                  </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="playlists" v-show="activeTab === 'playlists'">
-                  <ScrollArea>
                     <PlaylistResults :playlists="searchPlaylistData" @playlist-click="handlePlaylistClick"
                       @like-playlist="handleLikePlaylist" />
-                  </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="users" v-show="activeTab === 'users'">
-                  <ScrollArea>
                     <UserResults :users="searchUserData" @user-click="handleUserClick" @follow-user="handleFollowUser" />
-                  </ScrollArea>
                 </TabsContent>
               </div>
             </Transition>

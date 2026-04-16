@@ -7,6 +7,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
 import emitter from '@/utils/eventBus';
 import {EVENTS} from '@/constants/events'
+import ScrollArea from '../ui/scroll-area/ScrollArea.vue';
 //随机图片
 const randomImage = Math.floor(Math.random() * 3) + 1;
 const imageUrl = ref(`https://picsum.photos/1920/1080?random=${randomImage}`);
@@ -48,8 +49,8 @@ onUnmounted(()=>{
     </div>
     <TheHeader class="header" />
     <TheSidebar class="sidebar" />
-    <main ref="mainRef" class="main">
-      <slot />
+      <main ref="mainRef" class="main"> 
+          <slot /> 
     </main>
     <TheFooter class="footer" />
   </div>
