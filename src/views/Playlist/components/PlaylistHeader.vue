@@ -1,20 +1,8 @@
 <script setup lang="ts">
 import { PlayIcon, PauseIcon, HeartIcon, ShareIcon,User2Icon,Music } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-
-interface Playlist {
-  id: string;
-  title: string;
-  cover: string;
-  creator: string;
-  description: string;
-  songCount: string;
-  playCount: string;
-  likeCount: string;
-  isLiked: boolean;
-  createTime: string;
-  updateTime: string;
-}
+import type  { Playlist } from '@/types/playlist';
+import { formatNumber } from '@/utils/format';
 
 defineProps<{
   playlist: Playlist;
@@ -25,13 +13,6 @@ defineEmits<{
   'play-all': [];
   'toggle-like': [];
 }>();
-
-const formatPlayCount = (count: string) => {
-  if (parseInt(count) >= 10000) {
-    return (parseInt(count) / 10000).toFixed(1) + '万';
-  }
-  return count;
-};
 </script>
 
 <template>
@@ -39,7 +20,7 @@ const formatPlayCount = (count: string) => {
     <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
       <!-- 封面 -->
       <div class="cover-container">
-        <img :src="playlist.cover" :alt="playlist.title" class="cover-image" />
+        <img :src="playlist?.coverImgUrl" :alt="playlist?.name" class="cover-image" />
         <div class="cover-overlay">
           <Button variant="secondary" size="icon" class="play-cover-btn" @click="$emit('play-all')">
             <PlayIcon v-if="!isPlayingAll" class="h-8 w-8" />
@@ -50,25 +31,25 @@ const formatPlayCount = (count: string) => {
 
       <!-- 信息 -->
       <div class="flex-1 text-center md:text-left">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">{{ playlist.title }}</h1>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">{{ playlist.description }}</p>
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">{{ playlist?.name }}</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">{{ playlist?.description }}</p>
 
         <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-4">
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <User2Icon class="h-4 w-4" />
-            <span>{{ playlist.creator }}</span>
+            <span>{{ playlist?.creator?.nickname }}</span>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Music class="h-4 w-4" />
-            <span>{{ playlist.songCount }} 首</span>
+            <span>{{ playlist?.trackCount }} 首</span>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <PlayIcon class="h-4 w-4" />
-            <span>{{ formatPlayCount(playlist.playCount) }} 次播放</span>
+            <span>{{ formatNumber(playlist?.playCount) }} 次播放</span>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <HeartIcon class="h-4 w-4" />
-            <span>{{ playlist.likeCount }} 收藏</span>
+            <span>{{ formatNumber(playlist?.subscribedCount) }} 收藏</span>
           </div>
         </div>
 
@@ -79,8 +60,8 @@ const formatPlayCount = (count: string) => {
             <span class="font-text-primary">{{ isPlayingAll ? '暂停播放' : '播放全部' }}</span>
           </Button>
           <Button variant="outline" size="lg" @click="$emit('toggle-like')">
-            <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': playlist.isLiked }" />
-            {{ playlist.isLiked ? '已收藏' : '收藏' }}
+            <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': playlist?.subscribed }" />
+            {{ playlist?.subscribed ? '已收藏' : '收藏' }}
           </Button>
           <Button variant="outline" size="lg">
             <ShareIcon class="h-5 w-5 mr-2" />

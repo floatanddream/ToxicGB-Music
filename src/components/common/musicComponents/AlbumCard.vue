@@ -6,8 +6,6 @@ import { Calendar } from 'lucide-vue-next';
 defineProps<{
     album: Album;
 }>();
-
-
 </script>
 
 <template>

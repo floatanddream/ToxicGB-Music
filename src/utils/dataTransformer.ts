@@ -1,4 +1,5 @@
 import * as MusicTypes from '@/types/musicTypes'
+import type { Playlist } from '@/types/playlist';
 
   
   // 转换函数
@@ -102,4 +103,55 @@ export const transformToSong = (rawData: any) : MusicTypes.Song => {
   };
 
   return song;
+}
+
+// 转换歌单数据（如果需要处理字段类型或格式）
+export function transformPlaylistDetail(rawPlaylist: any): Playlist {
+    return {
+        id: String(rawPlaylist.id), // 将 number 转换为 string
+        name: rawPlaylist.name,
+        coverImgId: rawPlaylist.coverImgId,
+        coverImgUrl: rawPlaylist.coverImgUrl,
+        coverImgId_str: rawPlaylist.coverImgId_str,
+        adType: rawPlaylist.adType,
+        userId: rawPlaylist.userId,
+        createTime: rawPlaylist.createTime,
+        status: rawPlaylist.status,
+        opRecommend: rawPlaylist.opRecommend,
+        highQuality: rawPlaylist.highQuality,
+        newImported: rawPlaylist.newImported,
+        updateTime: rawPlaylist.updateTime,
+        trackCount: rawPlaylist.trackCount,
+        specialType: rawPlaylist.specialType,
+        privacy: rawPlaylist.privacy,
+        trackUpdateTime: rawPlaylist.trackUpdateTime,
+        commentThreadId: rawPlaylist.commentThreadId,
+        playCount: rawPlaylist.playCount,
+        trackNumberUpdateTime: rawPlaylist.trackNumberUpdateTime,
+        subscribedCount: rawPlaylist.subscribedCount,
+        cloudTrackCount: rawPlaylist.cloudTrackCount,
+        ordered: rawPlaylist.ordered,
+        description: rawPlaylist.description,
+        tags: rawPlaylist.tags,
+        updateFrequency: rawPlaylist.updateFrequency,
+        backgroundCoverId: rawPlaylist.backgroundCoverId,
+        backgroundCoverUrl: rawPlaylist.backgroundCoverUrl,
+        titleImage: rawPlaylist.titleImage,
+        titleImageUrl: rawPlaylist.titleImageUrl,
+        detailPageTitle: rawPlaylist.detailPageTitle,
+        englishTitle: rawPlaylist.englishTitle,
+        officialPlaylistType: rawPlaylist.officialPlaylistType,
+        copied: rawPlaylist.copied,
+        relateResType: rawPlaylist.relateResType,
+        coverStatus: rawPlaylist.coverStatus,
+        subscribers: rawPlaylist.subscribers?.map(transformToUser) || [],
+        subscribed: rawPlaylist.subscribed,
+        creator: rawPlaylist.creator, // 已经是 User 类型
+        tracks: rawPlaylist.tracks?.map(transformToSong) || [],
+        sharedPrivilege: rawPlaylist.sharedPrivilege,
+        resEntrance: rawPlaylist.resEntrance,
+        fromUsers: rawPlaylist.fromUsers,
+        fromUserCount: rawPlaylist.fromUserCount,
+        songFromUsers: rawPlaylist.songFromUsers
+    };
 }

@@ -1,0 +1,51 @@
+import type { Song } from "./musicTypes";
+import type { User } from "./user";
+
+// / 歌单信息
+export interface Playlist {
+    id: string;
+    name: string;
+    coverImgId: number;
+    coverImgUrl: string;
+    coverImgId_str: string;
+    adType: number;
+    userId: number;
+    createTime: number;
+    status: number;
+    opRecommend: boolean;
+    highQuality: boolean;
+    newImported: boolean;
+    updateTime: number;
+    trackCount: number;
+    specialType: number;
+    privacy: number;
+    trackUpdateTime: number;
+    commentThreadId: string;
+    playCount: number;
+    trackNumberUpdateTime: number;
+    subscribedCount: number;
+    cloudTrackCount: number;
+    ordered: boolean;
+    description: string;
+    tags: string[];
+    updateFrequency: string | null;
+    backgroundCoverId: number;
+    backgroundCoverUrl: string | null;
+    titleImage: number;
+    titleImageUrl: string | null;
+    detailPageTitle: string | null;
+    englishTitle: string | null;
+    officialPlaylistType: string | null;
+    copied: boolean;
+    relateResType: string | null;
+    coverStatus: number;
+    subscribers: User[];
+    subscribed: boolean;
+    creator: User;
+    tracks: Song[];
+    sharedPrivilege: string | null;
+    resEntrance: string | null;
+    fromUsers: string | null;
+    fromUserCount: number;
+    songFromUsers: string | null;
+}
