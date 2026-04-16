@@ -10,7 +10,7 @@ import UserResults from './components/UserResults.vue';
 import PlaylistResults from './components/PlaylistResults.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { SearchIcon } from 'lucide-vue-next';
+import { SearchIcon, Loader2 } from 'lucide-vue-next';
 import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser, searchBySong } from '@/api/search';
 import * as MusicTypes from '@/types/musicTypes'
 import emitter from '@/utils/eventBus';
@@ -22,34 +22,103 @@ const searchAlbumData = ref<Array<MusicTypes.Album>>([]);
 const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([]);
 const searchUserData = ref<Array<MusicTypes.User>>([]);
 const searchSongData = ref<Array<MusicTypes.Song>>([]);
+const loading = ref(false);
+const searchStatus = ref({
+  artist: false,
+  album: false,
+  playlist: false,
+  user: false,
+  song: false
+});
+
+const allSearchCompleted = computed(() => {
+  return searchStatus.value.artist &&
+         searchStatus.value.album &&
+         searchStatus.value.playlist &&
+         searchStatus.value.user &&
+         searchStatus.value.song;
+});
+
+const resetSearchStatus = () => {
+  searchStatus.value = {
+    artist: false,
+    album: false,
+    playlist: false,
+    user: false,
+    song: false
+  };
+};
 
 const searchArtist = async (keywords: string) => {
-  const data = await searchBySinger(keywords as string);
-  searchArtistData.value = data.result.artists.map(transformToArtist);
+  try {
+    const data = await searchBySinger(keywords as string);
+    searchArtistData.value = data.result.artists.map(transformToArtist);
+  } catch (error) {
+    console.error('搜索歌手失败:', error);
+    searchArtistData.value = [];
+  } finally {
+    searchStatus.value.artist = true;
+  }
 };
 const searchAlbum = async (keywords: string) => {
-  const data = await searchByAlbum(keywords as string);
-  searchAlbumData.value = data.result.albums.map((item: MusicTypes.RawAlbum) => transformAlbums(item, true));
+  try {
+    const data = await searchByAlbum(keywords as string);
+    searchAlbumData.value = data.result.albums.map((item: MusicTypes.RawAlbum) => transformAlbums(item, true));
+  } catch (error) {
+    console.error('搜索专辑失败:', error);
+    searchAlbumData.value = [];
+  } finally {
+    searchStatus.value.album = true;
+  }
 };
 const searchPlaylist = async (keywords: string) => {
-  const data = await searchByPlaylist(keywords as string);
-  searchPlaylistData.value = data.result.playlists.map(transformToPlaylist);
+  try {
+    const data = await searchByPlaylist(keywords as string);
+    searchPlaylistData.value = data.result.playlists.map(transformToPlaylist);
+  } catch (error) {
+    console.error('搜索歌单失败:', error);
+    searchPlaylistData.value = [];
+  } finally {
+    searchStatus.value.playlist = true;
+  }
 };
 const searchUser = async (keywords: string) => {
-  const data = await searchByUser(keywords as string);
-  searchUserData.value = data.result.userprofiles.map(transformToUser);
+  try {
+    const data = await searchByUser(keywords as string);
+    searchUserData.value = data.result.userprofiles.map(transformToUser);
+  } catch (error) {
+    console.error('搜索用户失败:', error);
+    searchUserData.value = [];
+  } finally {
+    searchStatus.value.user = true;
+  }
 };
 const searchSong = async (keywords: string) => {
-  const data = await searchBySong(keywords as string);
-  searchSongData.value = data.result.songs.map(transformToSong);
+  try {
+    const data = await searchBySong(keywords as string);
+    searchSongData.value = data.result.songs.map(transformToSong);
+  } catch (error) {
+    console.error('搜索歌曲失败:', error);
+    searchSongData.value = [];
+  } finally {
+    searchStatus.value.song = true;
+  }
 };
 const handelSearchAllType = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
-  searchSong(searchQuery.value)
-  searchArtist(searchQuery.value);
-  searchAlbum(searchQuery.value);
-  searchPlaylist(searchQuery.value);
-  searchUser(searchQuery.value);
+  loading.value = true;
+  resetSearchStatus();
+
+  // 并行执行所有搜索
+  Promise.all([
+    searchSong(searchQuery.value),
+    searchArtist(searchQuery.value),
+    searchAlbum(searchQuery.value),
+    searchPlaylist(searchQuery.value),
+    searchUser(searchQuery.value)
+  ]).finally(() => {
+    loading.value = false;
+  });
 };
 
 watch(() => route.query.keywords, async (newKeywords) => {
@@ -135,7 +204,12 @@ onMounted(()=>{
       </div>
 
       <div v-else class="glass-card rounded-2xl p-6">
-        <Tabs v-model="activeTab" class="w-full">
+        <div v-if="loading" class="flex items-center justify-center py-12">
+          <Loader2 class="w-10 h-10 animate-spin text-gray-500" />
+          <span class="ml-3 text-gray-600 dark:text-gray-400">正在搜索...</span>
+        </div>
+
+        <Tabs v-else v-model="activeTab" class="w-full">
           <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
             <TabsTrigger value="songs">
               <div class="flex items-center gap-1">
