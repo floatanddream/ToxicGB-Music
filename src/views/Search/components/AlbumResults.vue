@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Disc3, Music2, Calendar, Play } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
+import { Disc3,  Calendar } from 'lucide-vue-next';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 
 interface Album {
   id: string;
@@ -43,7 +43,7 @@ defineEmits<{
         <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
           <span class="truncate">
             <template v-for="(artist, index) in album.artist" :key="artist.id">
-              <span class="hover:text-red-500 cursor-pointer" @click.stop="$emit('artist-click', artist)">
+              <span class="hover:text-red-500 cursor-pointer" @click.stop="emitter.emit(EVENTS.ARTIST_CLICK, artist)">
                 {{ artist.name }}
               </span>
               <span v-if="index !== album.artist.length - 1"> / </span>
