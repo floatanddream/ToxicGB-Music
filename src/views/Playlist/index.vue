@@ -57,7 +57,7 @@ watch(playlistId, (newId) => {
   <div class="glass-container min-h-screen">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
       <!-- 歌单头部信息 -->
-      <PlaylistHeader :playlist="playlistDetail" :is-playing-all="isPlayingAll" 
+      <PlaylistHeader :playlist="playlistDetail || {}" :is-playing-all="isPlayingAll" 
         @toggle-like="toggleLike" />
 
       <!-- 歌曲列表 -->
