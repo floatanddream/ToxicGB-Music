@@ -3,15 +3,7 @@ import { User } from 'lucide-vue-next';
 import { formatNumber } from '@/utils/format';
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
-
-interface Artist {
-  id: string;
-  name: string;
-  avatar: string;
-  fanCount: string;
-  songCount: string;
-  verified: boolean;
-}
+import type{ Artist } from '@/types/musicTypes';
 
 defineProps<{
   artists: Artist[];

@@ -2,15 +2,7 @@
 import { Disc3,  Calendar } from 'lucide-vue-next';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
-
-interface Album {
-  id: string;
-  title: string;
-  artist: Array<any>;
-  cover: string;
-  releaseDate: string;
-  songCount: string;
-}
+import type { Album,Artist } from '@/types/musicTypes';
 
 defineProps<{
   albums: Album[];
@@ -50,7 +42,7 @@ defineEmits<{
             </template>
           </span>
           <span>•</span>
-          <span class="flex-shrink-0">{{ album.songCount }} 首</span>
+          <span class="shrink-0">{{ album.songCount }} 首</span>
         </div>
 
         <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
