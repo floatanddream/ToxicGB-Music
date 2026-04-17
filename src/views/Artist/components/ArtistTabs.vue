@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 const modelValue = defineModel<string>();
 
 const tabs = [
@@ -10,28 +12,27 @@ const tabs = [
 </script>
 
 <template>
-  <div class=" sticky top-0 z-20 py-2">
+  <div class="sticky top-0 z-20 py-2">
     <div class="flex justify-center px-2">
-      <div class="glass-tab-container rounded-xl px-1 py-1 shadow-lg border border-white/10 backdrop-blur-lg">
-        <div class="flex gap-1">
-          <button
+      <Tabs
+        v-model="modelValue"
+        class="glass-tab-container w-full rounded-xl px-1 py-1 shadow-lg border border-white/10 backdrop-blur-lg"
+      >
+        <TabsList class="bg-transparent w-full flex gap-1">
+          <TabsTrigger
             v-for="tab in tabs"
             :key="tab.value"
             :value="tab.value"
-            class="tab-button relative px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
-            :class="modelValue === tab.value
-              ? 'active-tab text-white'
-              : 'inactive-tab text-gray-300 hover:text-white'"
-            @click="modelValue = tab.value"
+            class="tab-button relative flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 data-[state=inactive]:text-gray-300 data-[state=active]:text-white"
           >
             <span class="relative z-10">{{ tab.label }}</span>
             <span
               v-if="modelValue === tab.value"
               class="absolute inset-0 bg-gradient-to-r rounded-lg shadow bg-gradient-red-custom"
             ></span>
-          </button>
-        </div>
-      </div>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   </div>
 </template>
@@ -42,16 +43,16 @@ const tabs = [
   overflow: hidden;
 }
 
-.inactive-tab {
+:deep(.tabs-trigger[data-state='inactive']) {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.inactive-tab:hover {
+:deep(.tabs-trigger[data-state='inactive']):hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
 
-.active-tab {
+:deep(.tabs-trigger[data-state='active']) {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
 }
@@ -66,7 +67,7 @@ const tabs = [
   }
 }
 
-.active-tab::before {
+:deep(.tabs-trigger[data-state='active'])::before {
   content: '';
   position: absolute;
   top: 0;

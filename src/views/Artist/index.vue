@@ -4,9 +4,9 @@ import { useRoute } from 'vue-router';
 import ArtistHeader from './components/ArtistHeader.vue';
 import ArtistContent from './components/ArtistContent.vue';
 import type { ArtistData } from '@/types/artist';
-import type { Song } from '@/types/musicTypes';
-import { getArtistTop50,getArtistDetail } from '@/api/artistPage';
-import { transformToSong } from '@/utils/dataTransformer';
+import type { Album, Song } from '@/types/musicTypes';
+import { getArtistTop50,getArtistDetail, getArtistAlbum } from '@/api/artistPage';
+import { transformAlbums, transformToSong } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
 import { EVENTS } from '@/constants/events';
 import emitter from '@/utils/eventBus'
@@ -16,6 +16,7 @@ const artistId = computed(() => route.query.id as string);
 
 const artistData = ref<ArtistData>();
 const Songs = ref<Song[]>([]);
+const Albums = ref<Album[]>([]);
 const loading = ref(false);
 
 const fetchArtistData = async () => { 
@@ -24,8 +25,10 @@ const fetchArtistData = async () => {
   try {
     const artistRes = await getArtistDetail(artistId.value);
     const songRes = await getArtistTop50(artistId.value);
+    const albumRes =await getArtistAlbum(artistId.value);
     artistData.value = artistRes.data as ArtistData;
     Songs.value = songRes.songs.map(transformToSong);
+    Albums.value = albumRes?.hotAlbums?.map(transformAlbums);
   } catch (error) {
     console.error('获取歌手数据失败:', error);
   } finally {
@@ -71,7 +74,7 @@ onMounted(() => {
       <div v-else :key="artistId">
         <ArtistHeader v-if="artistData" :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
         <div class="artist-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-          <ArtistContent v-if="Songs" :songs="Songs"/>
+          <ArtistContent v-if="artistData" :albums="Albums" :songs="Songs"/>
         </div>
       </div>
     </Transition>

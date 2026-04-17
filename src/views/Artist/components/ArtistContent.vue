@@ -1,58 +1,40 @@
 <script setup lang="ts">
-import { Play } from 'lucide-vue-next';
-import SongList from '@/components/common/musicComponents/SongList.vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import ArtistTabs from './ArtistTabs.vue';
-import type { Song } from '@/types/musicTypes';
+import ArtistAlbums from './ArtistAlbums.vue';
+import ArtistVideos from './ArtistVideos.vue';
+import ArtistActivities from './ArtistActivities.vue';
+import type { Album, Song } from '@/types/musicTypes';
+import ArtistSongs from './ArtistSongs.vue';
 const activeTab = ref<'songs' | 'albums' | 'videos' | 'activities'>('songs');
-
 const props = defineProps<{
   songs: Song[];
+  albums: Album[];
 }>();
 </script>
 
 <template>
-  <div class="artist-songs">
-    <!-- 自定义头部 -->
-    <div class="songs-header flex items-center justify-between mb-6">
-      <div>
-        <h3 class="text-xl font-semibold">热门歌曲</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">共 {{ songs.length }} 首歌曲</p>
+  <div class="artist-content-container">
+    <!-- 标签切换内容 -->
+    <ArtistTabs v-model="activeTab" />
+    <Transition name="fade-slide" mode="out-in">
+      <div class="artist-content">
+       <ArtistSongs v-if="activeTab === 'songs'" key="songs"  :songs="songs"/>
+       <ArtistAlbums :albums="albums" v-else-if="activeTab === 'albums'" key="albums" />
+      <ArtistVideos v-else-if="activeTab === 'videos'" key="videos" />
+      <ArtistActivities v-else-if="activeTab === 'activities'" key="activities" />
       </div>
-            <ArtistTabs v-model:active-tab="activeTab" />
-
-      <div class="text-right">
-        <p class="text-sm text-gray-500 dark:text-gray-400">最高播放量</p>
-        <p class="text-lg font-semibold text-red-500">
-          123
-        </p>
-      </div>
-    </div>
-
-    <!-- 使用SongList组件 -->
-    <SongList :songs="props.songs" />
-
-    <!-- 额外信息 -->
-    <div class="songs-footer mt-6 text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        最后更新: {{ new Date().toLocaleDateString() }}
-      </p>
-    </div>
+    </Transition>
   </div>
 </template>
 
 <style scoped>
-.artist-songs {
+.artist-content {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 20px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.songs-header {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding-bottom: 16px;
 }
 
 @media (max-width: 640px) {

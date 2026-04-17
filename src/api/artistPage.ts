@@ -8,3 +8,8 @@ export const getArtistTop50 = async (id: number| String) => {
 export const getArtistDetail = async (id: number | String) => {
     return await request.get(`/artist/detail?id=${id}`)
 }
+
+//获取歌手专辑
+export const getArtistAlbum = async (id: number | String) => {
+    return await request.get(`/artist/album?id=${id}`)
+}
