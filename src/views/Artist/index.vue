@@ -47,8 +47,8 @@ const playAllSongs = () => {
 
 // 关注歌手
 const handleSubscribe = () => {
-  artist.value.isSubscribed = !artist.value.isSubscribed;
-  console.log('关注状态:', artist.value.isSubscribed);
+  // artist.value.isSubscribed = !artist.value.isSubscribed;
+  // console.log('关注状态:', artist.value.isSubscribed);
 };
 
 //歌手切换时自动更新歌手
@@ -69,9 +69,9 @@ onMounted(() => {
       </div>
 
       <div v-else :key="artistId">
-        <ArtistHeader :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
+        <ArtistHeader v-if="artistData" :artist="artistData" @subscribe="handleSubscribe" @play-all="playAllSongs" />
         <div class="artist-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-          <ArtistContent :songs="Songs"/>
+          <ArtistContent v-if="Songs" :songs="Songs"/>
         </div>
       </div>
     </Transition>
