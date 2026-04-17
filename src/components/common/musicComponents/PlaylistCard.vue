@@ -9,25 +9,25 @@ import {
 } from '@/components/ui/tooltip';
 import { formatNumber } from '@/utils/format';
 import type { Playlist } from '@/types/musicTypes';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 
-defineProps<{
+const props = defineProps<{
   playlist: Playlist;
 }>();
 
 defineEmits<{
-  'playlist-click': [playlist: Playlist];
   'like-playlist': [playlist: Playlist];
   'artist-click': [artist: any];
 }>();
 
-const handlePlaylistClick = (playlist: Playlist, event?: Event) => {
-  if (event) event.stopPropagation();
-  window.dispatchEvent(new CustomEvent('playlist-click', { detail: playlist }));
+const handlePlaylistClick = () => {
+  emitter.emit(EVENTS.PLAYLIST_CLICK,props.playlist);
 };
 </script>
 
 <template>
-  <div class="playlist-card group cursor-pointer" @click="$emit('playlist-click', playlist)">
+  <div class="playlist-card group cursor-pointer" @click="handlePlaylistClick">
     <div class="relative">
       <div class="aspect-square rounded-lg overflow-hidden mb-3 shadow-lg group-hover:shadow-xl transition-all relative">
         <img :src="playlist.cover" :alt="playlist.title" class="w-full h-full object-cover playlist-image" />

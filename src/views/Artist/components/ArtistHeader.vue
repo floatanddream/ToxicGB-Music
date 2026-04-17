@@ -1,17 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Play, Heart, Users, Music, Disc, Award, Info } from 'lucide-vue-next';
+import { Play, Music, Disc, Award } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import type { ArtistData } from '@/types/artist';
-import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
+import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue';
 
 defineProps<{
   artist: ArtistData;
@@ -21,24 +12,6 @@ defineEmits<{
   'subscribe': [];
   'play-all': [];
 }>();
-
-const formatFanCount = (count: string) => {
-  const num = parseInt(count);
-  if (num >= 10000) {
-    return (num / 10000).toFixed(0) + '万';
-  }
-  return count;
-};
-
-const shouldTruncate = (text: string) => {
-  return text && text.length > 100;
-};
-
-// 获取缩略后的简介
-const getTruncatedDesc = (text: string) => {
-  if (!text) return '';
-  return shouldTruncate(text) ? text.slice(0, 100) + '...' : text;
-};
 </script>
 
 <template>
@@ -64,7 +37,8 @@ const getTruncatedDesc = (text: string) => {
           <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-3  drop-shadow-lg">
             {{ artist?.artist?.name }}
           </h1>
-          <div class="flex items-start gap-2 mb-4 max-w-2xl">
+          <DescriptionWithDialog title="歌手简介" trigger-text="详细" :text="artist?.artist?.briefDesc" />
+          <!-- <div class="flex items-start gap-2 mb-4 max-w-2xl">
             <p class="text-sm md:text-base">
               {{ getTruncatedDesc(artist?.artist?.briefDesc || '') }}
               <Dialog v-if="shouldTruncate(artist?.artist?.briefDesc || '')">
@@ -85,7 +59,7 @@ const getTruncatedDesc = (text: string) => {
                 </DialogContent>
               </Dialog>
             </p>
-          </div>
+          </div> -->
 
           <!-- 统计数据 -->
           <div class="flex flex-wrap gap-4 md:gap-6 justify-center md:justify-start mb-6">

@@ -3,6 +3,7 @@ import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import type { Router } from 'vue-router'
 import type { Artist } from '@/types/musicTypes'
+import type { Playlist } from '@/types/musicTypes'
 
 export function registerEvents(router: Router) {
 
@@ -14,7 +15,7 @@ export function registerEvents(router: Router) {
       })
     },
 
-    [EVENTS.PLAYLIST_CLICK]: (e: { id: number }) => {
+    [EVENTS.PLAYLIST_CLICK]: (e: Playlist) => {
       router.push({
         name: 'playlist',
         query: { id: e.id }

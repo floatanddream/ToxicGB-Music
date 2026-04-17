@@ -9,18 +9,6 @@ const activeTab = ref<'songs' | 'albums' | 'videos' | 'activities'>('songs');
 const props = defineProps<{
   songs: Song[];
 }>();
-
-const formatPlayCount = (count: string) => {
-  if (count.includes('万')) {
-    return count;
-  }
-  const num = parseInt(count);
-  if (num >= 10000) {
-    return (num / 10000).toFixed(0) + '万';
-  }
-  return count;
-};
-
 </script>
 
 <template>

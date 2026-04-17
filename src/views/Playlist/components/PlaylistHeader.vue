@@ -3,6 +3,7 @@ import { PlayIcon, PauseIcon, HeartIcon, ShareIcon,User2Icon,Music } from 'lucid
 import { Button } from '@/components/ui/button';
 import type  { Playlist } from '@/types/playlist';
 import { formatNumber } from '@/utils/format';
+import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue';
 
 defineProps<{
   playlist: Playlist;
@@ -32,8 +33,7 @@ defineEmits<{
       <!-- 信息 -->
       <div class="flex-1 text-center md:text-left">
         <h1 class="text-3xl md:text-4xl font-bold mb-3">{{ playlist?.name }}</h1>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">{{ playlist?.description }}</p>
-
+        <DescriptionWithDialog title="歌单简介" trigger-text="详细" :text="playlist?.description" />
         <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-4">
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <User2Icon class="h-4 w-4" />
