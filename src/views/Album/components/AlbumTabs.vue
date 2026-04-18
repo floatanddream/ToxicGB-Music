@@ -7,7 +7,6 @@ const modelValue = defineModel<string>();
 const tabs: TabItem[] = [
   { label: '歌曲', value: 'songs' },
   { label: '评论', value: 'comments' },
-  { label: '收藏者', value: 'subscribers' },
 ];
 </script>
 

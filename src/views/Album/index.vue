@@ -2,22 +2,30 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import AlbumHeader from './components/AlbumHeader.vue';
-import SongList from '@/components/common/musicComponents/SongList.vue';
+import AlbumContent from './components/AlbumContent.vue';
 import type { Song } from '@/types/musicTypes';
-import { getAlbumDetail } from '@/api/album';
-import { transformAlbumDetail, transformToSong } from '@/utils/dataTransformer';
+import { getAlbumDetail, getAlbumComments } from '@/api/album';
+import { transformAlbumDetail } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
 import { EVENTS } from '@/constants/events';
 import emitter from '@/utils/eventBus';
 import type { Album } from '@/types/album';
+import type { CommentListResponse } from '@/types/comment';
+import { transformCommentListResponse } from '@/utils/dataTransformer';
 
 const route = useRoute();
 const albumId = computed(() => route.query.id as string);
 
 const albumDetail = ref<Album>();
 const songs = ref<Song[]>([]);
+const albumComments = ref<CommentListResponse>();
+
 const loading = ref(false);
 const isPlayingAll = ref(false);
+
+const commentsLoading = ref(false);
+const commentsLoadingMore = ref(false);
+const commentsOffset = ref(0);
 
 const fetchAlbumDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
@@ -25,7 +33,6 @@ const fetchAlbumDetail = async () => {
   try {
     const albumRes = await getAlbumDetail(albumId.value);
     albumDetail.value = transformAlbumDetail(albumRes);
-    console.log(albumDetail.value)
     //处理网易云专辑的歌曲没有url问题
     albumDetail.value.songs?.map((item) => {
       if (item.cover?.startsWith('undefined')) {
@@ -37,6 +44,55 @@ const fetchAlbumDetail = async () => {
     console.error('获取专辑数据失败:', error);
   } finally {
     loading.value = false;
+  }
+};
+
+const fetchAlbumComments = async () => {
+  commentsLoading.value = true;
+  commentsOffset.value = 0;
+  try {
+    const data = await getAlbumComments({ id: albumId.value, limit: 50, offset: 0 });
+    albumComments.value = transformCommentListResponse(data);
+  } catch (error) {
+    console.error('获取专辑评论数据失败:', error);
+  } finally {
+    commentsLoading.value = false;
+  }
+};
+
+const loadMoreComments = async () => {
+  if (!albumComments.value?.more || commentsLoadingMore.value) return;
+
+  commentsLoadingMore.value = true;
+  commentsOffset.value += 20;
+
+  try {
+    const data = await getAlbumComments({
+      id: albumId.value,
+      limit: 20,
+      offset: commentsOffset.value
+    });
+
+    const newComments = transformCommentListResponse(data);
+
+    if (albumComments.value) {
+      albumComments.value.comments = [
+        ...albumComments.value.comments,
+        ...newComments.comments
+      ];
+      albumComments.value.more = newComments.more;
+      albumComments.value.total = newComments.total;
+    }
+  } catch (error) {
+    console.error('加载更多评论失败:', error);
+  } finally {
+    commentsLoadingMore.value = false;
+  }
+};
+
+const handleTabChange = (newTab: string) => {
+  if (newTab === 'comments') {
+    fetchAlbumComments();
   }
 };
 
@@ -83,8 +139,9 @@ onMounted(() => {
         <AlbumHeader v-if="albumDetail" :album="albumDetail" :is-playing-all="isPlayingAll" @play-all="playAllSongs"
           @toggle-like="toggleLike" />
 
-        <!-- 歌曲列表 -->
-        <SongList :songs="songs" />
+        <!-- 专辑内容区域 -->
+        <AlbumContent v-if="albumDetail" @active-tab-change="handleTabChange" @load-more-comments="loadMoreComments"
+          :songs="songs" :comments-loading="commentsLoading" :comments-loading-more="commentsLoadingMore" :comments="albumComments" />
       </div>
     </Transition>
   </div>
@@ -113,7 +170,6 @@ onMounted(() => {
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
