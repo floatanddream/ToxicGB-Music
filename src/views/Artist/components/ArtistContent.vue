@@ -5,7 +5,7 @@ import ArtistAlbums from './ArtistAlbums.vue';
 import ArtistVideos from './ArtistVideos.vue';
 import ArtistActivities from './ArtistActivities.vue';
 import type { Album, Song } from '@/types/musicTypes';
-import ArtistSongs from './ArtistSongs.vue';
+import SongsContainer from '@/components/common/songComponents/songsContainer.vue';
 const activeTab = ref<'songs' | 'albums' | 'videos' | 'activities'>('songs');
 const props = defineProps<{
   songs: Song[];
@@ -19,7 +19,7 @@ const props = defineProps<{
     <ArtistTabs v-model="activeTab" />
     <Transition name="fade-slide" mode="out-in">
       <div v-if="activeTab === 'songs'" key="songs" class="artist-content">
-        <ArtistSongs :songs="songs" />
+        <SongsContainer title="热门歌曲" :songs="songs" />
       </div>
       <div v-else-if="activeTab === 'albums'" key="albums" class="artist-content">
         <ArtistAlbums :albums="albums" />

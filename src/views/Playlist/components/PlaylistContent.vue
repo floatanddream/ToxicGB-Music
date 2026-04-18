@@ -4,6 +4,7 @@ import PlaylistTabs from './PlaylistTabs.vue';
 import SongList from '@/components/common/musicComponents/SongList.vue';
 import type { Song } from '@/types/musicTypes';
 import type { Comment, CommentListResponse } from '@/types/comment';
+import SongsContainer from '@/components/common/songComponents/songsContainer.vue';
 
 const activeTab = ref<'songs' | 'comments' | 'subscribers' | 'activities'>('songs');
 
@@ -236,15 +237,7 @@ const formatTime = (timestamp: number): string => {
     <Transition name="fade-slide" mode="out-in">
       <!-- 歌曲标签页 -->
       <div v-if="activeTab === 'songs'" key="songs" class="playlist-content">
-        <div class="songs-header flex items-center justify-between mb-6">
-          <div>
-            <h3 class="text-xl font-semibold">歌曲列表</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              共 {{ songs.length }} 首歌曲
-            </p>
-          </div>
-        </div>
-        <SongList :songs="props.songs" />
+        <SongsContainer title="歌单歌曲" :songs="songs" />
         <div class="songs-footer mt-6 text-center">
           <p class="text-sm text-gray-500 dark:text-gray-400">
             最后更新: {{ new Date().toLocaleDateString() }}
