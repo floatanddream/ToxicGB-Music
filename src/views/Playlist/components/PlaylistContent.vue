@@ -5,6 +5,7 @@ import PlaylistSongs from './PlaylistSongs.vue';
 import PlaylistComments from './PlaylistComments.vue';
 import PlaylistSubscribers from './PlaylistSubscribers.vue';
 import type { Song } from '@/types/musicTypes';
+import type { CommentListResponse } from '@/types/comment';
 
 const activeTab = ref<'songs' | 'comments' | 'subscribers'>('songs');
 
@@ -16,6 +17,8 @@ watch(activeTab, (newTab:string) => {
 
 const props = defineProps<{
   songs: Song[];
+  commentsLoading: boolean;
+  comments: CommentListResponse | undefined;
 }>();
 </script>
 
@@ -30,7 +33,7 @@ const props = defineProps<{
       <PlaylistSongs v-if="activeTab === 'songs'" key="songs" :songs="songs" />
 
       <!-- 评论标签页 -->
-      <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" />
+      <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" :loading="commentsLoading" :comments="comments" />
 
       <!-- 收藏者标签页 -->
       <PlaylistSubscribers v-else-if="activeTab === 'subscribers'" key="subscribers" />

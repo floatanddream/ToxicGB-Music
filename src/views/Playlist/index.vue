@@ -6,7 +6,7 @@ import PlaylistContent from './components/PlaylistContent.vue';
 import type { Song } from '@/types/musicTypes';
 import type { Playlist } from '@/types/playlist';
 import { getPlaylistComments, getPlaylistDetail } from '@/api/playlist';
-import { transformPlaylistDetail } from '@/utils/dataTransformer';
+import { transformCommentListResponse, transformPlaylistDetail } from '@/utils/dataTransformer';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { Loader2 } from 'lucide-vue-next';
@@ -16,10 +16,13 @@ import type { Comment } from '@/types/comment';
 const route = useRoute();
 const playlistId = computed(() => route.query.id as string);
 const playlistDetail = ref<Playlist>();
-const playlistComments = ref<Comment>();
+import type { CommentListResponse } from '@/types/comment';
+
+const playlistComments = ref<CommentListResponse>();
 
 const isPlayingAll = ref(false);
 const loading = ref(false);
+const commentsLoading = ref(false);
 
 const fetchPlaylistDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
@@ -47,15 +50,14 @@ const handleTabChange = (newTab: string) => {
 };
 
 const fetchPlaylistComments = async () => {
-  // TODO: 获取歌单评论
-  loading.value = true;
+  commentsLoading.value = true;
   try {
     const data = await getPlaylistComments(playlistId.value);
-    playlistDetail.value = transformPlaylistDetail(data.playlist);
+    playlistComments.value = transformCommentListResponse(data);
   } catch (error) {
-    console.error('获取歌单数据失败:', error);
+    console.error('获取歌单评论数据失败:', error);
   } finally {
-    loading.value = false;
+    commentsLoading.value = false;
   }
 }
 const fetchPlaylistSubscribers = async () => {
@@ -87,7 +89,7 @@ onMounted(() => {
           @toggle-like="toggleLike" />
         <!-- 歌单内容区域 -->
         <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange"
-          :songs="playlistDetail?.tracks || []" />
+          :songs="playlistDetail?.tracks || []" :comments-loading="commentsLoading" :comments="playlistComments" />
       </div>
     </Transition>
   </div>

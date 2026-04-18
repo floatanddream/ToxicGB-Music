@@ -177,3 +177,53 @@ export function transformAlbumDetail(rawData: any) :Album {
             shareCount: album.info?.commentThread?.shareCount || 0
     };
 }
+
+import type { CommentListResponse, Comment } from '@/types/comment';
+
+// 转换单条评论
+const transformComment = (rawComment: any): Comment => {
+    return {
+        user: rawComment.user,
+        beReplied: rawComment.beReplied || [],
+        pendantData: rawComment.pendantData || null,
+        showFloorComment: rawComment.showFloorComment || null,
+        status: rawComment.status || 0,
+        commentId: rawComment.commentId || 0,
+        content: rawComment.content || '',
+        richContent: rawComment.richContent || '',
+        contentResource: rawComment.contentResource || null,
+        time: rawComment.time || 0,
+        timeStr: rawComment.timeStr || '',
+        needDisplayTime: rawComment.needDisplayTime !== undefined ? rawComment.needDisplayTime : true,
+        likedCount: rawComment.likedCount || 0,
+        expressionUrl: rawComment.expressionUrl || null,
+        commentLocationType: rawComment.commentLocationType || 0,
+        parentCommentId: rawComment.parentCommentId || 0,
+        decoration: rawComment.decoration || null,
+        repliedMark: rawComment.repliedMark || null,
+        grade: rawComment.grade || null,
+        userBizLevels: rawComment.userBizLevels || null,
+        ipLocation: rawComment.ipLocation || { ip: null, location: '', userId: null },
+        owner: rawComment.owner || false,
+        medal: rawComment.medal || null,
+        likeAnimationMap: rawComment.likeAnimationMap || {},
+        liked: rawComment.liked || false
+    };
+};
+
+// 转换评论列表响应数据
+export function transformCommentListResponse(rawData: any): CommentListResponse {
+    return {
+        isMusician: rawData.isMusician || false,
+        cnum: rawData.cnum || 0,
+        userId: rawData.userId || 0,
+        topComments: (rawData.topComments || []).map(transformComment),
+        moreHot: rawData.moreHot || false,
+        hotComments: (rawData.hotComments || []).map(transformComment),
+        commentBanner: rawData.commentBanner || null,
+        code: rawData.code || 200,
+        comments: (rawData.comments || []).map(transformComment),
+        total: rawData.total || 0,
+        more: rawData.more || false
+    };
+}

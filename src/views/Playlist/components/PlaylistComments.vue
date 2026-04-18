@@ -1,202 +1,20 @@
 <script setup lang="ts">
-import type { Comment } from '@/types/comment';
+import type { Comment, CommentListResponse } from '@/types/comment';
+import { Loader2 } from 'lucide-vue-next';
+import { computed } from 'vue';
 
-// Mock 评论数据，符合 Comment 接口
-const mockComments: Comment[] = [
-  {
-    user: {
-      nickname: '音乐爱好者',
-      avatarUrl: '/api/placeholder/40/40',
-      userId: 12345,
-      authStatus: 0,
-      vipType: 0,
-      followed: false,
-      mutual: false,
-      userType: 0,
-      avatarDetail: null,
-      vipRights: null,
-      socialUserId: null,
-      remarkName: null,
-      experts: null,
-      expertTags: null,
-      commonIdentity: null,
-      locationInfo: null,
-      liveInfo: null,
-      anonym: 0,
-      highlight: false,
-      target: null
-    },
-    beReplied: [],
-    status: 0,
-    commentId: 1,
-    content: '这歌单太棒了！每首歌都是经典，循环播放一整天了！🎵',
-    richContent: '这歌单太棒了！每首歌都是经典，循环播放一整天了！🎵',
-    time: Date.now() - 2 * 60 * 60 * 1000, // 2小时前
-    timeStr: '2小时前',
-    likedCount: 128,
-    liked: false,
-    expressionUrl: null,
-    commentLocationType: 0,
-    parentCommentId: 0,
-    decoration: null,
-    repliedMark: null,
-    grade: null,
-    userBizLevels: null,
-    ipLocation: {
-      ip: null,
-      location: '北京',
-      userId: null
-    },
-    owner: false,
-    medal: null,
-    likeAnimationMap: {},
-    pendantData: null,
-    showFloorComment: null,
-    contentResource: null,
-    needDisplayTime: true
-  },
-  {
-    user: {
-      nickname: '歌单作者',
-      avatarUrl: '/api/placeholder/40/40',
-      userId: 67890,
-      authStatus: 1,
-      vipType: 1,
-      followed: true,
-      mutual: false,
-      userType: 1,
-      avatarDetail: null,
-      vipRights: null,
-      socialUserId: null,
-      remarkName: null,
-      experts: null,
-      expertTags: null,
-      commonIdentity: null,
-      locationInfo: null,
-      liveInfo: null,
-      anonym: 0,
-      highlight: true,
-      target: null
-    },
-    beReplied: [
-      {
-        user: {
-          nickname: '粉丝用户',
-          avatarUrl: '/api/placeholder/40/40',
-          userId: 11111,
-          authStatus: 0,
-          vipType: 0,
-          followed: false,
-          mutual: false,
-          userType: 0,
-          avatarDetail: null,
-          vipRights: null,
-          socialUserId: null,
-          remarkName: null,
-          experts: null,
-          expertTags: null,
-          commonIdentity: null,
-          locationInfo: null,
-          liveInfo: null,
-          anonym: 0,
-          highlight: false,
-          target: null
-        },
-        beRepliedCommentId: 2,
-        content: '感谢作者！歌单真的很用心',
-        richContent: '感谢作者！歌单真的很用心',
-        status: 0,
-        expressionUrl: null,
-        ipLocation: {
-          ip: null,
-          location: '上海',
-          userId: null
-        }
-      }
-    ],
-    status: 0,
-    commentId: 2,
-    content: '感谢大家的支持！我会继续更新更多优质歌单，有什么好听的歌也可以推荐给我哦～',
-    richContent: '感谢大家的支持！我会继续更新更多优质歌单，有什么好听的歌也可以推荐给我哦～',
-    time: Date.now() - 5 * 60 * 60 * 1000, // 5小时前
-    timeStr: '5小时前',
-    likedCount: 256,
-    liked: true,
-    expressionUrl: null,
-    commentLocationType: 0,
-    parentCommentId: 0,
-    decoration: {
-      repliedByAuthorCount: 1
-    },
-    repliedMark: null,
-    grade: null,
-    userBizLevels: null,
-    ipLocation: {
-      ip: null,
-      location: '广州',
-      userId: null
-    },
-    owner: true,
-    medal: null,
-    likeAnimationMap: {},
-    pendantData: null,
-    showFloorComment: null,
-    contentResource: null,
-    needDisplayTime: true
-  },
-  {
-    user: {
-      nickname: '深夜听歌人',
-      avatarUrl: '/api/placeholder/40/40',
-      userId: 22222,
-      authStatus: 0,
-      vipType: 0,
-      followed: false,
-      mutual: false,
-      userType: 0,
-      avatarDetail: null,
-      vipRights: null,
-      socialUserId: null,
-      remarkName: null,
-      experts: null,
-      expertTags: null,
-      commonIdentity: null,
-      locationInfo: null,
-      liveInfo: null,
-      anonym: 0,
-      highlight: false,
-      target: null
-    },
-    beReplied: [],
-    status: 0,
-    commentId: 3,
-    content: '深夜听这个歌单真的绝了，每首歌都直击心灵 🌙',
-    richContent: '深夜听这个歌单真的绝了，每首歌都直击心灵 🌙',
-    time: Date.now() - 24 * 60 * 60 * 1000, // 1天前
-    timeStr: '1天前',
-    likedCount: 89,
-    liked: false,
-    expressionUrl: null,
-    commentLocationType: 0,
-    parentCommentId: 0,
-    decoration: null,
-    repliedMark: null,
-    grade: null,
-    userBizLevels: null,
-    ipLocation: {
-      ip: null,
-      location: '深圳',
-      userId: null
-    },
-    owner: false,
-    medal: null,
-    likeAnimationMap: {},
-    pendantData: null,
-    showFloorComment: null,
-    contentResource: null,
-    needDisplayTime: true
-  }
-];
+const props = defineProps<{
+  loading: boolean;
+  comments: CommentListResponse | undefined;
+}>();
+
+// 合并热门评论和普通评论
+const allComments = computed(() => {
+  if (!props.comments) return [];
+
+  const { hotComments = [], comments = [] } = props.comments;
+  return [...hotComments, ...comments];
+});
 
 // 格式化时间的辅助函数
 const formatTime = (timestamp: number): string => {
@@ -220,9 +38,15 @@ const formatTime = (timestamp: number): string => {
 <template>
   <div class="playlist-comments">
     <div class="comments-container">
-      <div class="space-y-6">
+      <!-- 加载状态 -->
+      <div v-if="loading" class="flex items-center justify-center h-64">
+        <Loader2 class="w-8 h-8 animate-spin text-gray-500" />
+      </div>
+
+      <!-- 评论列表 -->
+      <div v-else class="space-y-6">
         <div
-          v-for="comment in mockComments"
+          v-for="comment in allComments"
           :key="comment.commentId"
           class="comment-item border-b border-gray-200/10 pb-6"
         >
@@ -242,8 +66,8 @@ const formatTime = (timestamp: number): string => {
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
                   {{ comment.user.nickname }}
                 </span>
-                <span class="text-xs-xs text-gray-500">
-                  {{ formatTime(comment.time) }}
+                <span class="text-xs text-gray-500">
+                  {{ comment.ipLocation?.location || formatTime(comment.time) }}
                 </span>
                 <span
                   v-if="comment.owner"
@@ -297,7 +121,7 @@ const formatTime = (timestamp: number): string => {
       </div>
 
       <!-- 加载更多 -->
-      <div class="text-center mt-8">
+      <div v-if="comments?.more" class="text-center mt-8">
         <button
           class="text-sm text-gray-500 hover:text-red-500 transition-colors"
         >
