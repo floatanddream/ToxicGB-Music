@@ -11,5 +11,5 @@ export const getArtistDetail = async (id: number | String) => {
 
 //获取歌手专辑
 export const getArtistAlbum = async (id: number | String) => {
-    return await request.get(`/artist/album?id=${id}`)
+    return await request.get(`/artist/album?id=${id}&limit=100`)
 }

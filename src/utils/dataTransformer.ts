@@ -7,7 +7,7 @@ export const transformToArtist = (rawArtist: any): MusicTypes.Artist => {
   return {
     id: String(rawArtist.id),
     name: rawArtist.name,
-    avatar: rawArtist.picUrl,
+    avatar: `${rawArtist.picUrl}?param=1024y1024` || `${rawArtist.img1v1Url}?param=1024y1024`,
     fanCount: String(rawArtist.fansSize),
     songCount: String(rawArtist.musicSize),
     verified: !!rawArtist.identityIconUrl, // 有认证图标即为认证歌手
@@ -25,7 +25,7 @@ export const transformAlbums = (rawAlbums: MusicTypes.RawAlbum, formatDate: bool
     id: String(rawAlbums.id),
     title: rawAlbums.name,
     artist: rawAlbums.artists.map(transformToArtist),
-    cover: rawAlbums.picUrl,
+    cover: `${rawAlbums.picUrl}?param=1024y1024`,
     releaseDate: formatDate ? formatTimestampToDate(rawAlbums.publishTime) : String(rawAlbums.publishTime),
     songCount: String(rawAlbums.size)
   };
@@ -34,7 +34,7 @@ export const transformToPlaylist = (rawPlaylist: any): MusicTypes.Playlist => {
   const creator: MusicTypes.User = {
     id: String(rawPlaylist.creator.userId),
     name: rawPlaylist.creator.nickname,
-    avatar: rawPlaylist.creator.avatarUrl,
+    avatar: `${rawPlaylist.creator.avatarUrl}?param=1024y1024`,
     fanCount: '0', // API 未返回粉丝数，需要额外获取或设默认值
     songCount: '0', // API 未返回歌曲数，需要额外获取或设默认值
     isFollowing: false, // API 未返回关注状态
@@ -57,7 +57,7 @@ export const transformToUser = (rawUser: MusicTypes.RawUserProfile): MusicTypes.
   return {
     id: String(rawUser.userId),
     name: rawUser.nickname,
-    avatar: rawUser.avatarUrl,
+    avatar: `${rawUser.avatarUrl}?param=1024y1024`,
     fanCount: '0', // 原始数据中没有粉丝数，需从其他接口获取
     songCount: '0', // 原始数据中没有歌曲数，需从其他接口获取
     isFollowing: rawUser.followed,
@@ -79,7 +79,7 @@ export const transformToSong = (rawData: any) : MusicTypes.Song => {
     id: String(rawData.al?.id || ''),
     title: rawData.al?.name || '',
     artist: artists, // 专辑的艺术家通常与歌曲相同
-    cover: rawData.al?.picUrl || '',
+    cover: `${rawData.al?.picUrl}?param=1024y1024` || '',
     releaseDate: formatTimestampToDate(rawData.publishTime),
     songCount: '0' // 原数据中没有专辑歌曲数，可后续获取
   };
@@ -99,7 +99,7 @@ export const transformToSong = (rawData: any) : MusicTypes.Song => {
     artist: artists,
     album: album,
     duration: formatDuration(rawData.dt || 0),
-    cover: rawData.al?.picUrl || '' // 使用专辑封面
+    cover: `${rawData.al?.picUrl}?param=1024y1024` || '' // 使用专辑封面
   };
 
   return song;
@@ -111,7 +111,7 @@ export function transformPlaylistDetail(rawPlaylist: any): Playlist {
         id: String(rawPlaylist.id), // 将 number 转换为 string
         name: rawPlaylist.name,
         coverImgId: rawPlaylist.coverImgId,
-        coverImgUrl: rawPlaylist.coverImgUrl,
+        coverImgUrl: `${rawPlaylist.coverImgUrl}?param=1024y1024`,
         coverImgId_str: rawPlaylist.coverImgId_str,
         adType: rawPlaylist.adType,
         userId: rawPlaylist.userId,
