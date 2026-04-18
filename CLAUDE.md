@@ -21,9 +21,32 @@ ToxicGB-Music 是一个基于 Vue 3 的现代音乐播放器 Web 应用，采用
 src/
 ├── components/           # 组件目录
 │   ├── common/          # 通用组件
+│   │   └── musicComponents/
+│   │       ├── AlbumCard.vue           # 专辑卡片组件
+│   │       ├── PlaylistCard.vue        # 歌单卡片组件
+│   │       ├── SongList.vue            # 歌曲列表组件
+│   │       └── artistDivider.vue       # 艺术家分隔组件
 │   ├── layout/          # 布局组件
 │   └── ui/              # UI基础组件
 ├── views/               # 页面视图
+│   ├── Artist/          # 歌手页面
+│   │   ├── index.vue              # 主页面
+│   │   └── components/
+│   │       ├── ArtistContent.vue  # 歌手内容区域
+│   │       ├── ArtistHeader.vue   # 歌手头部
+│   │       ├── ArtistTabs.vue     # 歌手标签页
+│   │       ├── ArtistSongs.vue    # 歌曲标签内容
+│   │       ├── ArtistAlbums.vue   # 专辑标签内容
+│   │       ├── ArtistVideos.vue   # 视频标签内容
+│   │       └── ArtistActivities.vue # 动态标签内容
+│   ├── Album/           # 专辑页面
+│   │   ├── index.vue              # 主页面
+│   │   └── components/
+│   │       └── AlbumHeader.vue    # 专辑头部
+│   ├── Playlist/        # 歌单页面
+│   │   ├── index.vue              # 主页面
+│   │   └── components/
+│   │       └── PlaylistHeader.vue # 歌单头部
 │   ├── Home/            # 首页
 │   ├── Player.vue       # 播放器页面
 │   └── Search.vue       # 搜索页面
