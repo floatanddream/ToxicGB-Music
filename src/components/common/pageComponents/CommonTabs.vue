@@ -15,7 +15,7 @@ const props = defineProps<{
 
 <template>
   <div class="sticky top-0 z-20 py-2">
-    <div class="flex justify-center px-2">
+    <div class="inline-flex px-2">
       <Tabs
         v-model="modelValue"
         class="glass-tab-container w-full rounded-xl px-1 py-1 shadow-lg border border-white/10 backdrop-blur-lg"
