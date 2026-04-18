@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlayIcon, PauseIcon, HeartIcon, ShareIcon, Calendar, Disc, MessageCircleHeart } from 'lucide-vue-next';
+import { PlayIcon, PauseIcon, HeartIcon, ShareIcon, Calendar, Disc, MessageCircleHeart, UserStarIcon } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/format';
 import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue';
@@ -34,7 +34,8 @@ defineEmits<{
         <h1 class="text-3xl md:text-4xl font-bold mb-3">{{ album?.name }}</h1>
         <div
           class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3 justify-center md:justify-start">
-        <ArtistDivider v-if="album.artists" :artists="album?.artists" />
+          <UserStarIcon class="h-4 w-4" />
+          <ArtistDivider v-if="album.artists" :artists="album?.artists" />
         </div>
         <DescriptionWithDialog v-if="album?.description" title="专辑简介" trigger-text="详细" :text="album?.description" />
         <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-4">
@@ -44,7 +45,7 @@ defineEmits<{
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Calendar class="h-4 w-4" />
-            <span>{{ formatTimestampToDate(album?.publishTime)}}</span>
+            <span>{{ formatTimestampToDate(album?.publishTime) }}</span>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <ShareIcon class="h-4 w-4" />
