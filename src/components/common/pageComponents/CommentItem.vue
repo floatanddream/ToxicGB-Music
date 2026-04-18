@@ -1,0 +1,115 @@
+<script setup lang="ts">
+import type { Comment } from '@/types/comment';
+import { formatTimestampToDate } from '@/utils/misc';
+
+const props = defineProps<{
+  comment: Comment;
+}>();
+
+// 格式化评论时间（相对时间或日期）
+const formatTime = (timestamp: number): string => {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const hours = Math.floor(diff / (60 * 60 * 1000));
+  const days = Math.floor(hours / 24);
+
+  if (hours < 1) {
+    return '刚刚';
+  } else if (hours < 24) {
+    return `${hours}小时前`;
+  } else if (days < 7) {
+    return `${days}天前`;
+  } else {
+    // 超过7天使用 misc.ts 中的函数格式化为日期
+    return formatTimestampToDate(timestamp);
+  }
+};
+</script>
+
+<template>
+  <div class="comment-item border-b border-gray-200/10 pb-6">
+    <div class="flex gap-4">
+      <!-- 用户头像 -->
+      <div class="flex-shrink-0">
+        <img
+          :src="comment.user.avatarUrl || '/api/placeholder/40/40'"
+          :alt="comment.user.nickname"
+          class="w-10 h-10 rounded-full object-cover"
+        />
+      </div>
+
+      <!-- 评论内容 -->
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm font-medium text-gray-900 dark:text-white">
+            {{ comment.user.nickname }}
+          </span>
+          <span class="text-xs text-gray-500">
+            {{ formatTime(comment.time) }}
+          </span>
+          <span
+            v-if="comment.ipLocation?.location && comment.ipLocation.location.trim()"
+            class="text-xs text-gray-500"
+          >
+            · 来自{{ comment.ipLocation.location }}
+          </span>
+          <span
+            v-if="comment.owner"
+            class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded"
+          >
+            作者
+          </span>
+        </div>
+
+        <div class="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
+          {{ comment.content }}
+        </div>
+
+        <div class="flex items-center gap-4 text-xs text-gray-500">
+          <button
+            class="flex items-center gap-1 hover:text-red-500 transition-colors"
+          >
+            <span class="w-4 h-4">👍</span>
+            {{ comment.likedCount }}
+          </button>
+          <button class="hover:text-red-500 transition-colors">回复</button>
+        </div>
+
+        <!-- 回复列表 -->
+        <div
+          v-if="comment.beReplied && comment.beReplied.length > 0"
+          class="mt-4 space-y-3"
+        >
+          <div
+            v-for="replied in comment.beReplied"
+            :key="replied.beRepliedCommentId"
+            class="bg-gray-50/5 rounded-lg p-3"
+          >
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-medium text-gray-900 dark:text-white">
+                {{ replied.user.nickname }}
+              </span>
+              <span class="text-xs text-gray-500">回复</span>
+              <span class="text-xs text-gray-900 dark:text-white">
+                {{ comment.user.nickname }}
+              </span>
+            </div>
+            <div class="text-xs text-gray-700 dark:text-gray-300">
+              {{ replied.content }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.comment-item {
+  transition: background-color 0.2s ease;
+}
+
+.comment-item:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+</style>
