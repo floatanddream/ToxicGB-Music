@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import type { Comment, CommentListResponse } from '@/types/comment';
-import { Loader2 } from 'lucide-vue-next';
+import { Loader2, MessageSquare } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { formatTimestampToDate } from '@/utils/misc';
 
 const props = defineProps<{
   loading: boolean;
+  loadingMore: boolean;
   comments: CommentListResponse | undefined;
+}>();
+
+const emit = defineEmits<{
+  'load-more': [];
 }>();
 
 // 合并热门评论和普通评论
@@ -16,7 +22,7 @@ const allComments = computed(() => {
   return [...hotComments, ...comments];
 });
 
-// 格式化时间的辅助函数
+// 格式化评论时间（相对时间或日期）
 const formatTime = (timestamp: number): string => {
   const now = Date.now();
   const diff = now - timestamp;
@@ -30,7 +36,8 @@ const formatTime = (timestamp: number): string => {
   } else if (days < 7) {
     return `${days}天前`;
   } else {
-    return new Date(timestamp).toLocaleDateString();
+    // 超过7天使用 misc.ts 中的函数格式化为日期
+    return formatTimestampToDate(timestamp);
   }
 };
 </script>
@@ -41,6 +48,17 @@ const formatTime = (timestamp: number): string => {
       <!-- 加载状态 -->
       <div v-if="loading" class="flex items-center justify-center h-64">
         <Loader2 class="w-8 h-8 animate-spin text-gray-500" />
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else-if="allComments.length === 0" class="empty-state">
+        <div class="text-center py-12">
+          <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <MessageSquare class="w-12 h-12 text-gray-400" />
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无评论</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">快来发表第一条评论吧</p>
+        </div>
       </div>
 
       <!-- 评论列表 -->
@@ -67,7 +85,13 @@ const formatTime = (timestamp: number): string => {
                   {{ comment.user.nickname }}
                 </span>
                 <span class="text-xs text-gray-500">
-                  {{ comment.ipLocation?.location || formatTime(comment.time) }}
+                  {{ formatTime(comment.time) }}
+                </span>
+                <span
+                  v-if="comment.ipLocation?.location && comment.ipLocation.location.trim()"
+                  class="text-xs text-gray-500"
+                >
+                  · 来自{{ comment.ipLocation.location }}
                 </span>
                 <span
                   v-if="comment.owner"
@@ -123,10 +147,16 @@ const formatTime = (timestamp: number): string => {
       <!-- 加载更多 -->
       <div v-if="comments?.more" class="text-center mt-8">
         <button
+          v-if="!loadingMore"
+          @click="emit('load-more')"
           class="text-sm text-gray-500 hover:text-red-500 transition-colors"
         >
           加载更多评论
         </button>
+        <div v-else class="flex items-center justify-center gap-2">
+          <Loader2 class="w-4 h-4 animate-spin text-gray-500" />
+          <span class="text-sm text-gray-500">加载中...</span>
+        </div>
       </div>
     </div>
   </div>

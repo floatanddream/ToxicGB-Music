@@ -4,21 +4,27 @@ import PlaylistTabs from './PlaylistTabs.vue';
 import PlaylistSongs from './PlaylistSongs.vue';
 import PlaylistComments from './PlaylistComments.vue';
 import PlaylistSubscribers from './PlaylistSubscribers.vue';
-import type { Song } from '@/types/musicTypes';
+import type { Song, User } from '@/types/musicTypes';
 import type { CommentListResponse } from '@/types/comment';
 
 const activeTab = ref<'songs' | 'comments' | 'subscribers'>('songs');
 
 // 当activeTab为comments，向父组件传递事件
-const emit = defineEmits(['activeTabChange']);
+const emit = defineEmits(['activeTabChange', 'load-more-comments']);
 watch(activeTab, (newTab:string) => {
   emit('activeTabChange', newTab);
 });
 
+const handleLoadMore = () => {
+  emit('load-more-comments');
+};
+
 const props = defineProps<{
   songs: Song[];
   commentsLoading: boolean;
+  commentsLoadingMore: boolean;
   comments: CommentListResponse | undefined;
+  subscribers : User[] | undefined;
 }>();
 </script>
 
@@ -33,10 +39,10 @@ const props = defineProps<{
       <PlaylistSongs v-if="activeTab === 'songs'" key="songs" :songs="songs" />
 
       <!-- 评论标签页 -->
-      <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" :loading="commentsLoading" :comments="comments" />
+      <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" :loading="commentsLoading" :loading-more="commentsLoadingMore" :comments="comments" @load-more="handleLoadMore" />
 
       <!-- 收藏者标签页 -->
-      <PlaylistSubscribers v-else-if="activeTab === 'subscribers'" key="subscribers" />
+      <PlaylistSubscribers :subscribers="subscribers" v-else-if="activeTab === 'subscribers'" key="subscribers" />
 
       <!-- 动态标签页 -->
       <div v-else-if="activeTab === 'activities'" key="activities" class="playlist-content">

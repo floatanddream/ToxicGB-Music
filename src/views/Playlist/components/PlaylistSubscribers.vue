@@ -1,7 +1,15 @@
+<script lang="ts" setup>
+import UserCard from '@/components/common/musicComponents/UserCard.vue';
+import type { User } from '@/types/musicTypes';
+const props = defineProps<{
+    subscribers : User[] | undefined;
+}>();
+</script>
+
 <template>
   <div class="playlist-subscribers">
-    <div class="text-center py-12 text-gray-500">
-      <p>收藏者列表</p>
+    <div class="text-center py-12 text-gray-500 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+      <UserCard v-if="subscribers" v-for="user in subscribers" :user="user" />
     </div>
   </div>
 </template>

@@ -3,10 +3,10 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import PlaylistHeader from './components/PlaylistHeader.vue';
 import PlaylistContent from './components/PlaylistContent.vue';
-import type { Song } from '@/types/musicTypes';
+import type { Song, User } from '@/types/musicTypes';
 import type { Playlist } from '@/types/playlist';
-import { getPlaylistComments, getPlaylistDetail } from '@/api/playlist';
-import { transformCommentListResponse, transformPlaylistDetail } from '@/utils/dataTransformer';
+import { getPlaylistComments, getPlaylistDetail, getPlaylistSubscribers } from '@/api/playlist';
+import { transformCommentListResponse, transformPlaylistDetail, transformToUser } from '@/utils/dataTransformer';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { Loader2 } from 'lucide-vue-next';
@@ -19,10 +19,18 @@ const playlistDetail = ref<Playlist>();
 import type { CommentListResponse } from '@/types/comment';
 
 const playlistComments = ref<CommentListResponse>();
+const playlistSubscribers = ref<User[]>();
 
 const isPlayingAll = ref(false);
 const loading = ref(false);
+
 const commentsLoading = ref(false);
+const commentsLoadingMore = ref(false);
+const commentsOffset = ref(0);
+
+const subscribersLoading = ref(false);
+const subscribersLoadingMore = ref(false);
+const subscribersOffset = ref(0);
 
 const fetchPlaylistDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
@@ -51,8 +59,9 @@ const handleTabChange = (newTab: string) => {
 
 const fetchPlaylistComments = async () => {
   commentsLoading.value = true;
+  commentsOffset.value = 0;
   try {
-    const data = await getPlaylistComments(playlistId.value);
+    const data = await getPlaylistComments({ id: playlistId.value, limit: 50, offset: 0 });
     playlistComments.value = transformCommentListResponse(data);
   } catch (error) {
     console.error('获取歌单评论数据失败:', error);
@@ -60,8 +69,47 @@ const fetchPlaylistComments = async () => {
     commentsLoading.value = false;
   }
 }
+
+const loadMoreComments = async () => {
+  if (!playlistComments.value?.more || commentsLoadingMore.value) return;
+
+  commentsLoadingMore.value = true;
+  commentsOffset.value += 20;
+
+  try {
+    const data = await getPlaylistComments({
+      id: playlistId.value,
+      limit: 20,
+      offset: commentsOffset.value
+    });
+
+    const newComments = transformCommentListResponse(data);
+
+    if (playlistComments.value) {
+      playlistComments.value.comments = [
+        ...playlistComments.value.comments,
+        ...newComments.comments
+      ];
+      playlistComments.value.more = newComments.more;
+      playlistComments.value.total = newComments.total;
+    }
+  } catch (error) {
+    console.error('加载更多评论失败:', error);
+  } finally {
+    commentsLoadingMore.value = false;
+  }
+}
 const fetchPlaylistSubscribers = async () => {
-  // TODO: 获取歌单订阅者
+  subscribersLoading.value = true;
+  subscribersOffset.value = 0;
+  try {
+    const data = await getPlaylistSubscribers({ id: playlistId.value, limit: 50, offset: 0 });
+    playlistSubscribers.value = data.subscribers?.map(transformToUser);
+  } catch (error) {
+    console.error('获取歌单评论数据失败:', error);
+  } finally {
+    subscribersLoading.value = false;
+  }
 }
 
 
@@ -88,8 +136,9 @@ onMounted(() => {
         <PlaylistHeader v-if="playlistDetail" :playlist="playlistDetail" :is-playing-all="isPlayingAll"
           @toggle-like="toggleLike" />
         <!-- 歌单内容区域 -->
-        <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange"
-          :songs="playlistDetail?.tracks || []" :comments-loading="commentsLoading" :comments="playlistComments" />
+        <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange" @load-more-comments="loadMoreComments"
+          :songs="playlistDetail?.tracks || []" :comments-loading="commentsLoading" :comments-loading-more="commentsLoadingMore" :comments="playlistComments"
+          :subscribers="playlistSubscribers" />
       </div>
     </Transition>
   </div>
