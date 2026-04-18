@@ -2,7 +2,8 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import PlaylistHeader from './components/PlaylistHeader.vue';
-import SongList from '@/components/common/musicComponents/SongList.vue';
+import PlaylistContent from './components/PlaylistContent.vue';
+import type { Song } from '@/types/musicTypes';
 import type { Playlist } from '@/types/playlist';
 import { getPlaylistDetail } from '@/api/playlist';
 import { transformPlaylistDetail } from '@/utils/dataTransformer';
@@ -66,8 +67,8 @@ onMounted(() => {
           @toggle-like="toggleLike" />
 
 
-        <!-- 歌曲列表 -->
-        <SongList v-if="playlistDetail" :songs="playlistDetail?.tracks || []" />
+        <!-- 歌单内容区域 -->
+        <PlaylistContent v-if="playlistDetail" :songs="playlistDetail?.tracks || []" />
       </div>
     </Transition>
   </div>
