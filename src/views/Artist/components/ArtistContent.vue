@@ -5,7 +5,7 @@ import ArtistAlbums from './ArtistAlbums.vue';
 import ArtistVideos from './ArtistVideos.vue';
 import ArtistActivities from './ArtistActivities.vue';
 import type { Album, Song } from '@/types/musicTypes';
-import SongsContainer from '@/components/common/songComponents/songsContainer.vue';
+import SongsContainer from '@/components/common/pageComponents/songsContainer.vue';
 const activeTab = ref<'songs' | 'albums' | 'videos' | 'activities'>('songs');
 const props = defineProps<{
   songs: Song[];

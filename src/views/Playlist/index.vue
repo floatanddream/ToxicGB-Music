@@ -5,16 +5,18 @@ import PlaylistHeader from './components/PlaylistHeader.vue';
 import PlaylistContent from './components/PlaylistContent.vue';
 import type { Song } from '@/types/musicTypes';
 import type { Playlist } from '@/types/playlist';
-import { getPlaylistDetail } from '@/api/playlist';
+import { getPlaylistComments, getPlaylistDetail } from '@/api/playlist';
 import { transformPlaylistDetail } from '@/utils/dataTransformer';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { Loader2 } from 'lucide-vue-next';
+import type { Comment } from '@/types/comment';
 
 
 const route = useRoute();
 const playlistId = computed(() => route.query.id as string);
 const playlistDetail = ref<Playlist>();
+const playlistComments = ref<Comment>();
 
 const isPlayingAll = ref(false);
 const loading = ref(false);
@@ -34,18 +36,36 @@ const fetchPlaylistDetail = async () => {
 
 // 收藏歌单
 const toggleLike = () => {
-  // playlist.value.isLiked = !playlist.value.isLiked;
 };
+
+const handleTabChange = (newTab: string) => {
+  if (newTab === 'comments') {
+    fetchPlaylistComments();
+  } else if (newTab === 'subscribers') {
+    fetchPlaylistSubscribers();
+  }
+};
+
+const fetchPlaylistComments = async () => {
+  // TODO: 获取歌单评论
+  loading.value = true;
+  try {
+    const data = await getPlaylistComments(playlistId.value);
+    playlistDetail.value = transformPlaylistDetail(data.playlist);
+  } catch (error) {
+    console.error('获取歌单数据失败:', error);
+  } finally {
+    loading.value = false;
+  }
+}
+const fetchPlaylistSubscribers = async () => {
+  // TODO: 获取歌单订阅者
+}
+
 
 onMounted(() => {
   fetchPlaylistDetail();
 })
-
-// 监听路由变化
-// watch(playlistId, (newId) => {
-//   console.log('Playlist ID changed:', newId);
-//   // 这里可以加载对应ID的歌单数据
-// });
 </script>
 
 <template>
@@ -65,10 +85,9 @@ onMounted(() => {
         <!-- 歌单头部信息 -->
         <PlaylistHeader v-if="playlistDetail" :playlist="playlistDetail" :is-playing-all="isPlayingAll"
           @toggle-like="toggleLike" />
-
-
         <!-- 歌单内容区域 -->
-        <PlaylistContent v-if="playlistDetail" :songs="playlistDetail?.tracks || []" />
+        <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange"
+          :songs="playlistDetail?.tracks || []" />
       </div>
     </Transition>
   </div>
