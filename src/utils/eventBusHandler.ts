@@ -1,36 +1,38 @@
-// src/events/register.ts
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import type { Router } from 'vue-router'
-import type { Artist } from '@/types/musicTypes'
-import type { Playlist } from '@/types/musicTypes'
+import type { Album, Artist, Playlist } from '@/types/musicTypes'
 
 export function registerEvents(router: Router) {
 
-  const handlerMap = {
-    [EVENTS.ARTIST_CLICK]: (e: Artist) => {
+  const handlerMap: Record<string, (event: unknown) => void> = {
+    [EVENTS.ARTIST_CLICK]: (e: unknown) => {
+      const artist = e as Artist;
       router.push({
         name: 'artist',
-        query: { id: e.id }
+        query: { id: artist.id }
       })
     },
 
-    [EVENTS.PLAYLIST_CLICK]: (e: Playlist) => {
+    [EVENTS.PLAYLIST_CLICK]: (e: unknown) => {
+      const playlist = e as Playlist;
       router.push({
         name: 'playlist',
-        query: { id: e.id }
+        query: { id: playlist.id }
       })
     },
 
-    [EVENTS.ALBUM_CLICK]: (e: { id: number }) => {
+    [EVENTS.ALBUM_CLICK]: (e: unknown) => {
+      const album = e as Album;
       router.push({
         name: 'album',
-        query: { id: e.id }
+        query: { id: album.id }
       })
     },
 
-    [EVENTS.SONG_CLICK]: (e: { id: number }) => {
-      console.log('播放歌曲:', e.id)
+    [EVENTS.SONG_CLICK]: (e: unknown) => {
+      const song = e as { id: number };
+      console.log('播放歌曲:', song.id)
     },
   };
 

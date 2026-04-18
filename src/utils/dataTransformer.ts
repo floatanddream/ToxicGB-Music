@@ -1,3 +1,4 @@
+import type { Album } from '@/types/album';
 import * as MusicTypes from '@/types/musicTypes'
 import type { Playlist } from '@/types/playlist';
 
@@ -13,7 +14,8 @@ export const transformToArtist = (rawArtist: any): MusicTypes.Artist => {
     verified: !!rawArtist.identityIconUrl, // 有认证图标即为认证歌手
   };
 };
-export const formatTimestampToDate = (timestamp: number): string => {
+export const formatTimestampToDate = (timestamp: number | undefined): string => {
+  if (!timestamp) return '';
   const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -153,5 +155,25 @@ export function transformPlaylistDetail(rawPlaylist: any): Playlist {
         fromUsers: rawPlaylist.fromUsers,
         fromUserCount: rawPlaylist.fromUserCount,
         songFromUsers: rawPlaylist.songFromUsers
+    };
+}
+
+export function transformAlbumDetail(rawData: any) :Album {
+    const { album, songs } = rawData;
+    return {
+        // 专辑信息
+            id: album.id,
+            name: album.name,
+            picUrl: album.picUrl,
+            blurPicUrl: album.blurPicUrl,
+            type: album.type,
+            subType: album.subType,
+            publishTime: album.publishTime,
+            description: album.description || album.briefDesc,
+            size: album.size,
+            artists: album.artists.map(transformToArtist),
+            songs: songs.map(transformToSong),
+            commentCount: album.info?.commentThread?.commentCount || 0,
+            shareCount: album.info?.commentThread?.shareCount || 0
     };
 }

@@ -18,11 +18,17 @@ const props = defineProps<{
     <!-- 标签切换内容 -->
     <ArtistTabs v-model="activeTab" />
     <Transition name="fade-slide" mode="out-in">
-      <div class="artist-content">
-       <ArtistSongs v-if="activeTab === 'songs'" key="songs"  :songs="songs"/>
-       <ArtistAlbums :albums="albums" v-else-if="activeTab === 'albums'" key="albums" />
-      <ArtistVideos v-else-if="activeTab === 'videos'" key="videos" />
-      <ArtistActivities v-else-if="activeTab === 'activities'" key="activities" />
+      <div v-if="activeTab === 'songs'" key="songs" class="artist-content">
+        <ArtistSongs :songs="songs" />
+      </div>
+      <div v-else-if="activeTab === 'albums'" key="albums" class="artist-content">
+        <ArtistAlbums :albums="albums" />
+      </div>
+      <div v-else-if="activeTab === 'videos'" key="videos" class="artist-content">
+        <ArtistVideos />
+      </div>
+      <div v-else-if="activeTab === 'activities'" key="activities" class="artist-content">
+        <ArtistActivities />
       </div>
     </Transition>
   </div>
@@ -41,5 +47,19 @@ const props = defineProps<{
   .artist-songs {
     padding: 16px;
   }
+}
+:deep(.fade-slide-enter-active),
+:deep(.fade-slide-leave-active) {
+  transition: all 0.3s ease;
+}
+
+:deep(.fade-slide-enter-from) {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+:deep(.fade-slide-leave-to) {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

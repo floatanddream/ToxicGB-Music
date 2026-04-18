@@ -5,7 +5,7 @@ export interface Song {
   artist: Artist[];
   album: Album;
   duration: string;
-  cover: string;
+  cover: string | undefined;
 }
 
 export interface Artist {
