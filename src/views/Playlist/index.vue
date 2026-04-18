@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import PlaylistHeader from './components/PlaylistHeader.vue';
 import PlaylistContent from './components/PlaylistContent.vue';
 import type { Song, User } from '@/types/musicTypes';
 import type { Playlist } from '@/types/playlist';
+import type { CommentListResponse } from '@/types/comment';
 import { getPlaylistComments, getPlaylistDetail, getPlaylistSubscribers } from '@/api/playlist';
 import { transformCommentListResponse, transformPlaylistDetail, transformToUser } from '@/utils/dataTransformer';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { Loader2 } from 'lucide-vue-next';
-import type { Comment } from '@/types/comment';
-
 
 const route = useRoute();
 const playlistId = computed(() => route.query.id as string);
 const playlistDetail = ref<Playlist>();
-import type { CommentListResponse } from '@/types/comment';
-
 const playlistComments = ref<CommentListResponse>();
 const playlistSubscribers = ref<User[]>();
 
@@ -31,6 +28,7 @@ const commentsOffset = ref(0);
 const subscribersLoading = ref(false);
 const subscribersLoadingMore = ref(false);
 const subscribersOffset = ref(0);
+const subscribersHasMore = ref(false);
 
 const fetchPlaylistDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
@@ -57,20 +55,7 @@ const handleTabChange = (newTab: string) => {
   }
 };
 
-const fetchPlaylistComments = async () => {
-  commentsLoading.value = true;
-  commentsOffset.value = 0;
-  try {
-    const data = await getPlaylistComments({ id: playlistId.value, limit: 50, offset: 0 });
-    playlistComments.value = transformCommentListResponse(data);
-  } catch (error) {
-    console.error('获取歌单评论数据失败:', error);
-  } finally {
-    commentsLoading.value = false;
-  }
-}
-
-const loadMoreComments = async () => {
+const handleLoadMoreComments = async () => {
   if (!playlistComments.value?.more || commentsLoadingMore.value) return;
 
   commentsLoadingMore.value = true;
@@ -98,20 +83,63 @@ const loadMoreComments = async () => {
   } finally {
     commentsLoadingMore.value = false;
   }
+};
+
+const handleLoadMoreSubscribers = async () => {
+  if (!subscribersHasMore.value || subscribersLoadingMore.value) return;
+
+  subscribersLoadingMore.value = true;
+  subscribersOffset.value += 30;
+
+  try {
+    const data = await getPlaylistSubscribers({
+      id: playlistId.value,
+      limit: 30,
+      offset: subscribersOffset.value
+    });
+
+    const newSubscribers = data.subscribers?.map(transformToUser) || [];
+
+    if (playlistSubscribers.value) {
+      playlistSubscribers.value = [
+        ...playlistSubscribers.value,
+        ...newSubscribers
+      ];
+    }
+    subscribersHasMore.value = data.more || false;
+  } catch (error) {
+    console.error('加载更多收藏者失败:', error);
+  } finally {
+    subscribersLoadingMore.value = false;
+  }
+};
+
+const fetchPlaylistComments = async () => {
+  commentsLoading.value = true;
+  commentsOffset.value = 0;
+  try {
+    const data = await getPlaylistComments({ id: playlistId.value, limit: 50, offset: 0 });
+    playlistComments.value = transformCommentListResponse(data);
+  } catch (error) {
+    console.error('获取歌单评论数据失败:', error);
+  } finally {
+    commentsLoading.value = false;
+  }
 }
+
 const fetchPlaylistSubscribers = async () => {
   subscribersLoading.value = true;
   subscribersOffset.value = 0;
   try {
-    const data = await getPlaylistSubscribers({ id: playlistId.value, limit: 50, offset: 0 });
+    const data = await getPlaylistSubscribers({ id: playlistId.value, limit: 30, offset: 0 });
     playlistSubscribers.value = data.subscribers?.map(transformToUser);
+    subscribersHasMore.value = data.more || false;
   } catch (error) {
-    console.error('获取歌单评论数据失败:', error);
+    console.error('获取歌单收藏者数据失败:', error);
   } finally {
     subscribersLoading.value = false;
   }
 }
-
 
 onMounted(() => {
   fetchPlaylistDetail();
@@ -136,9 +164,9 @@ onMounted(() => {
         <PlaylistHeader v-if="playlistDetail" :playlist="playlistDetail" :is-playing-all="isPlayingAll"
           @toggle-like="toggleLike" />
         <!-- 歌单内容区域 -->
-        <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange" @load-more-comments="loadMoreComments"
+        <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange" @load-more-comments="handleLoadMoreComments" @load-more-subscribers="handleLoadMoreSubscribers"
           :songs="playlistDetail?.tracks || []" :comments-loading="commentsLoading" :comments-loading-more="commentsLoadingMore" :comments="playlistComments"
-          :subscribers="playlistSubscribers" />
+          :subscribers="playlistSubscribers" :subscribers-loading="subscribersLoading" :subscribers-loading-more="subscribersLoadingMore" :subscribers-has-more="subscribersHasMore" />
       </div>
     </Transition>
   </div>

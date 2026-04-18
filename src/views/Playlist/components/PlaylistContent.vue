@@ -10,13 +10,17 @@ import type { CommentListResponse } from '@/types/comment';
 const activeTab = ref<'songs' | 'comments' | 'subscribers'>('songs');
 
 // 当activeTab为comments，向父组件传递事件
-const emit = defineEmits(['activeTabChange', 'load-more-comments']);
+const emit = defineEmits(['activeTabChange', 'load-more-comments', 'load-more-subscribers']);
 watch(activeTab, (newTab:string) => {
   emit('activeTabChange', newTab);
 });
 
-const handleLoadMore = () => {
+const handleLoadMoreComments = () => {
   emit('load-more-comments');
+};
+
+const handleLoadMoreSubscribers = () => {
+  emit('load-more-subscribers');
 };
 
 const props = defineProps<{
@@ -25,6 +29,9 @@ const props = defineProps<{
   commentsLoadingMore: boolean;
   comments: CommentListResponse | undefined;
   subscribers : User[] | undefined;
+  subscribersLoading: boolean;
+  subscribersLoadingMore: boolean;
+  subscribersHasMore: boolean;
 }>();
 </script>
 
@@ -39,10 +46,18 @@ const props = defineProps<{
       <PlaylistSongs v-if="activeTab === 'songs'" key="songs" :songs="songs" />
 
       <!-- 评论标签页 -->
-      <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" :loading="commentsLoading" :loading-more="commentsLoadingMore" :comments="comments" @load-more="handleLoadMore" />
+      <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" :loading="commentsLoading" :loading-more="commentsLoadingMore" :comments="comments" @load-more="handleLoadMoreComments" />
 
       <!-- 收藏者标签页 -->
-      <PlaylistSubscribers :subscribers="subscribers" v-else-if="activeTab === 'subscribers'" key="subscribers" />
+      <PlaylistSubscribers
+        v-else-if="activeTab === 'subscribers'"
+        key="subscribers"
+        :subscribers="subscribers"
+        :loading="subscribersLoading"
+        :loading-more="subscribersLoadingMore"
+        :has-more="subscribersHasMore"
+        @load-more="handleLoadMoreSubscribers"
+      />
 
       <!-- 动态标签页 -->
       <div v-else-if="activeTab === 'activities'" key="activities" class="playlist-content">
