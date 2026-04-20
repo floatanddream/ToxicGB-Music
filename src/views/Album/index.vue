@@ -150,7 +150,6 @@ onMounted(() => {
 <style scoped>
 .album-page {
   position: relative;
-  overflow: hidden;
 }
 
 /* 背景装饰 */

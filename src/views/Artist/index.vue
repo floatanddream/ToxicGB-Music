@@ -84,7 +84,6 @@ onMounted(() => {
 <style scoped>
 .artist-page {
   position: relative;
-  overflow: hidden;
 }
 
 /* 背景装饰 */
