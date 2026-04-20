@@ -211,10 +211,10 @@ onMounted(() => {
 
         <Tabs v-else v-model="activeTab" class="w-full">
           <div class="sticky top-10 z-20">
-            <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
+            <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8 tab-back ">
               <TabsTrigger value="songs">
-                <div class="flex items-center gap-1">
-                  <span>歌曲</span>
+                <div class="flex items-center gap-1 ">
+                  <span >歌曲</span>
                   <span class="text-xs text-gray-600 dark:text-gray-400">
                     ({{ searchSongData.length }})
                   </span>
@@ -288,6 +288,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
 .fade-scale-enter-active {
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   transform-style: preserve-3d;

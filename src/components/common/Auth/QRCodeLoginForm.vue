@@ -74,11 +74,21 @@ const checkStatus = async (key: string): Promise<QRCodeStatus> => {
 };
 
 // 设置cookie
-const setCookie = (name: string, value: string, days: number) => {
-  const expires = new Date();
-  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-  const cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-  document.cookie = cookie;
+function setCookie(statusCookie) {
+  const records = statusCookie.split(';;');
+  records.forEach(record => {
+    const firstPart = record.split(';')[0].trim();
+    if (firstPart.includes('=')) {
+      const [name, value] = firstPart.split('=');
+            if (!value || value === '') {
+        console.log(`跳过空值 Cookie: ${name}`);
+        return;
+      }
+    
+      document.cookie = `${name}=${value}; Path=/`;
+      console.log(`已写入: ${name}=${value.substring(0, 20)}...`);
+    }
+  });
 };
 
 const startCheckStatus = (key: string) => {
@@ -107,9 +117,10 @@ const startCheckStatus = (key: string) => {
       clearCheckInterval();
 
       if (status.cookie) {
+        console.log(status.cookie)
         // 保存cookie到localStorage和document.cookie
         localStorage.setItem('cookie', status.cookie);
-        setCookie('cookie', status.cookie, 7);
+        setCookie(status.cookie);
         emit('login-success', status.cookie);
       }
     }

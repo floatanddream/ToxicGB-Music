@@ -176,15 +176,6 @@ export function createClient(options?: any) {
    * 默认拦截器（你项目用）
    */
 
-  // token 自动注入
-  client.useRequest((request) => {
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      request.headers.set('Authorization', token)
-    }
-    return request
-  })
-
   // 全局错误提示
   client.useError((error) => {
     console.error('请求错误:', error.message)
