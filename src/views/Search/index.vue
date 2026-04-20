@@ -126,7 +126,7 @@ watch(() => route.query.keywords, async (newKeywords) => {
   handelSearchAllType();
 });
 
-const searchQuery = ref('');
+const searchQuery = ref();
 const activeTab = ref('songs');
 const isPlaying = ref(false);
 

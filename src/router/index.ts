@@ -1,3 +1,4 @@
+import { useUserStore } from '@/stores/user'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
@@ -31,6 +32,13 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
+})
+
+router.beforeEach(async () => {
+  const userStore = useUserStore()
+  if (!userStore.loaded) {
+    await userStore.fetchUser()
+  }
 })
 
 export default router
