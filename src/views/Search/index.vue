@@ -15,7 +15,7 @@ import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser, searchBy
 import * as MusicTypes from '@/types/musicTypes'
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
-import {transformAlbums,transformToArtist,transformToPlaylist,transformToSong,transformToUser} from '@/utils/dataTransformer'
+import { transformAlbums, transformToArtist, transformToPlaylist, transformToSong, transformToUser } from '@/utils/dataTransformer'
 const route = useRoute();
 const searchArtistData = ref<Array<MusicTypes.Artist>>([]);
 const searchAlbumData = ref<Array<MusicTypes.Album>>([]);
@@ -33,10 +33,10 @@ const searchStatus = ref({
 
 const allSearchCompleted = computed(() => {
   return searchStatus.value.artist &&
-         searchStatus.value.album &&
-         searchStatus.value.playlist &&
-         searchStatus.value.user &&
-         searchStatus.value.song;
+    searchStatus.value.album &&
+    searchStatus.value.playlist &&
+    searchStatus.value.user &&
+    searchStatus.value.song;
 });
 
 const resetSearchStatus = () => {
@@ -164,8 +164,8 @@ const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
   console.log('Like playlist:', playlist.title);
 };
 
-onMounted(()=>{
-  if(route.query.keywords){
+onMounted(() => {
+  if (route.query.keywords) {
     searchQuery.value = route.query.keywords as string;
     handelSearchAllType();
   }
@@ -210,72 +210,73 @@ onMounted(()=>{
         </div>
 
         <Tabs v-else v-model="activeTab" class="w-full">
-          <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
-            <TabsTrigger value="songs">
-              <div class="flex items-center gap-1">
-                <span>歌曲</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ searchSongData.length }})
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="artists">
-              <div class="flex items-center gap-1">
-                <span>歌手</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ searchArtistData.length }})
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="albums">
-              <div class="flex items-center gap-1">
-                <span>专辑</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ searchAlbumData.length }})
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="playlists">
-              <div class="flex items-center gap-1">
-                <span>歌单</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ searchPlaylistData.length }})
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="users">
-              <div class="flex items-center gap-1">
-                <span>用户</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">
-                  ({{ searchUserData.length }})
-                </span>
-              </div>
-            </TabsTrigger>
-          </TabsList>
-
+          <div class="sticky top-10 z-20">
+            <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8">
+              <TabsTrigger value="songs">
+                <div class="flex items-center gap-1">
+                  <span>歌曲</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                    ({{ searchSongData.length }})
+                  </span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="artists">
+                <div class="flex items-center gap-1">
+                  <span>歌手</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                    ({{ searchArtistData.length }})
+                  </span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="albums">
+                <div class="flex items-center gap-1">
+                  <span>专辑</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                    ({{ searchAlbumData.length }})
+                  </span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="playlists">
+                <div class="flex items-center gap-1">
+                  <span>歌单</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                    ({{ searchPlaylistData.length }})
+                  </span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="users">
+                <div class="flex items-center gap-1">
+                  <span>用户</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                    ({{ searchUserData.length }})
+                  </span>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
           <!-- 添加过渡动画 -->
           <div class="relative">
             <Transition name="fade-scale" mode="out-in">
               <div :key="activeTab">
                 <TabsContent value="songs" v-show="activeTab === 'songs'">
-                    <SongResults :songs="searchSongData" :is-playing="isPlaying" @play-song="handlePlaySong" />
+                  <SongResults :songs="searchSongData" :is-playing="isPlaying" @play-song="handlePlaySong" />
                 </TabsContent>
 
                 <TabsContent value="artists" v-show="activeTab === 'artists'">
-                    <ArtistResults :artists="searchArtistData" @artist-click="handleArtistClick" />
+                  <ArtistResults :artists="searchArtistData" @artist-click="handleArtistClick" />
                 </TabsContent>
 
                 <TabsContent value="albums" v-show="activeTab === 'albums'">
-                    <AlbumResults :albums="searchAlbumData" @album-click="handleAlbumClick" />
+                  <AlbumResults :albums="searchAlbumData" @album-click="handleAlbumClick" />
                 </TabsContent>
 
                 <TabsContent value="playlists" v-show="activeTab === 'playlists'">
-                    <PlaylistResults :playlists="searchPlaylistData" @playlist-click="handlePlaylistClick"
-                      @like-playlist="handleLikePlaylist" />
+                  <PlaylistResults :playlists="searchPlaylistData" @playlist-click="handlePlaylistClick"
+                    @like-playlist="handleLikePlaylist" />
                 </TabsContent>
 
                 <TabsContent value="users" v-show="activeTab === 'users'">
-                    <UserResults :users="searchUserData" @user-click="handleUserClick" @follow-user="handleFollowUser" />
+                  <UserResults :users="searchUserData" @user-click="handleUserClick" @follow-user="handleFollowUser" />
                 </TabsContent>
               </div>
             </Transition>
