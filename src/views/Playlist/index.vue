@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import PlaylistHeader from './components/PlaylistHeader.vue';
 import PlaylistContent from './components/PlaylistContent.vue';
@@ -140,6 +140,12 @@ const fetchPlaylistSubscribers = async () => {
     subscribersLoading.value = false;
   }
 }
+
+watch(()=> playlistId.value, async (newId) => {
+  if (newId) {
+    await fetchPlaylistDetail();
+  }
+});
 
 onMounted(() => {
   fetchPlaylistDetail();

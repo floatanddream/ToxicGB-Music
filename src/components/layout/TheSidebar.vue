@@ -1,9 +1,31 @@
 <script setup lang="ts">
 import NavigationMenu from '../common/NavigationMenu.vue'
 import type { MenuItem } from '@/types/menu'
-import { ref, onMounted } from 'vue'
+import type { Playlist } from '@/types/playlist'
+import { ref, onMounted, computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { MoonIcon, SunIcon } from 'lucide-vue-next'
+import { MoonIcon, SunIcon, Music, ListMusic } from 'lucide-vue-next'
+import { useUserStore } from '@/stores/user'
+import { useRoute } from 'vue-router'
+
+const userStore = useUserStore()
+const route = useRoute()
+
+// 是否有歌单数据
+const hasPlaylists = computed(() =>
+  (userStore.userCreatePlaylist?.length || 0) > 0 ||
+  (userStore.userSubPlaylist?.length || 0) > 0
+)
+
+// 当前歌单 ID
+const currentPlaylistId = computed(() => {
+  return route.query.id as string
+})
+
+// 判断歌单是否激活
+const isPlaylistActive = (playlistId: string) => {
+  return currentPlaylistId.value === playlistId
+}
 
 const isDarkMode = ref(false)
 
@@ -28,6 +50,7 @@ const initTheme = () => {
 
 onMounted(() => {
   initTheme()
+  userStore.ensureUser()
 })
 
 defineProps<{
@@ -38,7 +61,8 @@ defineEmits<{
   'update:isCollapsed': [value: boolean]
 }>()
 
-const menuItems: MenuItem[] = [
+// 基础菜单项（不包括歌单）
+const baseMenuItems: MenuItem[] = [
   {
     id: 'theme-toggle',
     label: '主题',
@@ -57,24 +81,64 @@ const menuItems: MenuItem[] = [
     icon: '🔍',
     route: '/search'
   },
-  {
-    id: 'playlists',
-    label: '歌单',
-    icon: '📋',
-    children: [
-      {
-        id: 'my-playlists',
-        label: '我的歌单',
-        route: '/playlist?id=2084738832'
-      },
-    ]
-  },
 ]
 </script>
 
 <template>
   <aside class="sidebar" :class="{ collapsed: isCollapsed }">
-    <NavigationMenu :items="menuItems" />
+    <NavigationMenu :items="baseMenuItems" />
+
+    <!-- 歌单列表 -->
+    <div v-if="hasPlaylists" class="playlists-section">
+      <!-- 我的歌单 -->
+      <div v-if="userStore.userCreatePlaylist.length" class="playlist-group">
+        <div class="playlist-group-header">
+          <Music class="h-4 w-4" />
+          <span>我的歌单</span>
+        </div>
+        <div class="playlist-list">
+          <RouterLink
+            v-for="playlist in userStore.userCreatePlaylist"
+            :key="playlist.id"
+            :to="`/playlist?id=${playlist.id}`"
+            class="playlist-item"
+            :class="{ active: isPlaylistActive(playlist.id) }"
+          >
+            <img
+              :src="playlist.cover"
+              :alt="playlist.title"
+              class="playlist-cover"
+            />
+            <span class="playlist-name">{{ playlist.title }}</span>
+          </RouterLink>
+        </div>
+      </div>
+
+      <!-- 收藏的歌单 -->
+      <div v-if="userStore.userSubPlaylist.length" class="playlist-group">
+        <div class="playlist-group-header">
+          <ListMusic class="h-4 w-4" />
+          <span>收藏的歌单</span>
+        </div>
+        <div class="playlist-list">
+          <RouterLink
+            v-for="playlist in userStore.userSubPlaylist"
+            :key="playlist.id"
+            :to="`/playlist?id=${playlist.id}`"
+            class="playlist-item"
+            :class="{ active: isPlaylistActive(playlist.id) }"
+          >
+            <img
+              :src="playlist.cover"
+              :alt="playlist.title"
+              class="playlist-cover"
+            />
+            <span class="playlist-name">{{ playlist.title }}</span>
+          </RouterLink>
+        </div>
+      </div>
+    </div>
+
     <div class="theme-toggle-container">
       <Button
         variant="outline"
@@ -145,5 +209,122 @@ const menuItems: MenuItem[] = [
   .sidebar.open {
     left: 0;
   }
+}
+
+/* 歌单区域样式 */
+.playlists-section {
+  padding: 10px 0;
+  border-top: 1px solid rgba(224, 224, 224, 0.3);
+  margin-top: 10px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 400px);
+}
+
+.dark .playlists-section {
+  border-top-color: rgba(51, 51, 51, 0.3);
+}
+
+.playlist-group {
+  margin-bottom: 15px;
+}
+
+.playlist-group-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  font-weight: bold;
+  color: #666;
+  font-size: 13px;
+}
+
+.dark .playlist-group-header {
+  color: #999;
+}
+
+.playlist-group-header span {
+  margin-left: 10px;
+}
+
+.playlist-list {
+  list-style: none;
+  padding: 0;
+}
+
+.playlist-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 20px;
+  margin: 4px 12px;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  gap: 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.dark .playlist-item {
+  color: #e0e0e0;
+}
+
+.playlist-item:hover {
+  background: #ff3b30;
+  border-radius: 8px;
+  border: 1px solid #ff3b30;
+  color: #fff;
+}
+
+.dark .playlist-item:hover {
+  background: #ff453a;
+  border: 1px solid #ff453a;
+  color: #fff;
+}
+
+.playlist-item.active {
+  background: #ff3b30;
+  border-radius: 8px;
+  border: 1px solid #ff3b30;
+  color: #fff;
+}
+
+.dark .playlist-item.active {
+  background: #ff453a;
+  border: 1px solid #ff453a;
+  color: #fff;
+}
+
+.playlist-cover {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.playlist-name {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* 滚动条样式 */
+.playlists-section::-webkit-scrollbar {
+  width: 4px;
+}
+
+.playlists-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.playlists-section::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.dark .playlists-section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
 }
 </style>
