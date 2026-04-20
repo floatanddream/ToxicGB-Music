@@ -7,10 +7,9 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
 import emitter from '@/utils/eventBus';
 import {EVENTS} from '@/constants/events'
-import ScrollArea from '../ui/scroll-area/ScrollArea.vue';
-//随机图片
-const randomImage = Math.floor(Math.random() * 3) + 1;
-const imageUrl = ref(`https://picsum.photos/1920/1080?random=${randomImage}`);
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore();
+const imageUrl = ref(`${userStore.avatar}`);
 
 //拿到main元素ref
 const mainRef = ref<HTMLElement | null>(null);
