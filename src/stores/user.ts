@@ -5,27 +5,26 @@ import type { Playlist } from '@/types/musicTypes'
 import { transformToPlaylist } from '@/utils/dataTransformer'
 
 interface UserState {
-  user: User | null;
-  account: Account | null;
-  loaded: boolean;
-  lastFetchTime: number;
-  userCreatePlaylist: Playlist[]| null;
-  userSubPlaylist: Playlist[]| null;
+  user: User | null
+  account: Account | null
+  loaded: boolean
+  lastFetchTime: number
+  _userCreatePlaylist: Playlist[] | null // 改名前缀加 _
+  _userSubPlaylist: Playlist[] | null // 改名前缀加 _
 }
 
 const getUserPlaylist = async (userId: number) => {
-  let userCreate: Array<Playlist> = [];
-  let userSub: Array<Playlist> = [];
-  const res = await fetchUserPlaylist(userId);
-  res.playlist.map((item : any) =>{
-    if(!item.subscribed){
-      userCreate.push(transformToPlaylist(item));
-    }
-    else{
+  let userCreate: Array<Playlist> = []
+  let userSub: Array<Playlist> = []
+  const res = await fetchUserPlaylist(userId)
+  res.playlist.map((item: any) => {
+    if (!item.subscribed) {
+      userCreate.push(transformToPlaylist(item))
+    } else {
       userSub.push(transformToPlaylist(item))
     }
-  });
-  return { userCreate, userSub };
+  })
+  return { userCreate, userSub }
 }
 
 const STORAGE_KEY = 'user_store'
@@ -37,8 +36,8 @@ export const useUserStore = defineStore('user', {
     account: null,
     loaded: false,
     lastFetchTime: 0,
-    userCreatePlaylist: null,
-    userSubPlaylist: null
+    _userCreatePlaylist: null,
+    _userSubPlaylist: null,
   }),
 
   getters: {
@@ -50,9 +49,9 @@ export const useUserStore = defineStore('user', {
 
     avatar: (state): string => state.user?.avatarUrl || '',
 
-    userCreatePlaylist: (state): Playlist[] => state.userCreatePlaylist || [],
+    userCreatePlaylist: (state): Playlist[] => state._userCreatePlaylist || [],
 
-    userSubPlaylist: (state): Playlist[] => state.userSubPlaylist || []
+    userSubPlaylist: (state): Playlist[] => state._userSubPlaylist || [],
   },
 
   actions: {
@@ -60,13 +59,13 @@ export const useUserStore = defineStore('user', {
       const cache = localStorage.getItem(STORAGE_KEY)
       if (!cache) return
       try {
-        const data = JSON.parse(cache);
-        this.user = data.user;
-        this.account = data.account;
-        this.lastFetchTime = data.lastFetchTime || 0;
-        this.loaded = data.loaded;
-        this.userCreatePlaylist=data.userCreatePlaylist;
-        this.userSubPlaylist=data.userSubPlaylist;
+        const data = JSON.parse(cache)
+        this.user = data.user
+        this.account = data.account
+        this.lastFetchTime = data.lastFetchTime || 0
+        this.loaded = data.loaded
+        this._userCreatePlaylist = data.userCreatePlaylist
+        this._userSubPlaylist = data.userSubPlaylist
       } catch {
         this.resetUser()
       }
@@ -78,40 +77,36 @@ export const useUserStore = defineStore('user', {
         this.resetUser()
         return
       }
-      if (
-        !force &&
-        this.loaded &&
-        Date.now() - this.lastFetchTime < FETCH_INTERVAL
-      ) {
+      if (!force && this.loaded && Date.now() - this.lastFetchTime < FETCH_INTERVAL) {
         return
       }
       try {
         const res = await getUserFromCookie()
-        const { userCreate, userSub } = await getUserPlaylist(res.account.id);
-        this.user = res.profile;
-        this.account = res.account;
-        this.loaded = true;
-        this.lastFetchTime = Date.now();
-        this.userCreatePlaylist = userCreate;
-        this.userSubPlaylist = userSub;
+        const { userCreate, userSub } = await getUserPlaylist(res.account.id)
+        this.user = res.profile
+        this.account = res.account
+        this.loaded = true
+        this.lastFetchTime = Date.now()
+        this._userCreatePlaylist = userCreate
+        this._userSubPlaylist = userSub
 
-        this.persist();
+        this.persist()
       } catch (error) {
-        console.error('token 失效或获取用户失败', error);
-        this.resetUser();
+        console.error('token 失效或获取用户失败', error)
+        this.resetUser()
       }
     },
     async ensureUser() {
       if (!this.loaded) {
-        await this.fetchUser();
+        await this.fetchUser()
       }
     },
     setUser(user: User, account: Account) {
-      this.user = user;
-      this.account = account;
-      this.loaded = true;
-      this.lastFetchTime = Date.now();
-      this.persist();
+      this.user = user
+      this.account = account
+      this.loaded = true
+      this.lastFetchTime = Date.now()
+      this.persist()
     },
 
     // ⭐ 退出登录 / token 失效
@@ -131,9 +126,9 @@ export const useUserStore = defineStore('user', {
         JSON.stringify({
           user: this.user,
           account: this.account,
-          lastFetchTime: this.lastFetchTime
-        })
+          lastFetchTime: this.lastFetchTime,
+        }),
       )
-    }
-  }
+    },
+  },
 })
