@@ -140,16 +140,18 @@ class HttpClient {
    * 请求方法封装
    */
   async get<T = any>(url: string, params?: any): Promise<T> {
-    const searchParams = params?.sendCookie
-      ? { ...params, cookie: encodeURIComponent(this.getCookie()) }
-      : params;
+    const { sendCookie, ...restParams } = params || {};
+    const searchParams = sendCookie
+      ? { ...restParams, cookie: encodeURIComponent(this.getCookie()) }
+      : restParams;
     return this.instance.get(url, { searchParams }).json();
   }
 
   async post<T = any>(url: string, data?: any): Promise<T> {
-    const jsonData = data?.sendCookie
-      ? { ...data, cookie: this.getCookie() }
-      : data;
+    const { sendCookie, ...restData } = data || {};
+    const jsonData = sendCookie
+      ? { ...restData, cookie: this.getCookie() }
+      : restData;
     return this.instance.post(url, { json: jsonData }).json();
   }
 
