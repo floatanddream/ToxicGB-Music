@@ -130,14 +130,27 @@ class HttpClient {
   }
 
   /**
-   * 请求方法封装
+   * 获取 cookie 值
    */
-  async get<T = any>(url: string, params?: any): Promise<T> {
-    return this.instance.get(url, { searchParams: params }).json()
+  private getCookie(): string {
+    return localStorage.getItem('cookie') || '';
   }
 
-  async post<T = any>(url: string, data?: any): Promise<T> {
-    return this.instance.post(url, { json: data }).json()
+  /**
+   * 请求方法封装
+   */
+  async get<T = any>(url: string, params?: any, sendCookie = false): Promise<T> {
+    const searchParams = sendCookie
+      ? { ...params, cookie: encodeURIComponent(this.getCookie()) }
+      : params;
+    return this.instance.get(url, { searchParams }).json();
+  }
+
+  async post<T = any>(url: string, data?: any, sendCookie = false): Promise<T> {
+    const jsonData = sendCookie
+      ? { ...data, cookie: this.getCookie() }
+      : data;
+    return this.instance.post(url, { json: jsonData }).json();
   }
 
   async put<T = any>(url: string, data?: any): Promise<T> {
