@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import { timestamp } from '@vueuse/core';
 
 //获取歌手详情
 export const getSongUrl = async (id: number | string) => {
