@@ -15,6 +15,9 @@ const progress = computed(() => {
   return (currentTime.value / duration.value) * 100
 })
 
+const handleClickPlayAndPause = () => {
+  playing.value ? playerStore.pause() : playerStore.play()
+}
 
 const handleProgress = (e: Event) => {
   const target = e.target as HTMLInputElement
@@ -51,7 +54,7 @@ const volume = ref(70)
           <button class="icon-btn" @click="playerStore.prev">
             <Rewind />
           </button>
-          <button class="play-btn" @click="playerStore.play">
+          <button class="play-btn" @click="handleClickPlayAndPause">
             <Play v-if="!playing" />
             <Pause v-else />
           </button>
