@@ -1,44 +1,25 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { usePlayerStore } from '@/stores/playerStore'
 
-const currentSong = ref({
-  title: '示例歌曲',
-  artist: '示例歌手',
-  duration: 180
-})
-
-const isPlaying = ref(false)
-const currentTime = ref(0)
-const volume = ref(70)
+const playerStore = usePlayerStore()
+const { currentSong, currentTime, duration, playing } = playerStore
 
 const formatTime = (seconds: number) => {
+  if (!seconds || isNaN(seconds)) return '0:00'
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-const togglePlay = () => {
-  isPlaying.value = !isPlaying.value
-}
-
-const playNext = () => {
-  // 模拟下一首
-  currentSong.value.title = '下一首歌曲'
-}
-
-const playPrev = () => {
-  // 模拟上一首
-  currentSong.value.title = '上一首歌曲'
-}
-
 const handleProgress = (e: Event) => {
   const target = e.target as HTMLInputElement
-  currentTime.value = Number(target.value)
+  playerStore.seek(Number(target.value))
 }
 
 const handleVolume = (e: Event) => {
   const target = e.target as HTMLInputElement
-  volume.value = Number(target.value)
+  playerStore.setVolume(Number(target.value) / 100)
 }
 </script>
 
@@ -47,22 +28,38 @@ const handleVolume = (e: Event) => {
     <div class="player-controls">
       <div class="song-info">
         <img
-          src="https://picsum.photos/50/50?random=1"
-          alt="专辑封面"
+          :src="currentSong?.picUrl || 'https://picsum.photos/50/50?random=1'"
+          :alt="currentSong?.name || '专辑封面'"
           class="album-cover"
         />
         <div class="song-details">
-          <span class="song-title">{{ currentSong.title }}</span>
-          <span class="song-artist">{{ currentSong.artist }}</span>
+          <span class="song-title">{{ currentSong?.name || '未播放' }}</span>
+          <span class="song-artist">{{ currentSong?.artists?.map(a => a.name).join(' / ') || '未知歌手' }}</span>
         </div>
       </div>
 
       <div class="playback-controls">
-        <button class="control-btn" @click="playPrev">⏮</button>
-        <button class="play-btn" @click="togglePlay">
-          {{ isPlaying ? '⏸' : '▶' }}
+        <button class="control-btn" @click="playerStore.prev">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="19 20 9 12 19 4 19 20"></polygon>
+            <line x1="5" y1="19" x2="5" y2="5"></line>
+          </svg>
         </button>
-        <button class="control-btn" @click="playNext">⏭</button>
+        <button class="play-btn" @click="playerStore.toggle">
+          <svg v-if="playing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+        <button class="control-btn" @click="playerStore.next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19"></line>
+          </svg>
+        </button>
       </div>
 
       <div class="progress-container">
@@ -71,24 +68,28 @@ const handleVolume = (e: Event) => {
           type="range"
           class="progress-bar"
           min="0"
-          :max="currentSong.duration"
-          v-model="currentTime"
+          :max="duration"
+          :value="currentTime"
           @input="handleProgress"
         />
-        <span class="time-total">{{ formatTime(currentSong.duration) }}</span>
+        <span class="time-total">{{ formatTime(duration) }}</span>
       </div>
 
       <div class="volume-controls">
-        <span class="volume-icon">🔊</span>
+        <button class="volume-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
         <input
           type="range"
           class="volume-bar"
           min="0"
           max="100"
-          v-model="volume"
+          :value="70"
           @input="handleVolume"
         />
-        <span class="volume-text">{{ volume }}%</span>
       </div>
     </div>
   </footer>
@@ -96,191 +97,295 @@ const handleVolume = (e: Event) => {
 
 <style scoped>
 .player-footer {
-  background-color: rgba(44, 44, 44, 0.85) !important;
-  color: #fff;
-  padding: 15px 20px;
-  border-top: 1px solid rgba(68, 68, 68, 0.5) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 99 !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #1f2937;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .player-footer {
-  background-color: rgba(13, 13, 13, 0.85) !important;
-  border-top-color: rgba(34, 34, 34, 0.5) !important;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
+  background-color: rgba(26, 26, 26, 0.85);
+  color: #f3f4f6;
+  border-top-color: rgba(75, 85, 99, 0.3);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .player-controls {
   display: flex;
+;
   align-items: center;
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
+  gap: 20px;
 }
 
 .song-info {
   display: flex;
   align-items: center;
-  flex: 1;
+  min-width: 200px;
   max-width: 300px;
+  flex: 1;
 }
 
 .album-cover {
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  margin-right: 15px;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  margin-right: 12px;
+  object-fit: cover;
 }
 
 .song-details {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .song-title {
-  font-weight: bold;
+  font-weight: 500;
   font-size: 14px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .song-artist {
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dark .song-artist {
-  color: #666;
+  color: #9ca3af;
 }
 
 .playback-controls {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
 
 .control-btn {
   background: none;
   border: none;
-  color: #fff;
-  font-size: 20px;
+  color: #374151;
   cursor: pointer;
-  padding: 5px;
-  transition: color 0.3s ease;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dark .control-btn {
-  color: #e0e0e0;
+  color: #e5e7eb;
 }
 
 .control-btn:hover {
-  color: #e74c3c;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #ef4444;
+}
+
+.dark .control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f87171;
 }
 
 .play-btn {
-  background-color: #e74c3c;
+  background-color:
+  #ef4444;
   border: none;
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  color: #fff;
-  font-size: 16px;
+  color: white;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .play-btn {
+  background-color: #f87171;
 }
 
 .play-btn:hover {
-  background-color: #c0392b;
+  transform: scale(1.05);
+  background-color: #dc2626;
+}
+
+.dark .play-btn:hover {
+  background-color: #ef4444;
 }
 
 .progress-container {
   display: flex;
   align-items: center;
-  flex: 2;
+  flex: 1;
   max-width: 500px;
-  margin: 0 30px;
+  margin: 0 20px;
 }
 
 .time-current,
 .time-total {
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   min-width: 40px;
 }
 
 .dark .time-current,
 .dark .time-total {
-  color: #666;
+  color: #9ca3af;
 }
 
 .progress-bar {
   flex: 1;
   margin: 0 10px;
   height: 4px;
-  background-color: #444;
+  background-color: #e5e7eb;
   border-radius: 2px;
   outline: none;
   -webkit-appearance: none;
+  cursor: pointer;
 }
 
 .dark .progress-bar {
-  background-color: #333;
+  background-color: #374151;
 }
 
 .progress-bar::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 12px;
   height: 12px;
-  background-color: #e74c3c;
+  background-color:
+  #ef4444;
   border-radius: 50%;
   cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.dark .progress-bar::-webkit-slider-thumb {
+  background-color: #f87171;
+}
+
+.progress-bar::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
 
 .volume-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 140px;
 }
 
-.volume-icon {
-  font-size: 16px;
+.volume-btn {
+  background: none;
+  border: none;
+  color: #374151;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.dark .volume-btn {
+  color: #9ca3af;
+}
+
+.volume-btn:hover {
+  color: #ef4444;
+}
+
+.dark .volume-btn:hover {
+  color: #f87171;
 }
 
 .volume-bar {
   width: 80px;
   height: 4px;
-  background-color: #444;
+  background-color: #e5e7eb;
   border-radius: 2px;
   outline: none;
   -webkit-appearance: none;
+  cursor: pointer;
 }
 
 .dark .volume-bar {
-  background-color: #333;
+  background-color: #374151;
 }
 
 .volume-bar::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 10px;
   height: 10px;
-  background-color: #e74c3c;
+  background-color:
+  #ef4444;
   border-radius: 50%;
   cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-.volume-text {
-  font-size: 12px;
-  color: #999;
-  min-width: 35px;
+.dark .volume-bar::-webkit-slider-thumb {
+  background-color: #f87171;
 }
 
-.dark .volume-text {
-  color: #666;
+.volume-bar::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  .player-controls {
+    gap: 12px;
+  }
+
+  .song-info {
+    min-width: 120px;
+    max-width: 150px;
+  }
+
+  .album-cover {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+
+  .song-title {
+    font-size: 12px;
+  }
+
+  .song-artist {
+    font-size: 11px;
+  }
+
+  .progress-container {
+    margin: 0 10px;
+  }
+
+  .volume-controls {
+    display: none;
+  }
+
+  .play-btn {
+    width: 36px;
+    height: 36px;
+  }
 }
 </style>
