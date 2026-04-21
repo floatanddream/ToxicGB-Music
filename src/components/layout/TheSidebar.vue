@@ -10,7 +10,15 @@ import { useRoute } from 'vue-router'
 const userStore = useUserStore();
 const route = useRoute();
 
-//用户创建歌单与用户收藏歌单
+//用户创建歌单与用户收藏歌单的容器ref
+const userCreatePlaylistRef = ref<HTMLDivElement>();
+const userSubPlaylistRef = ref<HTMLDivElement>();
+const createPlaylistHeight = computed(() => {
+  return userCreatePlaylistRef.value?.scrollHeight;
+});
+const subPlaylistHeight = computed(() => {
+  return userSubPlaylistRef.value?.scrollHeight;
+});
 
 // 是否有歌单数据
 const hasPlaylists = computed(() =>
@@ -111,19 +119,13 @@ const baseMenuItems: MenuItem[] = [
           <ChevronRight v-if="myPlaylistsCollapsed" class="h-4 w-4 ml-auto" />
           <ChevronDown v-else class="h-4 w-4 ml-auto" />
         </div>
-        <div :class="['playlist-list', { expanded: !myPlaylistsCollapsed }]">
-          <RouterLink
-            v-for="playlist in userStore.userCreatePlaylist"
-            :key="playlist.id"
-            :to="`/playlist?id=${playlist.id}`"
-            class="playlist-item"
-            :class="{ active: isPlaylistActive(playlist.id) }"
-          >
-            <img
-              :src="playlist.cover"
-              :alt="playlist.title"
-              class="playlist-cover"
-            />
+        <div ref="userCreatePlaylistRef"
+          :style="{ maxHeight: !myPlaylistsCollapsed ? `${createPlaylistHeight}px` : '0' }"
+          :class="['playlist-list', { expanded: !myPlaylistsCollapsed }]">
+          <RouterLink v-for="playlist in userStore.userCreatePlaylist" :key="playlist.id"
+            :to="`/playlist?id=${playlist.id}`" class="playlist-item"
+            :class="{ active: isPlaylistActive(playlist.id) }">
+            <img :src="playlist.cover" :alt="playlist.title" class="playlist-cover" />
             <span class="playlist-name">{{ playlist.title }}</span>
           </RouterLink>
         </div>
@@ -137,19 +139,12 @@ const baseMenuItems: MenuItem[] = [
           <ChevronRight v-if="subPlaylistsCollapsed" class="h-4 w-4 ml-auto" />
           <ChevronDown v-else class="h-4 w-4 ml-auto" />
         </div>
-        <div :class="['playlist-list', { expanded: !subPlaylistsCollapsed }]">
-          <RouterLink
-            v-for="playlist in userStore.userSubPlaylist"
-            :key="playlist.id"
-            :to="`/playlist?id=${playlist.id}`"
-            class="playlist-item"
-            :class="{ active: isPlaylistActive(playlist.id) }"
-          >
-            <img
-              :src="playlist.cover"
-              :alt="playlist.title"
-              class="playlist-cover"
-            />
+        <div ref="userSubPlaylistRef" :class="['playlist-list', { expanded: !subPlaylistsCollapsed }]"
+          :style="{ maxHeight: !subPlaylistsCollapsed ? `${subPlaylistHeight}px` : `0` }">
+          <RouterLink v-for="playlist in userStore.userSubPlaylist" :key="playlist.id"
+            :to="`/playlist?id=${playlist.id}`" class="playlist-item"
+            :class="{ active: isPlaylistActive(playlist.id) }">
+            <img :src="playlist.cover" :alt="playlist.title" class="playlist-cover" />
             <span class="playlist-name">{{ playlist.title }}</span>
           </RouterLink>
         </div>
@@ -157,12 +152,7 @@ const baseMenuItems: MenuItem[] = [
     </div>
 
     <div class="theme-toggle-container">
-      <Button
-        variant="outline"
-        size="sm"
-        @click="toggleTheme"
-        class="theme-toggle-btn"
-      >
+      <Button variant="outline" size="sm" @click="toggleTheme" class="theme-toggle-btn">
         <SunIcon v-if="isDarkMode" class="h-4 w-4 text-yellow-500" />
         <MoonIcon v-else class="h-4 w-4 text-gray-700" />
         {{ isDarkMode ? '浅色模式' : '深色模式' }}
@@ -284,11 +274,10 @@ const baseMenuItems: MenuItem[] = [
   padding: 0;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
 }
 
 .playlist-list.expanded {
-  max-height: 100rem;
   opacity: 1;
 }
 
