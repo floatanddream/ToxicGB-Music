@@ -3,13 +3,21 @@ import TheHeader from './TheHeader.vue'
 import TheSidebar from './TheSidebar.vue'
 import TheFooter from './TheFooter.vue'
 import { BackgroundRender } from '@applemusic-like-lyrics/vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
 import emitter from '@/utils/eventBus';
 import {EVENTS} from '@/constants/events'
 import { useUserStore } from '@/stores/user';
+import { storeToRefs } from 'pinia';
+import { usePlayerStore } from '@/stores/playerStore';
+
 const userStore = useUserStore();
-const imageUrl = ref(`${userStore.avatar}`);
+const playerStore = usePlayerStore();
+const { currentSong, playing } = storeToRefs(playerStore);
+
+const imageUrl = computed(()=>{
+  return playing.value ? currentSong.value?.cover : userStore.user?.avatarUrl
+});
 
 //拿到main元素ref
 const mainRef = ref<HTMLElement | null>(null);
