@@ -26,7 +26,7 @@ const handleProgress = (e: Event) => {
 
 const handleVolume = (e: Event) => {
   const target = e.target as HTMLInputElement
-  playerStore.setVolume(Number(target.value) / 100)
+  playerStore.setVolume(Number(target.value))
 }
 
 const volume = ref(70)

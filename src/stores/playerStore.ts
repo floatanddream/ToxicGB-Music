@@ -19,9 +19,10 @@ export const usePlayerStore = defineStore('player', () => {
   const duration = ref<number>(0);
 
   const loading = ref<boolean>(false);
+  const volume = ref<number>(50);
 
-  /* ---------------- 初始化（只执行一次）---------------- */
   const init = () => {
+    player.setVolume(volume.value);
     player.on('songchange', (song: Song) => {
       currentSong.value = song;
       currentIndex.value = player.getCurrentIndex();
@@ -106,6 +107,8 @@ export const usePlayerStore = defineStore('player', () => {
     player.playByIndex(0);
   };
 
+
+
   /* ---------------- 控制 ---------------- */
   const play = () => {
     player.play();
@@ -137,6 +140,7 @@ export const usePlayerStore = defineStore('player', () => {
 
   const setVolume = (v: number) => {
     player.setVolume(v);
+    volume.value = v;
   };
 
   const preloadNextSong = async () =>{
@@ -161,7 +165,7 @@ export const usePlayerStore = defineStore('player', () => {
   });
 
   return {
-    // state
+    volume,
     playlist,
     currentSong,
     currentIndex,

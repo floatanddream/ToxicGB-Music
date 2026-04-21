@@ -19,7 +19,7 @@ export class MusicController {
   private currentSong: Song | null = null
 
   constructor() {
-    this.audio = new Audio()
+    this.audio = new Audio();
     this.initEvents()
   }
 
