@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import NavigationMenu from '../common/NavigationMenu.vue'
 import type { MenuItem } from '@/types/menu'
-import type { Playlist } from '@/types/playlist'
 import { ref, onMounted, computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { MoonIcon, SunIcon, Music, ListMusic } from 'lucide-vue-next'
+import { MoonIcon, SunIcon, Music, ListMusic, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 
-const userStore = useUserStore()
-const route = useRoute()
+const userStore = useUserStore();
+const route = useRoute();
+
+//用户创建歌单与用户收藏歌单
 
 // 是否有歌单数据
 const hasPlaylists = computed(() =>
@@ -25,6 +26,18 @@ const currentPlaylistId = computed(() => {
 // 判断歌单是否激活
 const isPlaylistActive = (playlistId: string) => {
   return currentPlaylistId.value === playlistId
+}
+
+// 歌单折叠状态
+const myPlaylistsCollapsed = ref(true)
+const subPlaylistsCollapsed = ref(true)
+
+const toggleMyPlaylists = () => {
+  myPlaylistsCollapsed.value = !myPlaylistsCollapsed.value
+}
+
+const toggleSubPlaylists = () => {
+  subPlaylistsCollapsed.value = !subPlaylistsCollapsed.value
 }
 
 const isDarkMode = ref(false)
@@ -92,11 +105,13 @@ const baseMenuItems: MenuItem[] = [
     <div v-if="hasPlaylists" class="playlists-section">
       <!-- 我的歌单 -->
       <div v-if="userStore.userCreatePlaylist.length" class="playlist-group">
-        <div class="playlist-group-header">
+        <div class="playlist-group-header clickable" @click="toggleMyPlaylists">
           <Music class="h-4 w-4" />
           <span>我的歌单</span>
+          <ChevronRight v-if="myPlaylistsCollapsed" class="h-4 w-4 ml-auto" />
+          <ChevronDown v-else class="h-4 w-4 ml-auto" />
         </div>
-        <div class="playlist-list">
+        <div :class="['playlist-list', { expanded: !myPlaylistsCollapsed }]">
           <RouterLink
             v-for="playlist in userStore.userCreatePlaylist"
             :key="playlist.id"
@@ -116,11 +131,13 @@ const baseMenuItems: MenuItem[] = [
 
       <!-- 收藏的歌单 -->
       <div v-if="userStore.userSubPlaylist.length" class="playlist-group">
-        <div class="playlist-group-header">
+        <div class="playlist-group-header clickable" @click="toggleSubPlaylists">
           <ListMusic class="h-4 w-4" />
           <span>收藏的歌单</span>
+          <ChevronRight v-if="subPlaylistsCollapsed" class="h-4 w-4 ml-auto" />
+          <ChevronDown v-else class="h-4 w-4 ml-auto" />
         </div>
-        <div class="playlist-list">
+        <div :class="['playlist-list', { expanded: !subPlaylistsCollapsed }]">
           <RouterLink
             v-for="playlist in userStore.userSubPlaylist"
             :key="playlist.id"
@@ -232,10 +249,26 @@ const baseMenuItems: MenuItem[] = [
 .playlist-group-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 8px 20px;
   font-weight: bold;
   color: #666;
   font-size: 13px;
+  cursor: default;
+}
+
+.playlist-group-header.clickable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
+}
+
+.playlist-group-header.clickable:hover {
+  background-color: rgba(224, 224, 224, 0.1);
+}
+
+.dark .playlist-group-header.clickable:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .playlist-group-header {
@@ -249,6 +282,14 @@ const baseMenuItems: MenuItem[] = [
 .playlist-list {
   list-style: none;
   padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.playlist-list.expanded {
+  max-height: 100rem;
+  opacity: 1;
 }
 
 .playlist-item {

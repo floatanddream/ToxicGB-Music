@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root, body, html {
+    font-family: "PingFang SC", "苹方", "Microsoft YaHei", sans-serif !important;
+}
+
 * {
   font-family:'PingFang' !important
 }
