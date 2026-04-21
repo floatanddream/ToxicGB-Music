@@ -6,7 +6,9 @@
       "WebFetch(domain:www.shadcn-vue.com)",
       "Bash(F:ToxicGBToxicGB-Music list:*)",
       "Bash(pnpm list:*)",
-      "Bash(pnpm info:*)"
+      "Bash(pnpm info:*)",
+      "Bash(npm list:*)",
+      "Bash(pnpm dlx:*)"
     ]
   }
 }
