@@ -140,8 +140,7 @@ const volume = ref(70)
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 200px;
-  max-width: 300px;
+  width: 280px;
   flex: 0 0 auto;
 }
 
