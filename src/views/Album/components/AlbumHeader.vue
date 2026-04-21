@@ -9,7 +9,6 @@ import { formatTimestampToDate } from '@/utils/dataTransformer';
 
 defineProps<{
   album: Album;
-  isPlayingAll: boolean;
 }>();
 
 defineEmits<{
@@ -59,9 +58,8 @@ defineEmits<{
 
         <div class="flex gap-3 justify-center md:justify-start">
           <Button size="lg" class="bg-gradient-red-custom" @click="$emit('play-all')">
-            <PlayIcon v-if="!isPlayingAll" class="h-5 w-5 mr-2 font-text-primary" />
-            <PauseIcon v-else class="h-5 w-5 mr-2 font-text-primary" />
-            <span class="font-text-primary">{{ isPlayingAll ? '暂停播放' : '播放全部' }}</span>
+            <PlayIcon class="h-5 w-5 mr-2 font-text-primary" />
+            <span class="font-text-primary">{{  '播放全部' }}</span>
           </Button>
           <Button variant="outline" size="lg" @click="$emit('toggle-like')">
             <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': album?.isLiked }" />

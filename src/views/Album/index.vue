@@ -12,6 +12,7 @@ import emitter from '@/utils/eventBus';
 import type { Album } from '@/types/album';
 import type { CommentListResponse } from '@/types/comment';
 import { transformCommentListResponse } from '@/utils/dataTransformer';
+import { usePlayerStore } from '@/stores/playerStore';
 
 const route = useRoute();
 const albumId = computed(() => route.query.id as string);
@@ -21,7 +22,6 @@ const songs = ref<Song[]>([]);
 const albumComments = ref<CommentListResponse>();
 
 const loading = ref(false);
-const isPlayingAll = ref(false);
 
 const commentsLoading = ref(false);
 const commentsLoadingMore = ref(false);
@@ -96,20 +96,19 @@ const handleTabChange = (newTab: string) => {
   }
 };
 
+const player = usePlayerStore();
+
 // 播放全部
 const playAllSongs = () => {
-  isPlayingAll.value = !isPlayingAll.value;
   if (songs.value.length > 0) {
     console.log('播放专辑全部歌曲:', songs.value);
+    player.replaceList(songs.value,0);
   }
 };
 
 // 收藏专辑
 const toggleLike = () => {
-  // if (albumDetail.value) {
-  //   albumDetail.value.isLiked = !albumDetail.value.isLiked;
-  //   console.log('收藏状态:', albumDetail.value.isLiked);
-  // }
+  player.next();
 };
 
 watch(() => route.query.id, () => {
@@ -136,7 +135,7 @@ onMounted(() => {
 
       <div v-else :key="albumId" class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
         <!-- 专辑头部信息 -->
-        <AlbumHeader v-if="albumDetail" :album="albumDetail" :is-playing-all="isPlayingAll" @play-all="playAllSongs"
+        <AlbumHeader v-if="albumDetail" :album="albumDetail"  @play-all="playAllSongs"
           @toggle-like="toggleLike" />
 
         <!-- 专辑内容区域 -->

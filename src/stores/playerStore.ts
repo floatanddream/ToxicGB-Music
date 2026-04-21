@@ -1,134 +1,186 @@
-import { defineStore } from 'pinia'
-import type { Song, PlayMode } from '@/types/player'
-import { MusicController } from '@/core/player/musicController'
-import { getSong } from '@/core/player/MusicService'
+import { defineStore } from 'pinia';
+import type { Song, PlayMode } from '@/types/player';
+import { MusicController } from '@/core/player/musicController';
+import { getSong } from '@/core/player/MusicService';
+import { ref,watch } from 'vue';
 
 // 🎧 单例播放器（不要在 store 里 new 多次）
-const player = new MusicController()
+const player = new MusicController();
 
-export const usePlayerStore = defineStore('player', {
-  state: () => ({
-    playlist: [] as Song[],
-    currentSong: null as Song | null,
-    currentIndex: -1,
+export const usePlayerStore = defineStore('player', () => {
+  const playlist = ref<Song[]>([]);
+  const currentSong = ref<Song | null>(null);
+  const currentIndex = ref<number>(0);
 
-    mode: 'loop' as PlayMode,
+  const mode = ref<PlayMode>('loop');
 
-    playing: false,
-    currentTime: 0,
-    duration: 0,
+  const playing = ref<boolean>(false);
+  const currentTime = ref<number>(0);
+  const duration = ref<number>(0);
 
-    loading: false
-  }),
+  const loading = ref<boolean>(false);
 
-  actions: {
-    /* ---------------- 初始化（只执行一次）---------------- */
-    init() {
-      player.on('songchange', (song: Song) => {
-        this.currentSong = song
-        this.currentIndex = player.getCurrentIndex()
-      })
+  /* ---------------- 初始化（只执行一次）---------------- */
+  const init = () => {
+    player.on('songchange', (song: Song) => {
+      currentSong.value = song;
+      currentIndex.value = player.getCurrentIndex();
+    });
 
-      player.on('play', () => {
-        this.playing = true
-      })
+    player.on('play', () => {
+      playing.value = true;
+    });
 
-      player.on('pause', () => {
-        this.playing = false
-      })
+    player.on('pause', () => {
+      playing.value = false;
+    });
 
-      player.on('timeupdate', (t: number) => {
-        this.currentTime = t
-      })
+    player.on('timeupdate', (t: number) => {
+      currentTime.value = t;
+    });
 
-      player.on('loaded', (d: number) => {
-        this.duration = d
-      })
+    player.on('loaded', (d: number) => {
+      duration.value = d;
+    });
 
-      player.on('modechange', (m: PlayMode) => {
-        this.mode = m
-      })
-    },
+    player.on('modechange', (m: PlayMode) => {
+      mode.value = m;
+    });
+  };
 
-    /* ---------------- 🎯 播放歌单（核心）---------------- */
-    async playList(list: Song[], index = 0) {
-      this.loading = true
+  // const replaceList = async (list: Song[], index = 0) => {
+  //   loading.value = true;
 
-      try {
-        // 🎧 当前歌曲（必须有 url）
-        const current = await getSong(list[index])
+  //   try {
+  //     // 🎧 当前歌曲（必须有 url）
+  //     const current = await getSong(list[index]!);
 
-        const playlist: Song[] = [current]
+  //     const newPlaylist: Song[] = [current];
 
-        // 🎯 下一首（预加载，提升体验）
-        const next = list[index + 1]
-          ? await getSong(list[index + 1])
-          : null
+  //     // 🎯 下一首（预加载，提升体验）
+  //     const next = list[index + 1]
+  //       ? await getSong(list[index + 1]!)
+  //       : null;
 
-        if (next) playlist.push(next)
+  //     if (next) newPlaylist.push(next);
 
-        this.playlist = playlist
+  //     playlist.value = newPlaylist;
 
-        player.setPlaylist(playlist)
-        player.playByIndex(0)
+  //     player.setPlaylist(newPlaylist);
+  //     player.playByIndex(0);
 
-        this.currentIndex = index
-        this.currentSong = current
+  //     currentIndex.value = index;
+  //     currentSong.value = current;
 
-        // 🚀 后台预加载第3首（不阻塞）
-        const third = list[index + 2]
-        if (third) {
-          getSong(third)
-        }
+  //     // 🚀 后台预加载第3首（不阻塞）
+  //     const third = list[index + 2];
+  //     if (third) {
+  //       getSong(third);
+  //     }
 
-      } finally {
-        this.loading = false
-      }
-    },
+  //   } finally {
+  //     loading.value = false;
+  //   }
+  // };
 
-    /* ---------------- 🎯 播放单曲 ---------------- */
-    async playSong(song: Song) {
-      const fullSong = await getSong(song)
-
-      this.playlist = [fullSong]
-      this.currentIndex = 0
-      this.currentSong = fullSong
-
-      player.setPlaylist([fullSong])
-      player.playByIndex(0)
-    },
-
-    /* ---------------- 控制 ---------------- */
-    play() {
-      player.play()
-    },
-
-    pause() {
-      player.pause()
-    },
-
-    toggle() {
-      player.toggle()
-    },
-
-    next() {
-      player.next()
-    },
-
-    prev() {
-      player.prev()
-    },
-
-    seek(time: number) {
-      player.seek(time)
-    },
-
-    setMode(mode: PlayMode) {
-      player.setMode(mode)
-    },
-
-    setVolume(v: number) {
-      player.setVolume(v)
+  const replaceList = async (list: Song[], index = 0) => {
+    loading.value = true;
+    try{
+      playlist.value = list;
+      currentIndex.value = index;
+      await preloadNextSong();
+      player.playByIndex(index);
+    }finally{
+      loading.value = false;
     }
+  };
+  /* ---------------- 🎯 播放单曲 ---------------- */
+  const playSong = async (song: Song) => {
+    const fullSong = await getSong(song);
+
+    playlist.value = [fullSong];
+    currentIndex.value = 0;
+    currentSong.value = fullSong;
+
+    player.setPlaylist([fullSong]);
+    player.playByIndex(0);
+  };
+
+  /* ---------------- 控制 ---------------- */
+  const play = () => {
+    player.play();
+  };
+
+  const pause = () => {
+    player.pause();
+  };
+
+  const toggle = () => {
+    player.toggle();
+  };
+
+  const next = () => {
+    player.next();
+  };
+
+  const prev = () => {
+    player.prev();
+  };
+
+  const seek = (time: number) => {
+    player.seek(time);
+  };
+
+  const setMode = (modeValue: PlayMode) => {
+    player.setMode(modeValue);
+  };
+
+  const setVolume = (v: number) => {
+    player.setVolume(v);
+  };
+
+  const preloadNextSong = async () =>{
+    //index变化时，预加载后面3首歌,当后面无3首歌时那么自动加载
+    for(let i=currentIndex.value;i<currentIndex.value+3;i++){
+      if(i<playlist.value.length){
+        //如有已有url
+        if (playlist.value[i]?.url) continue;
+        //获取url
+        let songWithUrl:Song = await getSong(playlist.value[i]!);
+        playlist.value[i] = songWithUrl;
+
+      }else{
+        break;
+      };
+    };
+     player.setPlaylist(playlist.value)
   }
-})
+
+  watch(currentIndex,()=>{
+   preloadNextSong();
+  });
+
+  return {
+    // state
+    playlist,
+    currentSong,
+    currentIndex,
+    mode,
+    playing,
+    currentTime,
+    duration,
+    loading,
+    // actions
+    init,
+    replaceList,
+    playSong,
+    play,
+    pause,
+    toggle,
+    next,
+    prev,
+    seek,
+    setMode,
+    setVolume,
+  };
+});
