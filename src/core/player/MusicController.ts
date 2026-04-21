@@ -71,7 +71,7 @@ export class MusicController {
   private load(song: Song) {
     this.currentSong = song
 
-    this.audio.src = song.url
+    this.audio.src = song.url!
     this.audio.load()
 
     this.emit('songchange', song)
