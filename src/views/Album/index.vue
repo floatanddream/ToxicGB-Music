@@ -12,7 +12,6 @@ import emitter from '@/utils/eventBus';
 import type { Album } from '@/types/album';
 import type { CommentListResponse } from '@/types/comment';
 import { transformCommentListResponse } from '@/utils/dataTransformer';
-import { usePlayerStore } from '@/stores/playerStore';
 
 const route = useRoute();
 const albumId = computed(() => route.query.id as string);
@@ -96,19 +95,16 @@ const handleTabChange = (newTab: string) => {
   }
 };
 
-const player = usePlayerStore();
-
 // 播放全部
 const playAllSongs = () => {
   if (songs.value.length > 0) {
-    console.log('播放专辑全部歌曲:', songs.value);
-    player.replaceList(songs.value,0);
+    emitter.emit(EVENTS.PLAY_ALL,songs.value);
   }
 };
 
 // 收藏专辑
 const toggleLike = () => {
-  player.next();
+  // player.next();
 };
 
 watch(() => route.query.id, () => {

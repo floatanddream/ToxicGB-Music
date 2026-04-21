@@ -7,7 +7,6 @@ import DescriptionWithDialog from '@/components/common/musicComponents/Descripti
 
 defineProps<{
   playlist: Playlist;
-  isPlayingAll: boolean;
 }>();
 
 defineEmits<{
@@ -24,8 +23,7 @@ defineEmits<{
         <img :src="playlist?.coverImgUrl" :alt="playlist?.name" class="cover-image" />
         <div class="cover-overlay">
           <Button variant="secondary" size="icon" class="play-cover-btn" @click="$emit('play-all')">
-            <PlayIcon v-if="!isPlayingAll" class="h-8 w-8" />
-            <PauseIcon v-else class="h-8 w-8" />
+            <PlayIcon class="h-8 w-8" />
           </Button>
         </div>
       </div>

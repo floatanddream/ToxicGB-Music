@@ -5,11 +5,11 @@ import App from './App.vue'
 import router from './router'
 import './style.css'
 import './styles/dark-mode.css'
-import { registerEvents } from '@/utils/eventBusHandler'
+import { registerClickEvents, registerPlayEvents } from '@/utils/eventBusHandler'
 import { useUserStore } from './stores/user'
 import { usePlayerStore } from './stores/playerStore'
 
-registerEvents(router);
+
 
 const app = createApp(App);
 
@@ -20,5 +20,8 @@ const userStore = useUserStore();
 const player = usePlayerStore();
 player.init();
 userStore.init();
+
+registerClickEvents(router);
+registerPlayEvents(player);
 
 app.mount('#app');

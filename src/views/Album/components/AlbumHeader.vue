@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlayIcon, PauseIcon, HeartIcon, ShareIcon, Calendar, Disc, MessageCircleHeart, UserStarIcon } from 'lucide-vue-next';
+import { PlayIcon,  HeartIcon, ShareIcon, Calendar, Disc, MessageCircleHeart, UserStarIcon } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/format';
 import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue';

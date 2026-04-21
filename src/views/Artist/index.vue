@@ -36,15 +36,10 @@ const fetchArtistData = async () => {
   }
 }
 
-// 播放歌曲
-const playSong = () => {
-  console.log('播放全部歌曲:', Songs);
-};
-
 // 播放全部
 const playAllSongs = () => {
   if (Songs.value.length > 0) {
-    playSong();
+    emitter.emit(EVENTS.PLAY_ALL, Songs.value);
   }
 };
 

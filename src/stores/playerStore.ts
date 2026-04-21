@@ -184,3 +184,5 @@ export const usePlayerStore = defineStore('player', () => {
     setVolume,
   };
 });
+
+export type playerStore = ReturnType<typeof usePlayerStore>;

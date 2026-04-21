@@ -79,7 +79,7 @@ defineEmits<{
 
           <!-- 操作按钮 -->
           <div class="flex gap-3 justify-center md:justify-start">
-            <Button size="lg" class="play-all-btn btn-gradient-primary" @click="$emit('play-all')">
+            <Button size="lg" class="play-all-btn bg-gradient-red-custom" @click="$emit('play-all')">
               <Play class="w-5 h-5 mr-2 fill-current" />
               播放全部
             </Button>

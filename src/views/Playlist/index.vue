@@ -18,7 +18,6 @@ const playlistDetail = ref<Playlist>();
 const playlistComments = ref<CommentListResponse>();
 const playlistSubscribers = ref<User[]>();
 
-const isPlayingAll = ref(false);
 const loading = ref(false);
 
 const commentsLoading = ref(false);
@@ -43,8 +42,8 @@ const fetchPlaylistDetail = async () => {
   }
 }
 
-// 收藏歌单
-const toggleLike = () => {
+const playAll = () => {
+  emitter.emit(EVENTS.PLAY_ALL,playlistDetail.value?.tracks)
 };
 
 const handleTabChange = (newTab: string) => {
@@ -167,8 +166,7 @@ onMounted(() => {
 
       <div v-else :key="playlistId" class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
         <!-- 歌单头部信息 -->
-        <PlaylistHeader v-if="playlistDetail" :playlist="playlistDetail" :is-playing-all="isPlayingAll"
-          @toggle-like="toggleLike" />
+        <PlaylistHeader v-if="playlistDetail" :playlist="playlistDetail" @play-all="playAll" />
         <!-- 歌单内容区域 -->
         <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange" @load-more-comments="handleLoadMoreComments" @load-more-subscribers="handleLoadMoreSubscribers"
           :songs="playlistDetail?.tracks || []" :comments-loading="commentsLoading" :comments-loading-more="commentsLoadingMore" :comments="playlistComments"
