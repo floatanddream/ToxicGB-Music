@@ -7,15 +7,18 @@ import './style.css'
 import './styles/dark-mode.css'
 import { registerEvents } from '@/utils/eventBusHandler'
 import { useUserStore } from './stores/user'
+import { usePlayerStore } from './stores/playerStore'
 
-registerEvents(router)
+registerEvents(router);
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(createPinia())
-app.use(router)
+app.use(createPinia());
+app.use(router);
 
-const userStore = useUserStore()
-userStore.init()
+const userStore = useUserStore();
+const player = usePlayerStore();
+player.init();
+userStore.init();
 
-app.mount('#app')
+app.mount('#app');
