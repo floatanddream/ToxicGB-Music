@@ -18,6 +18,7 @@ const createPlaylistHeight = computed(() => {
 });
 const subPlaylistHeight = computed(() => {
   return userSubPlaylistRef.value?.scrollHeight;
+  
 });
 
 // 是否有歌单数据
