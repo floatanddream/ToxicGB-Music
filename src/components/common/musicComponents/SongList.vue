@@ -5,6 +5,7 @@ import type { Song, Artist, Album } from '@/types/musicTypes';
 import ArtistDivider from './artistDivider.vue';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
+import { MESSAGE_TYPE } from '@/constants/messages';
 
 const props = defineProps<{
   songs: Song[];
@@ -12,6 +13,7 @@ const props = defineProps<{
 
 const playSong = (song :Song) =>{
   emitter.emit(EVENTS.INSERT_AND_PLAY,song);
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌曲 "${song.title}"`)
 }
 </script>
 

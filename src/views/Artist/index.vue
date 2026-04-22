@@ -10,6 +10,7 @@ import { transformAlbums, transformToSong } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
 import { EVENTS } from '@/constants/events';
 import emitter from '@/utils/eventBus'
+import { MESSAGE_TYPE } from '@/constants/messages';
 
 const route = useRoute();
 const artistId = computed(() => route.query.id as string);
@@ -40,6 +41,7 @@ const fetchArtistData = async () => {
 const playAllSongs = () => {
   if (Songs.value.length > 0) {
     emitter.emit(EVENTS.PLAY_ALL, Songs.value);
+    emitter.emit(MESSAGE_TYPE.TOAST_INFO,`播放歌手"${artistData.value?.artist?.name}"所有歌曲`);
   }
 };
 

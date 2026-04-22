@@ -11,6 +11,7 @@ import { transformCommentListResponse, transformPlaylistDetail, transformToUser 
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { Loader2 } from 'lucide-vue-next';
+import { MESSAGE_TYPE } from '@/constants/messages';
 
 const route = useRoute();
 const playlistId = computed(() => route.query.id as string);
@@ -43,7 +44,8 @@ const fetchPlaylistDetail = async () => {
 }
 
 const playAll = () => {
-  emitter.emit(EVENTS.PLAY_ALL,playlistDetail.value?.tracks)
+  emitter.emit(EVENTS.PLAY_ALL,playlistDetail.value?.tracks);
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO,`开始播放歌单"${playlistDetail.value?.name}"所有歌曲`);
 };
 
 const handleTabChange = (newTab: string) => {

@@ -10,6 +10,8 @@ import {EVENTS} from '@/constants/events'
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 import { usePlayerStore } from '@/stores/playerStore';
+import 'vue-sonner/style.css'
+import { Toaster } from '@/components/ui/sonner'
 
 const userStore = useUserStore();
 const playerStore = usePlayerStore();
@@ -50,7 +52,9 @@ onUnmounted(()=>{
 </script>
 
 <template>
+  
   <div class="layout-container">
+    <Toaster :duration="3000" :position="'top-center'" />
     <div class="full-page-background">
       <BackgroundRender :renderer="MeshGradientRenderer" :fps="90" :render-scale="1" :album="imageUrl" />
     </div>

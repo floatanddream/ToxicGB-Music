@@ -12,6 +12,8 @@ import emitter from '@/utils/eventBus';
 import type { Album } from '@/types/album';
 import type { CommentListResponse } from '@/types/comment';
 import { transformCommentListResponse } from '@/utils/dataTransformer';
+import { toast } from 'vue-sonner';
+import { MESSAGE_TYPE } from '@/constants/messages';
 
 const route = useRoute();
 const albumId = computed(() => route.query.id as string);
@@ -99,12 +101,13 @@ const handleTabChange = (newTab: string) => {
 const playAllSongs = () => {
   if (songs.value.length > 0) {
     emitter.emit(EVENTS.PLAY_ALL,songs.value);
+    emitter.emit(MESSAGE_TYPE.TOAST_INFO,`播放专辑"${albumDetail.value?.name}"所有歌曲`);
   }
 };
 
 // 收藏专辑
 const toggleLike = () => {
-  // player.next();
+  
 };
 
 watch(() => route.query.id, () => {

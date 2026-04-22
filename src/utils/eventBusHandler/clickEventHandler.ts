@@ -1,8 +1,7 @@
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import type { Router } from 'vue-router'
-import type { Album, Artist, Playlist, Song } from '@/types/musicTypes'
-import type { playerStore } from '@/stores/playerStore'
+import type { Album, Artist, Playlist } from '@/types/musicTypes'
 
 export function registerClickEvents(router: Router) {
   const handlerMap: Record<string, (event: unknown) => void> = {
@@ -26,7 +25,7 @@ export function registerClickEvents(router: Router) {
       const album = e as Album
       router.push({
         name: 'album',
-        query: { id: album.id },
+        query: { id:  album.id  },
       })
     },
 
@@ -36,27 +35,6 @@ export function registerClickEvents(router: Router) {
     },
   }
 
-  Object.entries(handlerMap).forEach(([event, handler]) => {
-    emitter.on(event, handler)
-  })
-}
-
-export function registerPlayEvents(player: playerStore) {
-  const handlerMap: Record<string, (event: unknown) => void> = {
-    [EVENTS.PLAY_ALL]: (e: unknown) => {
-      const songs = e as Song[]
-      player.replaceList(songs) // 替换播放列表
-    },
-
-    [EVENTS.INSERT_NEXT]: (e: unknown) => {
-      const song = e as Song
-      player.insertNext(song)
-    },
-    [EVENTS.INSERT_AND_PLAY]: (e: unknown) => {
-      const song = e as Song
-      player.insertNextAndPlay(song)
-    },
-  }
   Object.entries(handlerMap).forEach(([event, handler]) => {
     emitter.on(event, handler)
   })
