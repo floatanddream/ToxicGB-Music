@@ -10,21 +10,16 @@ const props = defineProps<{
   songs: Song[];
 }>();
 
-const emit = defineEmits<{
-  'play-song': [song: Song];
-  'artist-click': [artist: Artist];
-}>();
-
-const playSong = (song: Song) => {
-  emit('play-song', song);
-};
+const playSong = (song :Song) =>{
+  emitter.emit(EVENTS.INSERT_AND_PLAY,song);
+}
 </script>
 
 <template>
   <div class="song-list-container glass-card rounded-2xl p-6">
     <h2 class="text-2xl font-bold mb-6">歌曲列表</h2>
     <div class="space-y-2">
-      <div v-for="(song, index) in songs" :key="song.id" class="song-item group" @click="playSong(song)">
+      <div v-for="(song, index) in songs" :key="song.id" class="song-item group" @dblclick="playSong(song)">
         <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <!-- 序号/播放按钮 -->
           <div class="w-8 h-8 flex items-center justify-center">

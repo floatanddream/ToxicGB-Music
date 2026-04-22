@@ -5,4 +5,6 @@ export const EVENTS = {
   SONG_CLICK: 'song-click',
   SCROOL_TOP: 'scroll-top',
   PLAY_ALL: 'play-all',
+  INSERT_NEXT: 'insert-next',
+  INSERT_AND_PLAY: 'insert-and-play',
 }

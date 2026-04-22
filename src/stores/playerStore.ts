@@ -94,19 +94,33 @@ export const usePlayerStore = defineStore('player', () => {
       loading.value = false;
     }
   };
-  /* ---------------- 🎯 播放单曲 ---------------- */
+
   const playSong = async (song: Song) => {
     const fullSong = await getSong(song);
-
     playlist.value = [fullSong];
     currentIndex.value = 0;
     currentSong.value = fullSong;
-
     player.setPlaylist([fullSong]);
     player.playByIndex(0);
   };
 
+  const insertNext = async (song: Song) => {
+    if (playlist.value.length === 0) {
+      await playSong(song);
+      return;
+    }
+    const insertIndex = currentIndex.value + 1;
+    const fullSong = await getSong(song);
+    // 插入到当前歌曲的下一首
+    playlist.value.splice(insertIndex, 0, fullSong);
+    // 更新播放器的播放列表
+    player.setPlaylist(playlist.value);
+  };
 
+  const insertNextAndPlay = async (song: Song) => {
+    await insertNext(song);
+    next();
+  }
 
   /* ---------------- 控制 ---------------- */
   const play = () => {
@@ -178,6 +192,8 @@ export const usePlayerStore = defineStore('player', () => {
     init,
     replaceList,
     playSong,
+    insertNext,
+    insertNextAndPlay,
     play,
     pause,
     toggle,
