@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia';
 import type { Song, PlayMode } from '@/types/player';
-import { MusicController } from '@/core/player/musicController';
+import { MusicController } from '@/core/player/MusicController';
 import { getSong } from '@/core/player/MusicService';
 import { ref,watch } from 'vue';
 
-// 🎧 单例播放器（不要在 store 里 new 多次）
 const player = new MusicController();
 
 export const usePlayerStore = defineStore('player', () => {
