@@ -19,7 +19,7 @@ export const usePlayerStore = defineStore('player', () => {
   const duration = ref<number>(0);
 
   const loading = ref<boolean>(false);
-  const volume = ref<number>(50);
+  const volume = ref<number>(0.5);
 
   const init = () => {
     player.setVolume(volume.value);
@@ -139,6 +139,7 @@ export const usePlayerStore = defineStore('player', () => {
   };
 
   const setVolume = (v: number) => {
+    v = v / 100;
     player.setVolume(v);
     volume.value = v;
   };
