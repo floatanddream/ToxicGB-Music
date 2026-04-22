@@ -14,6 +14,11 @@ const props = defineProps<{
   songs: Song[];
 }>();
 
+const handleInsertSong = (song :Song) =>{
+  emitter.emit(EVENTS.INSERT_NEXT,song);
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `已将歌曲 "${song.title}" 插入到下一首`)
+}
+
 const playSong = (song :Song) =>{
   emitter.emit(EVENTS.INSERT_AND_PLAY,song);
   emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌曲 "${song.title}"`)
@@ -57,7 +62,7 @@ const playSong = (song :Song) =>{
             <Button variant="ghost" size="icon">
               <HeartIcon class="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button @click="handleInsertSong(song)" variant="ghost" size="icon">
               <ListPlusIcon class="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon">
