@@ -10,33 +10,119 @@
 * {
   font-family:'PingFang' !important
 }
-/* 玻璃容器 */
-.glass-container {
-  padding: 1.25rem;
-  opacity: 0.9;
+/* =========================
+   🧊 通用玻璃基础层
+========================= */
+.glass-container,
+.glass-card,
+.glass-effect {
+  position: relative;
+
+  backdrop-filter:
+    blur(18px)
+    saturate(200%)
+    brightness(1.2)
+    contrast(1.05);
+
+  -webkit-backdrop-filter:
+    blur(18px)
+    saturate(200%)
+    brightness(1.2)
+    contrast(1.05);
   transition: all 0.3s ease;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  background-color: var(--glass-bg);
-  border-radius: 20px;
 }
 
-/* 毛玻璃效果卡片 */
+/* =========================
+   🧊 1. 容器级玻璃（最稳定）
+========================= */
+.glass-container {
+  padding: 1.25rem;
+  opacity: 0.95;
+
+  background: var(--glass-bg);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.12),
+    0 0 40px rgba(120, 180, 255, 0.06);
+}
+
+/* =========================
+   🪟 2. 卡片级玻璃（UI主用）
+========================= */
 .glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.08);
+
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 0 30px rgba(120, 180, 255, 0.08);
+}
+
+/* =========================
+   🌟 3. 强化发光玻璃（重点UI）
+========================= */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.18);
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.18),
+    0 0 60px rgba(255, 255, 255, 0.08);
+}
+
+/* =========================
+   🌙 Dark mode 统一优化
+========================= */
+.dark .glass-container {
+  background: rgba(17, 25, 40, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dark .glass-card {
-  background: rgba(17, 25, 40, 0.25);
+  background: rgba(17, 25, 40, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass-effect {
+  background: rgba(17, 25, 40, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* =========================
+   ⚡ hover 微动效（高级感关键）
+========================= */
+.glass-container:hover,
+.glass-card:hover,
+.glass-effect:hover {
+
+  backdrop-filter:
+    blur(20px)
+    saturate(220%)
+    brightness(1.25)
+    contrast(1.08);
+
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(220%)
+    brightness(1.25)
+    contrast(1.08);
+}
+
+/* =========================
+   🧠 optional：轻微“空气漂浮感”
+========================= */
+.glass-card,
+.glass-effect {
+  will-change: transform, backdrop-filter;
 }
 
 /* 全局样式变量 */
 :root {
+  --glass-bg: rgba(255, 255, 255, 0.12);
   --primary-color: #e74c3c;
   --primary-dark: #c0392b;
   --text-primary: #2c3e50;
@@ -88,13 +174,6 @@
   }
 }
 
-.glass-effect {
-  background: rgba(255, 255, 255, 0.416);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
 
 body {
   font-family:

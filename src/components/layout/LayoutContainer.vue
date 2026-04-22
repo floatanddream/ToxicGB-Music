@@ -60,7 +60,7 @@ onUnmounted(()=>{
     </div>
     <TheHeader class="header" />
     <TheSidebar class="sidebar" />
-      <main ref="mainRef" class="main"> 
+      <main ref="mainRef" class="main  " style="border-radius: 0%;"> 
           <slot /> 
     </main>
     <TheFooter class="footer" />
@@ -118,9 +118,7 @@ onUnmounted(()=>{
 .main {
   grid-area: main;
   overflow-y: auto;
-  height: calc(100vh - 60px);
-  /* 减去header高度 */
-  padding: 20px 20px 100px 20px;
+  height: calc(100vh - 100px);
   /* 底部增加80px padding避免被footer挡住 */
   position: relative;
   z-index: 1;
