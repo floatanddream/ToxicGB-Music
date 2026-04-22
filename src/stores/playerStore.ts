@@ -4,6 +4,7 @@ import { MusicController } from '@/core/player/musicController';
 import { getSong } from '@/core/player/MusicService';
 import { ref,watch } from 'vue';
 
+// 🎧 单例播放器（不要在 store 里 new 多次）
 const player = new MusicController();
 
 export const usePlayerStore = defineStore('player', () => {
