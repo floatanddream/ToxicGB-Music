@@ -310,14 +310,6 @@ onMounted(() => {
   transform-origin: bottom center;
 }
 
-/* 背景装饰 */
-.bg-decoration {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-
 .bg-circle {
   position: absolute;
   border-radius: 50%;

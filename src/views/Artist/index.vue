@@ -81,14 +81,6 @@ onMounted(() => {
   position: relative;
 }
 
-/* 背景装饰 */
-.bg-decoration {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-
 .bg-blur-circle {
   position: absolute;
   border-radius: 50%;

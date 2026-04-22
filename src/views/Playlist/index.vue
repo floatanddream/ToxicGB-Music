@@ -153,12 +153,6 @@ onMounted(() => {
 
 <template>
   <div class="playlist-page glass-container min-h-screen">
-    <div class="bg-decoration">
-      <div class="bg-blur-circle bg-purple-500 top-1/4 left-1/4 w-96 h-96"></div>
-      <div class="bg-blur-circle bg-pink-500 top-1/3 right-1/4 w-80 h-80"></div>
-      <div class="bg-blur-circle bg-blue-500 bottom-1/4 left-1/3 w-72 h-72"></div>
-    </div>
-
     <Transition name="fade-slide" mode="out-in">
       <div v-if="loading" key="loading" class="flex items-center justify-center h-screen">
         <Loader2 class="w-12 h-12 animate-spin text-gray-500" />
@@ -177,14 +171,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 背景装饰 */
-.bg-decoration {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-
 .bg-blur-circle {
   position: absolute;
   border-radius: 50%;
