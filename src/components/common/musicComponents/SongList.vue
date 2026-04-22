@@ -6,6 +6,9 @@ import ArtistDivider from './artistDivider.vue';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { MESSAGE_TYPE } from '@/constants/messages';
+import { usePlayerStore } from '@/stores/playerStore';
+
+const playerStore = usePlayerStore();
 
 const props = defineProps<{
   songs: Song[];
@@ -25,7 +28,7 @@ const playSong = (song :Song) =>{
         <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <!-- 序号/播放按钮 -->
           <div class="w-8 h-8 flex items-center justify-center">
-            <span v-if="!song.isPlaying" class="text-sm text-gray-500">{{ index + 1 }}</span>
+            <span v-if="song.id !== playerStore.currentSong?.id" class="text-sm text-gray-500">{{ index + 1 }}</span>
             <PlayIcon v-else class="h-5 w-5 text-red-500" />
           </div>
 
