@@ -226,7 +226,7 @@ const baseMenuItems: MenuItem[] = [
   margin-top: 10px;
   flex: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 300px);
 }
 
 .dark .playlists-section {
