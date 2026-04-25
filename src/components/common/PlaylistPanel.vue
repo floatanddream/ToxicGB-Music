@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { X, ListMusic } from 'lucide-vue-next'
-import type { MusicType } from '@/types/musicTypes'
 import { usePlayerStore } from '@/stores/playerStore'
 import ArtistDivider from './musicComponents/artistDivider.vue';
 
