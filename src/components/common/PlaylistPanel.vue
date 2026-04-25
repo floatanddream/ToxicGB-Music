@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { X, ListMusic } from 'lucide-vue-next'
 import type { MusicType } from '@/types/musicTypes'
 import { usePlayerStore } from '@/stores/playerStore'
 import ArtistDivider from './musicComponents/artistDivider.vue';
 
+const props = defineProps<{
+  visible: boolean
+}>()
+
 const playerStore = usePlayerStore();
 
-// 直接使用 store 的响应式数据（不需要 .value，模板会自动解包）
+// 直接使用 store 的响应式数据
 const songs = computed(() => playerStore.playlist)
 const currentSong = computed(() => playerStore.currentSong)
 
@@ -38,9 +42,44 @@ const onScroll = (e: Event) => {
   scrollTop.value = target.scrollTop
 }
 
+// 滚动到当前播放歌曲
+const scrollToCurrentSong = () => {
+  if (!scrollRef.value) return
+  if (!currentSong.value) return
+
+  const index = songs.value.findIndex(s => s.id === currentSong.value?.id)
+  if (index === -1) return
+
+  const marginTop = 20
+  const targetScrollTop = index * ITEM_HEIGHT - marginTop
+  const maxScrollTop = totalHeight.value - containerHeight.value
+  const clampedScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop))
+
+  scrollRef.value.scrollTop = clampedScrollTop
+  scrollTop.value = clampedScrollTop
+}
+
 onMounted(() => {
   if (scrollRef.value) {
     containerHeight.value = scrollRef.value.clientHeight
+  }
+  if (props.visible) {
+    setTimeout(() => {
+      nextTick(() => {
+        scrollToCurrentSong()
+      })
+    }, 100)
+  }
+})
+
+// 监听 visible 变化，自动滚动到当前歌曲
+watch(() => props.visible, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      nextTick(() => {
+        scrollToCurrentSong()
+      })
+    }, 100)
   }
 })
 </script>

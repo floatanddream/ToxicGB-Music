@@ -116,8 +116,7 @@ const volume = ref(70)
       <Transition name="playlist-slide">
         <PlaylistPanel
           v-if="isPlaylistOpen"
-          :playlist="[]"
-          :current-song="currentSong"
+          :visible="isPlaylistOpen"
           @close="isPlaylistOpen = false"
         />
       </Transition>
