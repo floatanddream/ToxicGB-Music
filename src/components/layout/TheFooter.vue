@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
-import { FastForward, Pause, Play, Rewind } from 'lucide-vue-next'
+import { FastForward, Pause, Play, Rewind, ListMusic } from 'lucide-vue-next'
 import ArtistDivider from '../common/musicComponents/artistDivider.vue';
 import { storeToRefs } from 'pinia';
 import { formatTime } from '@/utils/format';
+import PlaylistPanel from '../common/PlaylistPanel.vue';
 
 const playerStore = usePlayerStore();
 
 const { currentSong, currentTime, duration, playing } = storeToRefs(playerStore);
+const isPlaylistOpen = ref(false);
 
 const progress = computed(() => {
   if (!duration || duration.value === 0 || !currentTime) return 0
@@ -79,7 +81,7 @@ const volume = ref(70)
         </div>
       </div>
 
-      <!-- 右侧：音量 -->
+      <!-- 右侧：音量 & 播放列表 -->
       <div class="volume-section">
         <button class="icon-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -104,8 +106,22 @@ const volume = ref(70)
             <polygon points="10 8 16 12 10 16 10 8"/>
           </svg>
         </button>
+        <button class="icon-btn" @click="isPlaylistOpen = !isPlaylistOpen">
+          <ListMusic :size="20" />
+        </button>
       </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="playlist-slide">
+        <PlaylistPanel
+          v-if="isPlaylistOpen"
+          :playlist="[]"
+          :current-song="currentSong"
+          @close="isPlaylistOpen = false"
+        />
+      </Transition>
+    </Teleport>
   </footer>
 </template>
 
@@ -393,5 +409,17 @@ const volume = ref(70)
   .volume-section {
     display: none;
   }
+}
+
+/* 播放列表面板过渡动画 */
+.playlist-slide-enter-active,
+.playlist-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.playlist-slide-enter-from,
+.playlist-slide-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
 }
 </style>
