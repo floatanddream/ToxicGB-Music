@@ -112,7 +112,7 @@ watch(() => props.visible, (newVal) => {
             <div class="playlist-info">
               <span class="playlist-song-title">{{ song.title }}</span>
               <!-- <span class="playlist-artist">{{ song.artist[0]?.name }}</span> -->
-              <ArtistDivider style="color: rgba(255, 255, 255, 0.5);" :artists="song.artist" />
+              <ArtistDivider :artists="song.artist" />
             </div>
             <span class="playlist-duration">{{ song.duration }}</span>
           </div>
