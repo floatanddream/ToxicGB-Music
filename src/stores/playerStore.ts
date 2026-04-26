@@ -28,6 +28,13 @@ export const usePlayerStore = defineStore('player', () => {
   const init = () => {
     player.setVolume(volume.value);
 
+    // 设置 MediaSession 控制
+    player.setMediaSessionHandlers({
+      onNext: () => next(),
+      onPrevious: () => prev(),
+      onSeek: (time: number) => seek(time)
+    });
+
     player.on('play', () => {
       playing.value = true;
     });
