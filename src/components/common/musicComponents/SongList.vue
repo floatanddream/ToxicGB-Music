@@ -70,13 +70,13 @@ onBeforeUnmount(() => {
   observer?.disconnect();
 });
 
-const handleInsertSong = (song :Song) =>{
-  emitter.emit(EVENTS.INSERT_NEXT,song);
+const handleInsertSong = (song: Song) => {
+  emitter.emit(EVENTS.INSERT_NEXT, song);
   emitter.emit(MESSAGE_TYPE.TOAST_INFO, `已将歌曲 "${song.title}" 插入到下一首`)
 }
 
-const playSong = (song :Song) =>{
-  emitter.emit(EVENTS.INSERT_AND_PLAY,song);
+const playSong = (song: Song) => {
+  emitter.emit(EVENTS.INSERT_AND_PLAY, song);
   emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌曲 "${song.title}"`)
 }
 </script>
@@ -128,7 +128,8 @@ const playSong = (song :Song) =>{
         </div>
       </div>
       <!-- 加载更多指示器 -->
-      <div  v-if="displayedSongs.length < songs.length" ref="loadMoreTrigger" class="flex items-center justify-center py-8">
+      <div v-if="displayedSongs.length < songs.length" ref="loadMoreTrigger"
+        class="flex items-center justify-center py-8">
         <Loader2Icon class="h-6 w-6 animate-spin text-gray-400" />
       </div>
     </div>
@@ -142,15 +143,14 @@ const playSong = (song :Song) =>{
   cursor: pointer;
   border-radius: 10px;
 }
+
 /* 浅色模式 - 透明毛玻璃效果 */
 .song-item:hover .p-3 {
   background:
-    radial-gradient(
-      ellipse at 50% 30%,
+    radial-gradient(ellipse at 50% 30%,
       rgba(255, 255, 255, 0.45) 0%,
       rgba(255, 255, 255, 0.3) 50%,
-      transparent 100%
-    ),
+      transparent 100%),
     rgba(255, 255, 255, 0.35);
 
   backdrop-filter: blur(10px) saturate(200%) brightness(1.05);
@@ -165,7 +165,7 @@ const playSong = (song :Song) =>{
 
 /* 暗色模式 - 透明毛玻璃效果 */
 .dark .song-item:hover .p-3 {
-  background:rgba(37, 37, 37, 0.1);
+  background: rgba(37, 37, 37, 0.1);
 
   backdrop-filter: blur(10px) saturate(180%) brightness(1.5);
   -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.5);

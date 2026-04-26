@@ -153,7 +153,7 @@ export const usePlayerStore = defineStore('player', () => {
   const replaceList = async (list: Song[], index = 0) => {
     loading.value = true;
     try {
-      playlist.value = list;
+      playlist.value = [...list];
       currentIndex.value = index;
       resetRandomQueue();
       await preloadNextSong();
@@ -177,6 +177,15 @@ export const usePlayerStore = defineStore('player', () => {
       await playSong(song);
       return;
     }
+
+    const existingIndex = playlist.value.findIndex(s => s.id === song.id);
+    if (existingIndex !== -1) {
+      playlist.value.splice(existingIndex, 1);
+      if (existingIndex < currentIndex.value) {
+        currentIndex.value--;
+      }
+    }
+
     const insertIndex = currentIndex.value + 1;
     const fullSong = await getSong(song);
     playlist.value.splice(insertIndex, 0, fullSong);
