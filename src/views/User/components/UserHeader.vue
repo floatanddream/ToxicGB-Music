@@ -92,19 +92,24 @@ const isOwnProfile = computed(() => {
   top: 0;
   left: 0;
   right: 0;
-  /* height: 320px; */
+  bottom: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0.6;
 }
 
-@media (max-width: 768px) {
-  .background-image-container {
-    height: 280px;
-  }
+.background-image-container img {
+  filter: blur(10px);
+  transform: scale(1.1);
 }
 
 .gradient-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 50%, var(--background-color) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 50%, var(--background-color) 100%);
+  border-radius: 1rem;
 }
 
 .avatar-container {
