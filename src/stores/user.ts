@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import type { User, Account } from '@/types/user'
-import { fetchUserPlaylist, getUserFromCookie } from '@/api/user'
+import type { User, Account, userSimpleInfo } from '@/types/user'
+import { fetchUserPlaylist, getUserFromCookie, getUserSimpleIInfo } from '@/api/user'
 import type { Playlist } from '@/types/musicTypes'
 import { transformToPlaylist } from '@/utils/dataTransformer'
 
@@ -11,6 +11,7 @@ interface UserState {
   lastFetchTime: number
   _userCreatePlaylist: Playlist[] | null // 改名前缀加 _
   _userSubPlaylist: Playlist[] | null // 改名前缀加 _
+  userSubCount: userSimpleInfo | null;
 }
 
 const getUserPlaylist = async (userId: number) => {
@@ -38,6 +39,7 @@ export const useUserStore = defineStore('user', {
     lastFetchTime: 0,
     _userCreatePlaylist: null,
     _userSubPlaylist: null,
+    userSubCount: null,
   }),
 
   getters: {
@@ -83,13 +85,16 @@ export const useUserStore = defineStore('user', {
       try {
         const res = await getUserFromCookie()
         const { userCreate, userSub } = await getUserPlaylist(res.account.id)
+        const userSimpleInfoRes = await getUserSimpleIInfo()
+
         this.user = res.profile
         this.account = res.account
         this.loaded = true
         this.lastFetchTime = Date.now()
         this._userCreatePlaylist = userCreate
         this._userSubPlaylist = userSub
-
+        const { code, ...userSimpleInfo } = userSimpleInfoRes;
+        this.userSubCount = userSimpleInfo;
         this.persist()
       } catch (error) {
         console.error('token 失效或获取用户失败', error)
