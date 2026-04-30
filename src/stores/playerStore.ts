@@ -204,9 +204,14 @@ export const usePlayerStore = defineStore('player', () => {
     next();
   };
 
-  const switchSong = (song : Song) => {
+  const switchSong = async (song: Song) => {
     const index = playlist.value.findIndex(s => s.id === song.id);
     if (index !== -1) {
+      // 如果歌曲没有 URL，先获取
+      if (!playlist.value[index]?.url) {
+        const fullSong = await getSong(playlist.value[index]!);
+        playlist.value[index] = fullSong;
+      }
       playByIndex(index);
     };
   };
