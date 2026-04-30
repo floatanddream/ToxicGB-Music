@@ -9,19 +9,24 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
+import { useUserStore } from '@/stores/user';
+
+const user = useUserStore();
+
 </script>
 <template>
   <div class="lg:col-span-1 h-90">
     <Card class="h-full user-card">
       <CardHeader class="items-center text-center pb-6">
         <div class="relative mb-4">
-          <div class="user-avatar">
-            <UserIcon class="w-12 h-12 text-white" />
+          <div class="user-avatar" >
+            <!-- <UserIcon class="w-12 h-12 text-white" /> -->
+            <img class="w-full h-full rounded-full" alt="user avatar" :src="user.user?.avatarUrl" />
           </div>
           <div class="user-status" />
         </div>
-        <CardTitle class="text-xl text-primary">音乐爱好者</CardTitle>
-        <CardDescription class="text-secondary">聆听世界的声音</CardDescription>
+        <CardTitle class="text-xl text-primary">{{ user.user?.nickname }}</CardTitle>
+        <CardDescription class="text-secondary">{{ user.user?.signature }}</CardDescription>
       </CardHeader>
       <CardContent class="py-2">
         <div class="grid place-items-center">
@@ -67,10 +72,11 @@ import {
 }
 
 .user-avatar {
+  
   width: 6rem;
   height: 6rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%);
+  /* background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%); */
   display: flex;
   align-items: center;
   justify-content: center;

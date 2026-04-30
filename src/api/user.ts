@@ -19,3 +19,7 @@ export async function fetchUserFollows(uid: number|string, limit = 150, offset =
 export async function fetchUserFolloweds(uid: number|string, limit = 150, offset = 0) {
   return await request.get(`/user/followeds?uid=${uid}&limit=${limit}&offset=${offset}`,{sendCookie:true})
 }
+
+export async function getUserSimpleIInfo() {
+  return await request.post(`/user/subcount`,{sendCookie:true})
+}

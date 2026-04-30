@@ -66,3 +66,14 @@ export interface Account {
   anonimousUser: boolean,
   paidFee: boolean,
 }
+
+export interface userSimpleInfo {
+  programCount: number,
+  djRadioCount: number,
+  mvCount: number,
+  artistCount: number,
+  newProgramCount: number,
+  createDjRadioCount: number,
+  createdPlaylistCount: number,
+  subPlaylistCount: number,
+}
