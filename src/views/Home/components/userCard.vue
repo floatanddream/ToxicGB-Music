@@ -1,17 +1,15 @@
 <script lang="ts" setup>
-import { UserIcon } from 'lucide-vue-next';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 
 import { useUserStore } from '@/stores/user';
 
-const user = useUserStore();
+const userStore = useUserStore();
 
 </script>
 <template>
@@ -20,37 +18,41 @@ const user = useUserStore();
       <CardHeader class="items-center text-center pb-6">
         <div class="relative mb-4">
           <div class="user-avatar" >
-            <!-- <UserIcon class="w-12 h-12 text-white" /> -->
-            <img class="w-full h-full rounded-full" alt="user avatar" :src="user.user?.avatarUrl" />
+            <img class="w-full h-full rounded-full" alt="user avatar" :src="userStore.user?.avatarUrl" />
           </div>
           <div class="user-status" />
         </div>
-        <CardTitle class="text-xl text-primary">{{ user.user?.nickname }}</CardTitle>
-        <CardDescription class="text-secondary">{{ user.user?.signature }}</CardDescription>
+        <CardTitle class="text-xl text-primary">{{ userStore.user?.nickname }}</CardTitle>
+        <CardDescription class="text-secondary">{{ userStore.user?.signature }}</CardDescription>
       </CardHeader>
       <CardContent class="py-2">
-        <div class="grid place-items-center">
-          <div class="w-1/2">
-            <div class="w-full space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-secondary">听歌时长</span>
-                <span class="font-semibold text-primary">2,560小时</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-secondary">收藏歌曲</span>
-                <span class="font-semibibold text-primary">892首</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-secondary">创建歌单</span>
-                <span class="font-semibold text-primary">12个</span>
-              </div>
-            </div>
+        <div class="grid grid-cols-2 gap-x-12 gap-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-secondary">创建歌单</span>
+            <span class="font-semibold text-primary">{{ userStore.userSubCount?.createdPlaylistCount }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-secondary">收藏歌单</span>
+            <span class="font-semibold text-primary">{{ userStore.userSubCount?.subPlaylistCount }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-secondary">关注歌手</span>
+            <span class="font-semibold text-primary">{{ userStore.userSubCount?.artistCount }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-secondary">电台</span>
+            <span class="font-semibold text-primary">{{ userStore.userSubCount?.djRadioCount }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-secondary">MV</span>
+            <span class="font-semibold text-primary">{{ userStore.userSubCount?.mvCount }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-secondary">关注歌手</span>
+            <span class="font-semibold text-primary">{{ userStore.userSubCount?.artistCount }}</span>
           </div>
         </div>
       </CardContent>
-      <CardFooter class="mt-auto pt-4">
-        <p class="text-sm italic text-gray-600 text-center w-full">"音乐是心灵的翅膀"</p>
-      </CardFooter>
     </Card>
   </div>
 </template>
