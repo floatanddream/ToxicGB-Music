@@ -74,45 +74,9 @@ const userStore = useUserStore();
 }
 
 .user-avatar {
-  
   width: 6rem;
   height: 6rem;
   border-radius: 50%;
-  /* background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%); */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-.user-status {
-  position: absolute;
-  bottom: 0;
-  left: 4rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  background-color: #10b981;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.user-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-}
-
-.user-avatar {
-  width: 6rem;
-  height: 6rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%);
   display: flex;
   align-items: center;
   justify-content: center;

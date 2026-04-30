@@ -1,40 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { Button } from '@/components/ui/button';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-vue-next';
+import { getBanner } from '@/api/banner';
+import type { Banner } from '@/types/banner';
+
+const getBannerContent = async () =>{
+   const res = await getBanner();
+   const data : Banner[] = res.banners.map((item : any)=>{
+        return {
+            imageUrl: item.imageUrl,
+            bigImageUrl: item.bigImageUrl,
+            typeTitle: item.typeTitle,
+        }
+   });
+   slides.value = data;
+}
+
 // 轮播图数据
-const slides = [
-    {
-        image: 'https://picsum.photos/800/400?random=1',
-        title: '发现音乐之美',
-        description: '探索无限音乐世界',
-        action: '开始探索'
-    },
-    {
-        image: 'https://picsum.photos/800/400?random=2',
-        title: '热门歌单',
-        description: '紧跟潮流音乐',
-        action: '查看歌单'
-    },
-    {
-        image: 'https://picsum.photos/800/400?random=3',
-        title: '新歌首发',
-        description: '抢先试听最新音乐',
-        action: '立即试听'
-    },
-    {
-        image: 'https://picsum.photos/800/400?random=4',
-        title: '热门歌手',
-        description: '关注你的偶像动态',
-        action: '查看详情'
-    },
-    {
-        image: 'https://picsum.photos/800/400?random=5',
-        title: '个性化推荐',
-        description: '专属你的音乐体验',
-        action: '开启体验'
-    }
-];
+const slides = ref<Banner[]>();
 
 // 当前轮播索引
 const currentSlide = ref(0);
@@ -45,18 +28,21 @@ let autoPlayTimer: number | null = null;
 
 // 下一张
 const nextSlide = () => {
-    currentSlide.value = (currentSlide.value + 1) % slides.length;
+    if (!slides.value || slides.value.length === 0) return;
+    currentSlide.value = (currentSlide.value + 1) % slides.value.length;
     resetAutoPlay();
 };
 
 // 上一张
 const prevSlide = () => {
-    currentSlide.value = (currentSlide.value - 1 + slides.length) % slides.length;
+    if (!slides.value || slides.value.length === 0) return;
+    currentSlide.value = (currentSlide.value - 1 + slides.value.length) % slides.value.length;
     resetAutoPlay();
 };
 
 // 跳转到指定幻灯片
 const goToSlide = (index: number) => {
+    if (!slides.value || slides.value.length === 0) return;
     currentSlide.value = index;
     resetAutoPlay();
 };
@@ -98,6 +84,7 @@ const handleMouseLeave = () => {
 
 // 组件挂载时开始自动轮播
 onMounted(() => {
+    getBannerContent();
     startAutoPlay();
 });
 
@@ -111,49 +98,42 @@ onUnmounted(() => {
         <div class="relative h-full min-h-75 overflow-hidden rounded-xl opacity-90 shadow-lg hover:shadow-2xl transition-shadow duration-500"
             @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
             <!-- 图片容器 -->
-            <Transition name="carousel" mode="out-in">
+            <Transition v-if="slides && slides.length > 0" name="carousel" mode="out-in">
                 <div :key="currentSlide" class="absolute inset-0">
-                    <img :src="slides[currentSlide].image" :alt="slides[currentSlide].title"
+                    <img :src="slides[currentSlide].bigImageUrl || slides[currentSlide].imageUrl" :alt="slides[currentSlide].typeTitle || ''"
                         class="w-full h-full object-cover" />
                 </div>
             </Transition>
 
             <!-- 多层遮罩效果 -->
             <div class="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-black/30" />
-            <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+            <div class="absolute inset-0 bg-black/15 backdrop-blur-[4px]" />
 
             <!-- 轮播内容 -->
             <div class="absolute inset-0 flex items-center justify-center">
-                <Transition name="text-carousel" mode="out-in">
+                <Transition v-if="slides && slides.length > 0" name="text-carousel" mode="out-in">
                     <div :key="currentSlide" class="text-center text-white px-4 max-w-xl hover:scale-105 transition-transform duration-700">
                         <h2 class="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg text-white">
-                            {{ slides[currentSlide]?.title }}
+                            {{ slides[currentSlide]?.typeTitle }}
                         </h2>
-                        <p class="text-base md:text-lg mb-6 drop-shadow text-gray-100">
-                            {{ slides[currentSlide]?.description }}
-                        </p>
-                        <Button size="default"
-                            class="btn-gradient-primary">
-                            {{ slides[currentSlide]?.action }}
-                        </Button>
                     </div>
                 </Transition>
             </div>
 
             <!-- 左侧控制按钮 -->
-            <button @click="prevSlide"
+            <button v-if="slides && slides.length > 0" @click="prevSlide"
                 class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-3 transition-all duration-300 group z-10">
                 <ChevronLeftIcon class="w-6 h-6 text-white group-hover:scale-125 transition-transform duration-200" />
             </button>
 
             <!-- 右侧控制按钮 -->
-            <button @click="nextSlide"
+            <button v-if="slides && slides.length > 0" @click="nextSlide"
                 class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-3 transition-all duration-300 group z-10">
                 <ChevronRightIcon class="w-6 h-6 text-white group-hover:scale-125 transition-transform duration-200" />
             </button>
 
             <!-- 底部指示器 -->
-            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+            <div v-if="slides && slides.length > 0" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
                 <button v-for="(slide, index) in slides" :key="`indicator-${index}`" @click="goToSlide(index)"
                     class="w-3 h-3 rounded-full transition-all duration-300 transform hover:scale-125"
                     :class="currentSlide === index ? 'bg-white scale-150 shadow-lg' : 'bg-white/50 hover:bg-white/80'"
@@ -161,7 +141,7 @@ onUnmounted(() => {
             </div>
 
             <!-- 当前页码显示 -->
-            <div
+            <div v-if="slides && slides.length > 0"
                 class="absolute bottom-6 right-6 text-white text-sm font-medium bg-black/40 backdrop-blur-md px-3 py-1 rounded-full z-10">
                 {{ currentSlide + 1 }} / {{ slides.length }}
             </div>
