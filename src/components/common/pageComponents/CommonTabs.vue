@@ -27,7 +27,7 @@ const props = defineProps<{
             :value="tab.value"
             class="tab-button relative flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 data-[state=inactive]:text-gray-300 data-[state=active]:text-white"
           >
-            <span class="relative z-10">{{ tab.label }}</span>
+            <span class="relative z-10 font-text-primary">{{ tab.label }}</span>
             <span
               v-if="modelValue === tab.value"
               class="absolute inset-0 bg-gradient-to-r rounded-lg shadow bg-gradient-red-custom"
