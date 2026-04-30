@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { User } from '@/types/musicTypes';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 
 defineProps<{
   user: User;
@@ -9,14 +11,13 @@ defineEmits<{
   'user-click': [user: User];
 }>();
 
-const handleUserClick = (user: User, event?: Event) => {
-  if (event) event.stopPropagation();
-  window.dispatchEvent(new CustomEvent('user-click', { detail: user }));
+const handleUserClick = (user: User) => {
+  emitter.emit(EVENTS.USER_CLICK, user);
 };
 </script>
 
 <template>
-  <div class="artist-card group cursor-pointer" @click="$emit('user-click', user)">
+  <div class="artist-card group cursor-pointer" @click="handleUserClick(user)">
     <div class="relative">
       <div
         class="aspect-square rounded-full overflow-hidden mb-3 ring-2 ring-transparent group-hover:ring-gray-200 dark:group-hover:ring-gray-700 transition-all relative">

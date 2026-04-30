@@ -1,4 +1,5 @@
 import type { AvatarDetail } from "./artist";
+import type { User } from "./musicTypes";
 
 // IP归属地信息
 export interface IPLocation {
@@ -66,7 +67,7 @@ export interface LikeAnimationMap {
 
 // 单条评论
 export interface Comment {
-    user: CommentUser;
+    user: User;
     beReplied: BeRepliedComment[];
     pendantData: null;
     showFloorComment: null;

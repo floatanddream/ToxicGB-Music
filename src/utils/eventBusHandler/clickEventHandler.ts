@@ -34,7 +34,7 @@ export function registerClickEvents(router: Router) {
       const user = e as User
       router.push({
         name: 'user',
-        query: { id: user.id },
+        query: { id: user.id  },
       })
     },
 

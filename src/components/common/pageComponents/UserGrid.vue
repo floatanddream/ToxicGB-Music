@@ -2,17 +2,13 @@
 import { UserPlus } from 'lucide-vue-next';
 import type { User } from '@/types/musicTypes';
 import UserCard from '@/components/common/musicComponents/UserCard.vue';
-import emitter from '@/utils/eventBus';
-import { EVENTS } from '@/constants/events';
 
 defineProps<{
   users: User[];
   title?: string;
 }>();
 
-const handleUserClick = (user: User) => {
-  emitter.emit(EVENTS.USER_CLICK, user);
-};
+
 </script>
 
 <template>
@@ -27,7 +23,6 @@ const handleUserClick = (user: User) => {
         v-for="user in users"
         :key="user.id"
         :user="user"
-        @user-click="handleUserClick"
       />
     </div>
     <div v-else class="text-center py-12">

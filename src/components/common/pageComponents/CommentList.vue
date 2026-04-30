@@ -3,6 +3,7 @@ import type { Comment, CommentListResponse } from '@/types/comment';
 import { Loader2, MessageSquare } from 'lucide-vue-next';
 import { computed } from 'vue';
 import CommentItem from './CommentItem.vue';
+import { transformToUser } from '@/utils/dataTransformer';
 
 const props = defineProps<{
   loading: boolean;
@@ -15,11 +16,18 @@ const emit = defineEmits<{
 }>();
 
 // 合并热门评论和普通评论
-const allComments = computed(() => {
+const allComments = computed<Comment[]>(() => {
+  console.log(props.comments)
   if (!props.comments) return [];
 
   const { hotComments = [], comments = [] } = props.comments;
-  return [...hotComments, ...comments];
+  const TempComments = [...hotComments, ...comments];
+  
+  // 转换 user 数据
+  return TempComments.map(comment => ({
+    ...comment,
+    user: transformToUser(comment.user as any)
+  }));
 });
 </script>
 

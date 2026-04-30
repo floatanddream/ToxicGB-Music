@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import type { Comment } from '@/types/comment';
 import { formatTimestampToDate } from '@/utils/misc';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
+import type { User } from '@/types/musicTypes';
 
 const props = defineProps<{
   comment: Comment;
 }>();
+
+const handleUserClick = (user: User) => {
+  emitter.emit(EVENTS.USER_CLICK, user);
+};
 
 // 格式化评论时间（相对时间或日期）
 const formatTime = (timestamp: number): string => {
@@ -30,10 +37,10 @@ const formatTime = (timestamp: number): string => {
   <div class="comment-item border-b border-gray-200/10 pb-6">
     <div class="flex gap-4">
       <!-- 用户头像 -->
-      <div class="flex-shrink-0">
+      <div @click="handleUserClick(comment.user)" class="flex-shrink-0 cursor-pointer">
         <img
-          :src="comment.user.avatarUrl || '/api/placeholder/40/40'"
-          :alt="comment.user.nickname"
+          :src="comment.user.avatar || '/api/placeholder/40/40'"
+          :alt="comment.user.name"
           class="w-10 h-10 rounded-full object-cover"
         />
       </div>
@@ -42,7 +49,7 @@ const formatTime = (timestamp: number): string => {
       <div class="flex-1">
         <div class="flex items-center gap-2 mb-2">
           <span class="text-sm font-medium text-gray-900 dark:text-white">
-            {{ comment.user.nickname }}
+            {{ comment.user.name }}
           </span>
           <span class="text-xs text-gray-500">
             {{ formatTime(comment.time) }}
@@ -91,7 +98,7 @@ const formatTime = (timestamp: number): string => {
               </span>
               <span class="text-xs text-gray-500">回复</span>
               <span class="text-xs text-gray-900 dark:text-white">
-                {{ comment.user.nickname }}
+                {{ comment.user.name }}
               </span>
             </div>
             <div class="text-xs text-gray-700 dark:text-gray-300">
