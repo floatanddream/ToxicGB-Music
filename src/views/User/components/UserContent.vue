@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import UserTabs from './UserTabs.vue';
-import type { Playlist } from '@/types/musicTypes';
-import PlaylistCard from '@/components/common/musicComponents/PlaylistCard.vue';
+import type { Playlist, User } from '@/types/musicTypes';
+import UserGrid from '@/components/common/pageComponents/UserGrid.vue';
+import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue';
 
-const activeTab = ref<'playlists'>('playlists');
-const props = defineProps<{
+const activeTab = ref<'playlists' | 'follows' | 'followeds'>('playlists');
+defineProps<{
   playlists: Playlist[];
+  follows: User[];
+  followeds: User[];
 }>();
 </script>
 
@@ -15,17 +18,19 @@ const props = defineProps<{
     <!-- 标签切换内容 -->
     <UserTabs v-model="activeTab" />
     <Transition name="fade-slide" mode="out-in">
+      <!-- 歌单 -->
       <div v-if="activeTab === 'playlists'" key="playlists" class="user-content">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <PlaylistCard
-            v-for="playlist in playlists"
-            :key="playlist.id"
-            :playlist="playlist"
-          />
-        </div>
-        <div v-if="playlists.length === 0" class="text-center py-12 text-gray-500">
-          暂无歌单
-        </div>
+        <PlaylistGrid :playlists="playlists" />
+      </div>
+
+      <!-- 关注 -->
+      <div v-else-if="activeTab === 'follows'" key="follows" class="user-content">
+        <UserGrid :users="follows" />
+      </div>
+
+      <!-- 粉丝 -->
+      <div v-else-if="activeTab === 'followeds'" key="followeds" class="user-content">
+        <UserGrid :users="followeds" />
       </div>
     </Transition>
   </div>

@@ -3,11 +3,11 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import SearchInput from './components/SearchInput.vue';
-import SongResults from './components/SongResults.vue';
-import ArtistResults from './components/ArtistResults.vue';
-import AlbumResults from './components/AlbumResults.vue';
-import UserResults from './components/UserResults.vue';
-import PlaylistResults from './components/PlaylistResults.vue';
+import SongList from '@/components/common/pageComponents/SongList.vue';
+import ArtistGrid from '@/components/common/pageComponents/ArtistGrid.vue';
+import AlbumGrid from '@/components/common/pageComponents/AlbumGrid.vue';
+import UserGrid from '@/components/common/pageComponents/UserGrid.vue';
+import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchIcon, Loader2 } from 'lucide-vue-next';
@@ -259,24 +259,23 @@ onMounted(() => {
             <Transition name="fade-scale" mode="out-in">
               <div :key="activeTab">
                 <TabsContent value="songs" v-show="activeTab === 'songs'">
-                  <SongResults :songs="searchSongData" :is-playing="isPlaying" @play-song="handlePlaySong" />
+                  <SongList :songs="searchSongData" />
                 </TabsContent>
 
                 <TabsContent value="artists" v-show="activeTab === 'artists'">
-                  <ArtistResults :artists="searchArtistData" @artist-click="handleArtistClick" />
+                  <ArtistGrid :artists="searchArtistData" />
                 </TabsContent>
 
                 <TabsContent value="albums" v-show="activeTab === 'albums'">
-                  <AlbumResults :albums="searchAlbumData" @album-click="handleAlbumClick" />
+                  <AlbumGrid :albums="searchAlbumData" />
                 </TabsContent>
 
                 <TabsContent value="playlists" v-show="activeTab === 'playlists'">
-                  <PlaylistResults :playlists="searchPlaylistData" @playlist-click="handlePlaylistClick"
-                    @like-playlist="handleLikePlaylist" />
+                  <PlaylistGrid :playlists="searchPlaylistData" />
                 </TabsContent>
 
                 <TabsContent value="users" v-show="activeTab === 'users'">
-                  <UserResults :users="searchUserData" @user-click="handleUserClick" @follow-user="handleFollowUser" />
+                  <UserGrid :users="searchUserData" />
                 </TabsContent>
               </div>
             </Transition>

@@ -3,10 +3,10 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import UserHeader from './components/UserHeader.vue';
 import UserContent from './components/UserContent.vue';
-import type { User } from '@/types/user';
-import type { Playlist } from '@/types/musicTypes';
-import { getUser, fetchUserPlaylist } from '@/api/user';
-import { transformToPlaylist } from '@/utils/dataTransformer';
+import type { User as UserInfo } from '@/types/user';
+import type { Playlist, User } from '@/types/musicTypes';
+import { getUser, fetchUserPlaylist, fetchUserFollows, fetchUserFolloweds } from '@/api/user';
+import { transformToPlaylist, transformToUser } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
 import { EVENTS } from '@/constants/events';
 import emitter from '@/utils/eventBus';
@@ -14,8 +14,10 @@ import emitter from '@/utils/eventBus';
 const route = useRoute();
 const userId = computed(() => route.query.id as string);
 
-const userData = ref<User>();
+const userData = ref<UserInfo>();
 const playlists = ref<Playlist[]>([]);
+const follows = ref<User[]>([]);
+const followeds = ref<User[]>([]);
 const loading = ref(false);
 
 const fetchUserData = async () => {
@@ -27,15 +29,24 @@ const fetchUserData = async () => {
     const userRes = await getUser(userIdToFetch);
     const userInfo = userRes.profile;
     if (userInfo) {
-      userData.value = userInfo as User;
+      userData.value = userInfo as UserInfo;
     }
 
-    // 获取用户歌单
     const uid = userId.value || userInfo?.userId;
+
+    // 获取用户歌单
     if (uid) {
       const playlistRes = await fetchUserPlaylist(uid);
       const allPlaylists = playlistRes.playlist || [];
       playlists.value = allPlaylists.map(transformToPlaylist);
+
+      // 获取关注列表
+      const followsRes = await fetchUserFollows(uid);
+      follows.value = followsRes.follow.map(transformToUser);
+
+      // 获取粉丝列表
+      const followedsRes = await fetchUserFolloweds(uid);
+      followeds.value = followedsRes.followeds.map(transformToUser);
     }
   } catch (error) {
     console.error('获取用户数据失败:', error);
@@ -64,7 +75,7 @@ onMounted(() => {
       <div v-else :key="userId">
         <UserHeader v-if="userData" :user="userData" />
         <div class="user-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-          <UserContent v-if="userData" :playlists="playlists" />
+          <UserContent v-if="userData" :playlists="playlists" :follows="follows" :followeds="followeds" />
         </div>
       </div>
     </Transition>
