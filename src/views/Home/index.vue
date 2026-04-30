@@ -11,24 +11,26 @@ import MusicRankingList from './components/musicRankingList.vue';
 </script>
 
 <template>
-  <div class="home">
-    <!-- 新的布局：左侧用户信息，右侧轮播图 -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- 左侧：用户卡片 -->
-      <UserCard />
+  <div class="glass-container">
+    <div class="home ">
+      <!-- 新的布局：左侧用户信息，右侧轮播图 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- 左侧：用户卡片 -->
+        <UserCard />
 
-      <!-- 右侧：轮播图 -->
-      <Carousel />
+        <!-- 右侧：轮播图 -->
+        <Carousel />
+      </div>
+
+      <!-- 热门歌手图片布局  -->
+      <PopularSinger />
+
+      <!-- 推荐歌单 -->
+      <PlaylistSection />
+
+      <!-- 音乐榜单 -->
+      <MusicRankingList />
     </div>
-
-    <!-- 热门歌手图片布局  -->
-    <PopularSinger />
-
-    <!-- 推荐歌单 -->
-    <PlaylistSection />
-
-    <!-- 音乐榜单 -->
-    <MusicRankingList />
   </div>
 </template>
 
