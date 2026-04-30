@@ -5,7 +5,6 @@ import type { Song } from '@/types/musicTypes';
 
 const props = defineProps<{
   songs: Song[];
-  isPlaying: boolean;
 }>();
 
 defineEmits<{
