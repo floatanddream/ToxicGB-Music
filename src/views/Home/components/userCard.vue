@@ -103,20 +103,6 @@ const userStore = useUserStore();
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .user-status {
-    border-color: #1f2937;
-  }
-
-  padding: 1.25rem !important;
-  opacity: 0.9;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  background-color: var(--glass-bg) !important;
-  border: 1px solid var(--glass-border) !important;
-}
-
 .user-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);

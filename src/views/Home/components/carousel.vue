@@ -111,13 +111,12 @@ onUnmounted(() => {
         <div class="relative h-full min-h-75 overflow-hidden rounded-xl opacity-90 shadow-lg hover:shadow-2xl transition-shadow duration-500"
             @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
             <!-- 图片容器 -->
-            <div class="absolute inset-0 flex transition-transform duration-1000 cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-                <div v-for="(slide, index) in slides" :key="index" class="min-w-full h-full relative">
-                    <img :src="slide.image" :alt="slide.title"
-                        class="w-full h-full object-cover transform transition-transform duration-1000 hover:scale-105">
+            <Transition name="carousel" mode="out-in">
+                <div :key="currentSlide" class="absolute inset-0">
+                    <img :src="slides[currentSlide].image" :alt="slides[currentSlide].title"
+                        class="w-full h-full object-cover" />
                 </div>
-            </div>
+            </Transition>
 
             <!-- 多层遮罩效果 -->
             <div class="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-black/30" />
@@ -125,21 +124,20 @@ onUnmounted(() => {
 
             <!-- 轮播内容 -->
             <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center text-white px-4 max-w-xl transform transition-all duration-700 hover:scale-105"
-                    :style="{ opacity: slides[currentSlide] ? 1 : 0 }">
-                    <h2
-                        class="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg text-white transform transition-all duration-500">
-                        {{ slides[currentSlide]?.title }}
-                    </h2>
-                    <p
-                        class="text-base md:text-lg mb-6 drop-shadow text-gray-100 transform transition-all duration-500 delay-75">
-                        {{ slides[currentSlide]?.description }}
-                    </p>
-                    <Button size="default"
-                        class="btn-gradient-primary">
-                        {{ slides[currentSlide]?.action }}
-                    </Button>
-                </div>
+                <Transition name="text-carousel" mode="out-in">
+                    <div :key="currentSlide" class="text-center text-white px-4 max-w-xl hover:scale-105 transition-transform duration-700">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg text-white">
+                            {{ slides[currentSlide]?.title }}
+                        </h2>
+                        <p class="text-base md:text-lg mb-6 drop-shadow text-gray-100">
+                            {{ slides[currentSlide]?.description }}
+                        </p>
+                        <Button size="default"
+                            class="btn-gradient-primary">
+                            {{ slides[currentSlide]?.action }}
+                        </Button>
+                    </div>
+                </Transition>
             </div>
 
             <!-- 左侧控制按钮 -->
@@ -167,11 +165,33 @@ onUnmounted(() => {
                 class="absolute bottom-6 right-6 text-white text-sm font-medium bg-black/40 backdrop-blur-md px-3 py-1 rounded-full z-10">
                 {{ currentSlide + 1 }} / {{ slides.length }}
             </div>
-
-            <!-- 加载动画 -->
-            <div v-if="!slides[currentSlide]" class="absolute inset-0 flex items-center justify-center bg-gray-900">
-                <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
-            </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.carousel-enter-active,
+.carousel-leave-active {
+    transition: opacity 0.8s ease;
+}
+
+.carousel-enter-from,
+.carousel-leave-to {
+    opacity: 0;
+}
+
+.text-carousel-enter-active,
+.text-carousel-leave-active {
+    transition: all 0.6s ease;
+}
+
+.text-carousel-enter-from {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.text-carousel-leave-to {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+</style>
