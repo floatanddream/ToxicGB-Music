@@ -20,9 +20,6 @@ const firstRowSingers = ref<Singer[]>([
     { id: 10, name: '林忆莲', imageUrl: 'https://picsum.photos/96/76?random=29' },
     { id: 11, name: '王菲', imageUrl: 'https://picsum.photos/96/96?random=40' },
     { id: 12, name: '张学友', imageUrl: 'https://picsum.photos/96/88?random=41' },
-    { id: 13, name: '陈奕迅', imageUrl: 'https://picsum.photos/96/104?random=42' },
-    { id: 14, name: '刘德华', imageUrl: 'https://picsum.photos/96/92?random=43' },
-    { id: 15, name: '孙燕姿', imageUrl: 'https://picsum.photos/96/100?random=44' },
 ])
 
 const secondRowSingers = ref<Singer[]>([
@@ -38,9 +35,6 @@ const secondRowSingers = ref<Singer[]>([
     { id: 25, name: '莫文蔚', imageUrl: 'https://picsum.photos/96/88?random=54' },
     { id: 26, name: 'Shawn Mendes', imageUrl: 'https://picsum.photos/96/96?random=55' },
     { id: 27, name: '张杰', imageUrl: 'https://picsum.photos/96/80?random=56' },
-    { id: 28, name: 'Lizzo', imageUrl: 'https://picsum.photos/96/108?random=57' },
-    { id: 29, name: '邓丽君', imageUrl: 'https://picsum.photos/96/92?random=58' },
-    { id: 30, name: 'Sam Smith', imageUrl: 'https://picsum.photos/96/100?random=59' },
 ])
 
 //生成一个值区间为20-30vh的随机数
@@ -58,7 +52,7 @@ function getRamdonHeight() {
         <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
 
         <!-- 第一行 -->
-        <div class="grid grid-cols-15 gap-0 w-full items-end">
+        <div class="grid grid-cols-12 gap-0 w-full items-end">
             <div
                 :style="getRamdonHeight()"
                 class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
@@ -79,7 +73,7 @@ function getRamdonHeight() {
         </div>
 
         <!-- 第二行 -->
-        <div class="grid grid-cols-15 gap-0 w-full items-start mt-4">
+        <div class="grid grid-cols-12 gap-0 w-full items-start mt-4">
             <div
                 :style="getRamdonHeight()"
                 class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
