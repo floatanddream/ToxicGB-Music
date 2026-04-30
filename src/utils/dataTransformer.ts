@@ -49,7 +49,7 @@ export const transformToPlaylist = (rawPlaylist: any): MusicTypes.Playlist => {
     cover: rawPlaylist.coverImgUrl,
     songCount: String(rawPlaylist.trackCount),
     playCount: rawPlaylist.playCount, // 格式化播放量
-    likeCount: String(rawPlaylist.bookCount), // bookCount 对应收藏数
+    likeCount: String(rawPlaylist.bookCount | 0), // bookCount 对应收藏数
     isLiked: rawPlaylist.subscribed, // subscribed 是收藏状态
     description: rawPlaylist.description || '',
     updateTime: '', // API 未返回更新时间，需要额外获取
