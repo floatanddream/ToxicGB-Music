@@ -5,7 +5,7 @@ import ArtistHeader from './components/ArtistHeader.vue';
 import ArtistContent from './components/ArtistContent.vue';
 import type { ArtistData } from '@/types/artist';
 import type { Album, Song } from '@/types/musicTypes';
-import { getArtistTop50,getArtistDetail, getArtistAlbum } from '@/api/artistPage';
+import { getArtistTop50,getArtistDetail, getArtistAlbum } from '@/api/artist';
 import { transformAlbums, transformToSong } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
 import { EVENTS } from '@/constants/events';
