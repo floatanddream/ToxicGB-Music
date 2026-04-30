@@ -3,6 +3,8 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { X, ListMusic } from 'lucide-vue-next'
 import { usePlayerStore } from '@/stores/playerStore'
 import ArtistDivider from './musicComponents/artistDivider.vue';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 
 const props = defineProps<{
   visible: boolean
@@ -106,7 +108,8 @@ watch(() => props.visible, (newVal) => {
       <div class="playlist-spacer" :style="{ height: `${totalHeight}px` }">
         <div class="playlist-visible" :style="{ transform: `translateY(${offsetY}px)` }">
           <div v-for="song in visibleItems" :key="song.id" class="playlist-item"
-            :class="{ 'playlist-item-active': currentSong?.id === song.id }" @click="$emit('playSong', song)">
+            :class="{ 'playlist-item-active': currentSong?.id === song.id }" 
+            @dblclick="emitter.emit(EVENTS.SWITCH_SONG,song)">
             <img :src="song.cover" :alt="song.title" class="playlist-cover" />
             <div class="playlist-info">
               <span class="playlist-song-title">{{ song.title }}</span>

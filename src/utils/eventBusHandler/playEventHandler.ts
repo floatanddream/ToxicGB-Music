@@ -19,6 +19,11 @@ export function registerPlayEvents(player: playerStore) {
       const song = e as Song
       player.insertNextAndPlay(song)
     },
+
+    [EVENTS.SWITCH_SONG]: (e: unknown) => {
+      const song = e as Song
+      player.switchSong(song);
+    },
   }
 
   Object.entries(handlerMap).forEach(([event, handler]) => {

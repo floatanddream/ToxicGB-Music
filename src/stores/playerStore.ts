@@ -204,6 +204,13 @@ export const usePlayerStore = defineStore('player', () => {
     next();
   };
 
+  const switchSong = (song : Song) => {
+    const index = playlist.value.findIndex(s => s.id === song.id);
+    if (index !== -1) {
+      playByIndex(index);
+    };
+  };
+
   /* ---------------- 基础控制 ---------------- */
   const play = () => {
     player.play();
@@ -268,6 +275,7 @@ export const usePlayerStore = defineStore('player', () => {
     seek,
     setMode,
     setVolume,
+    switchSong,
   };
 });
 

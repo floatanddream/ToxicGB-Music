@@ -8,4 +8,5 @@ export const EVENTS = {
   PLAY_ALL: 'play-all',
   INSERT_NEXT: 'insert-next',
   INSERT_AND_PLAY: 'insert-and-play',
+  SWITCH_SONG: 'switch-song',
 }
