@@ -2,6 +2,7 @@ import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import type { Router } from 'vue-router'
 import type { Album, Artist, Playlist } from '@/types/musicTypes'
+import type { User } from '@/types/user'
 
 export function registerClickEvents(router: Router) {
   const handlerMap: Record<string, (event: unknown) => void> = {
@@ -26,6 +27,14 @@ export function registerClickEvents(router: Router) {
       router.push({
         name: 'album',
         query: { id:  album.id  },
+      })
+    },
+
+    [EVENTS.USER_CLICK]: (e: unknown) => {
+      const user = e as User
+      router.push({
+        name: 'user',
+        query: { id: user.id },
       })
     },
 

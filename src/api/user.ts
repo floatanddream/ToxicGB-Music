@@ -4,6 +4,10 @@ export async function getUserFromCookie() {
   return await request.post(`/user/account`,{sendCookie:true})
 }
 
+export async function getUser(uid: number|string) {
+  return await request.post(`/user/detail?uid=${uid}`,{sendCookie:true})
+}
+
 export async function fetchUserPlaylist(uid: number|string) {
   return await request.get(`/user/playlist?uid=${uid}`,{sendCookie:true})
 }
