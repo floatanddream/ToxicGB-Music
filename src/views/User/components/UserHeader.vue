@@ -92,7 +92,7 @@ const isOwnProfile = computed(() => {
   top: 0;
   left: 0;
   right: 0;
-  height: 320px;
+  /* height: 320px; */
 }
 
 @media (max-width: 768px) {
