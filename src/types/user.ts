@@ -47,6 +47,8 @@ export interface User {
     userType: number;
     experts: string | null;
     avatarDetail: AvatarDetail;
+    followeds: number,
+    follows: number,
 }
 export interface Account {
   //生成

@@ -54,18 +54,18 @@ const isOwnProfile = computed(() => {
           </div>
 
           <!-- 统计数据 -->
-          <div class="flex flex-wrap gap-4 md:gap-6 justify-center md:justify-start mb-6">
+          <div class="flex flex-wrap gap-4 md:gap-6 justify-center md:justify-start mb-20">
             <div class="flex items-center gap-2 text-sm">
               <User class="w-4 h-4" />
               <span>动态</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
               <Music2 class="w-4 h-4" />
-              <span>关注</span>
+              <span>关注 {{ user.follows }}</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
               <Disc class="w-4 h-4" />
-              <span>粉丝</span>
+              <span>粉丝 {{ user.followeds }}</span>
             </div>
           </div>
 
