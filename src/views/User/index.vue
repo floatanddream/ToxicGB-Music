@@ -27,49 +27,7 @@ const fetchUserData = async () => {
     const userRes = await getUser(userIdToFetch);
     const userInfo = userRes.profile;
     if (userInfo) {
-      userData.value = {
-        id: String(userInfo.userId),
-        username: userInfo.nickname,
-        avatar: userInfo.avatarUrl,
-        email: '',
-        role: '',
-        backgroundUrl: userInfo.backgroundUrl,
-        birthday: userInfo.birthday,
-        detailDescription: userInfo.detailDescription,
-        authenticated: !!userInfo.authenticated,
-        gender: userInfo.gender,
-        city: userInfo.city,
-        signature: userInfo.signature,
-        description: userInfo.description,
-        remarkName: userInfo.remarkName,
-        shortUserName: userInfo.shortUserName,
-        accountStatus: userInfo.accountStatus,
-        locationStatus: userInfo.locationStatus,
-        avatarImgId: userInfo.avatarImgId,
-        defaultAvatar: userInfo.defaultAvatar,
-        province: userInfo.province,
-        nickname: userInfo.nickname,
-        expertTags: userInfo.expertTags,
-        djStatus: userInfo.djStatus,
-        avatarUrl: userInfo.avatarUrl,
-        accountType: userInfo.accountType,
-        authStatus: userInfo.authStatus,
-        vipType: userInfo.vipType,
-        userName: userInfo.userName,
-        followed: userInfo.followed,
-        userId: userInfo.userId,
-        lastLoginIP: userInfo.lastLoginIP,
-        lastLoginTime: userInfo.lastLoginTime,
-        authenticationTypes: userInfo.authenticationTypes,
-        mutual: userInfo.mutual,
-        createTime: userInfo.createTime,
-        anchor: userInfo.anchor,
-        authority: userInfo.authority,
-        backgroundImgId: userInfo.backgroundImgId,
-        userType: userInfo.userType,
-        experts: userInfo.experts,
-        avatarDetail: userInfo.avatarDetail
-      };
+      userData.value = userInfo as User;
     }
 
     // 获取用户歌单
@@ -77,10 +35,6 @@ const fetchUserData = async () => {
     if (uid) {
       const playlistRes = await fetchUserPlaylist(uid);
       const allPlaylists = playlistRes.playlist || [];
-      // 分离创建的歌单和收藏的歌单
-      const createdPlaylists = allPlaylists.filter((p: any) => p.userId === uid);
-      const subscribedPlaylists = allPlaylists.filter((p: any) => p.userId !== uid);
-      // 合并显示，优先显示创建的歌单
       playlists.value = allPlaylists.map(transformToPlaylist);
     }
   } catch (error) {

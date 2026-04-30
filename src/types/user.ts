@@ -10,6 +10,7 @@ export interface UserInfo {
 
 // 用户信息
 export interface User {
+    id : number | string;
     backgroundUrl: string;
     birthday: number;
     detailDescription: string;
