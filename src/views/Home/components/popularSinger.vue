@@ -5,54 +5,51 @@ interface Singer {
     name: string;
     imageUrl: string;
     id: number;
+    height: string;
 }
 
 const singers = ref<Singer[]>([
-    { id: 1, name: 'Taylor', imageUrl: 'https://picsum.photos/96/96?random=20' },
-    { id: 2, name: '周杰伦', imageUrl: 'https://picsum.photos/96/80?random=21' },
-    { id: 3, name: 'Adele', imageUrl: 'https://picsum.photos/96/112?random=22' },
-    { id: 4, name: 'Bruno', imageUrl: 'https://picsum.photos/96/88?random=23' },
-    { id: 5, name: '林俊杰', imageUrl: 'https://picsum.photos/96/104?random=24' },
-    { id: 6, name: '邓紫棋', imageUrl: 'https://picsum.photos/96/92?random=25' },
-    { id: 7, name: 'Ed Sheeran', imageUrl: 'https://picsum.photos/96/100?random=26' },
-    { id: 8, name: '蔡依林', imageUrl: 'https://picsum.photos/96/84?random=27' },
-    { id: 9, name: 'Rihanna', imageUrl: 'https://picsum.photos/96/108?random=28' },
-    { id: 10, name: '林忆莲', imageUrl: 'https://picsum.photos/96/76?random=29' },
-    { id: 11, name: '王菲', imageUrl: 'https://picsum.photos/96/96?random=40' },
-    { id: 12, name: '张学友', imageUrl: 'https://picsum.photos/96/88?random=41' },
-    { id: 16, name: 'Ariana', imageUrl: 'https://picsum.photos/96/80?random=45' },
-    { id: 17, name: '李荣浩', imageUrl: 'https://picsum.photos/96/96?random=46' },
-    { id: 18, name: 'Dua Lipa', imageUrl: 'https://picsum.photos/96/108?random=47' },
-    { id: 19, name: '薛之谦', imageUrl: 'https://picsum.photos/96/84?random=48' },
-    { id: 20, name: 'Billie Eilish', imageUrl: 'https://picsum.photos/96/92?random=49' },
-    { id: 21, name: '张惠妹', imageUrl: 'https://picsum.photos/96/100?random=50' },
-    { id: 22, name: 'The Weeknd', imageUrl: 'https://picsum.photos/96/112?random=51' },
-    { id: 23, name: '田馥甄', imageUrl: 'https://picsum.photos/96/76?random=52' },
-    { id: 24, name: 'Post Malone', imageUrl: 'https://picsum.photos/96/104?random=53' },
-    { id: 25, name: '莫文蔚', imageUrl: 'https://picsum.photos/96/88?random=54' },
-    { id: 26, name: 'Shawn Mendes', imageUrl: 'https://picsum.photos/96/96?random=55' },
-    { id: 27, name: '张杰', imageUrl: 'https://picsum.photos/96/80?random=56' },
-    { id: 28, name: 'Coldplay', imageUrl: 'https://picsum.photos/96/96?random=57' },
-    { id: 29, name: '陈奕迅', imageUrl: 'https://picsum.photos/96/84?random=58' },
-    { id: 30, name: 'Maroon 5', imageUrl: 'https://picsum.photos/96/100?random=59' },
-    { id: 31, name: '李宇春', imageUrl: 'https://picsum.photos/96/92?random=60' },
-    { id: 32, name: 'Justin Bieber', imageUrl: 'https://picsum.photos/96/108?random=61' },
-    { id: 33, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/76?random=62' },
-    { id: 34, name: 'G.E.M.邓紫棋', imageUrl: 'https://picsum.photos/96/96?random=63' },
-    { id: 35, name: 'Adele', imageUrl: 'https://picsum.photos/96/88?random=64' },
-    { id: 36, name: 'Bruno Mars', imageUrl: 'https://picsum.photos/96/80?random=65' },
-    { id: 37, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/96?random=66' },
-    { id: 38, name: '周杰伦', imageUrl: 'https://picsum.photos/96/84?random=67' },
-    { id: 39, name: '张学友', imageUrl: 'https://picsum.photos/96/100?random=68' },
+    { id: 1, name: 'Taylor', imageUrl: 'https://picsum.photos/96/96?random=20', height: '80px' },
+    { id: 2, name: '周杰伦', imageUrl: 'https://picsum.photos/96/80?random=21', height: '65px' },
+    { id: 3, name: 'Adele', imageUrl: 'https://picsum.photos/96/112?random=22', height: '95px' },
+    { id: 4, name: 'Bruno', imageUrl: 'https://picsum.photos/96/88?random=23', height: '72px' },
+    { id: 5, name: '林俊杰', imageUrl: 'https://picsum.photos/96/104?random=24', height: '88px' },
+    { id: 6, name: '邓紫棋', imageUrl: 'https://picsum.photos/96/92?random=25', height: '76px' },
+    { id: 7, name: 'Ed Sheeran', imageUrl: 'https://picsum.photos/96/100?random=26', height: '84px' },
+    { id: 8, name: '蔡依林', imageUrl: 'https://picsum.photos/96/84?random=27', height: '68px' },
+    { id: 9, name: 'Rihanna', imageUrl: 'https://picsum.photos/96/108?random=28', height: '92px' },
+    { id: 10, name: '林忆莲', imageUrl: 'https://picsum.photos/96/76?random=29', height: '62px' },
+    { id: 11, name: '王菲', imageUrl: 'https://picsum.photos/96/96?random=40', height: '80px' },
+    { id: 12, name: '张学友', imageUrl: 'https://picsum.photos/96/88?random=41', height: '72px' },
+    { id: 16, name: 'Ariana', imageUrl: 'https://picsum.photos/96/80?random=45', height: '65px' },
+    { id: 17, name: '李荣浩', imageUrl: 'https://picsum.photos/96/96?random=46', height: '80px' },
+    { id: 18, name: 'Dua Lipa', imageUrl: 'https://picsum.photos/96/108?random=47', height: '92px' },
+    { id: 19, name: '薛之谦', imageUrl: 'https://picsum.photos/96/84?random=48', height: '68px' },
+    { id: 20, name: 'Billie Eilish', imageUrl: 'https://picsum.photos/96/92?random=49', height: '76px' },
+    { id: 21, name: '张惠妹', imageUrl: 'https://picsum.photos/96/100?random=50', height: '84px' },
+    { id: 22, name: 'The Weeknd', imageUrl: 'https://picsum.photos/96/112?random=51', height: '95px' },
+    { id: 23, name: '田馥甄', imageUrl: 'https://picsum.photos/96/76?random=52', height: '62px' },
+    { id: 24, name: 'Post Malone', imageUrl: 'https://picsum.photos/96/104?random=53', height: '88px' },
+    { id: 25, name: '莫文蔚', imageUrl: 'https://picsum.photos/96/88?random=54', height: '72px' },
+    { id: 26, name: 'Shawn Mendes', imageUrl: 'https://picsum.photos/96/96?random=55', height: '80px' },
+    { id: 27, name: '张杰', imageUrl: 'https://picsum.photos/96/80?random=56', height: '65px' },
+    { id: 28, name: 'Coldplay', imageUrl: 'https://picsum.photos/96/96?random=57', height: '80px' },
+    { id: 29, name: '陈奕迅', imageUrl: 'https://picsum.photos/96/84?random=58', height: '68px' },
+    { id: 30, name: 'Maroon 5', imageUrl: 'https://picsum.photos/96/100?random=59', height: '84px' },
+    { id: 31, name: '李宇春', imageUrl: 'https://picsum.photos/96/92?random=60', height: '76px' },
+    { id: 32, name: 'Justin Bieber', imageUrl: 'https://picsum.photos/96/108?random=61', height: '92px' },
+    { id: 33, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/76?random=62', height: '62px' },
+    { id: 34, name: 'G.E.M.邓紫棋', imageUrl: 'https://picsum.photos/96/96?random=63', height: '80px' },
+    { id: 35, name: 'Adele', imageUrl: 'https://picsum.photos/96/88?random=64', height: '72px' },
+    { id: 36, name: 'Bruno Mars', imageUrl: 'https://picsum.photos/96/80?random=65', height: '65px' },
+    { id: 37, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/96?random=66', height: '80px' },
+    { id: 38, name: '周杰伦', imageUrl: 'https://picsum.photos/96/84?random=67', height: '68px' },
+    { id: 39, name: '张学友', imageUrl: 'https://picsum.photos/96/100?random=68', height: '84px' },
 ])
 
 // 分成两行显示
 const firstRowSingers = computed(() => singers.value.slice(0, 16))
 const secondRowSingers = computed(() => singers.value.slice(16))
-
-function getRandomHeight() {
-    return Math.floor(Math.random() * (50 + 1)) + 50 + 'px'
-}
 </script>
 
 <template>
@@ -61,8 +58,8 @@ function getRandomHeight() {
 
         <!-- 第一行 - 向左滚动 -->
         <div class="mb-4 relative" style="overflow: hidden;">
-            <div class="scroll-track" style="animation: scroll-left 10s linear infinite;">
-                <div v-for="singer in firstRowSingers" :key="'row1-' + singer.id" :style="{ height: getRandomHeight() }"
+            <div class="scroll-track" style="animation: scroll-left 120s linear 0s infinite ;">
+                <div v-for="singer in firstRowSingers" :key="'row1-' + singer.id" :style="{ height: singer.height }"
                     class="singer-item">
                     <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
                     <div class="singer-overlay">
@@ -72,8 +69,8 @@ function getRandomHeight() {
                     </div>
                 </div>
                 <!-- 重复数据实现无缝循环 -->
-                <div v-for="singer in firstRowSingers" :key="'row1-dup-' + singer.id"
-                    :style="{ height: getRandomHeight() }" class="singer-item">
+                <div v-for="singer in firstRowSingers" :key="'row1-dup-' + singer.id" :style="{ height: singer.height }"
+                    class="singer-item">
                     <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
                     <div class="singer-overlay">
                         <div class="singer-name">
@@ -86,9 +83,9 @@ function getRandomHeight() {
 
         <!-- 第二行 - 向右滚动 -->
         <div class="relative" style="overflow: hidden;">
-            <div class="scroll-track-right" style="animation: scroll-left 10s linear infinite; animation-delay: -5s;">
-                <div v-for="singer in secondRowSingers" :key="'row2-' + singer.id"
-                    :style="{ height: getRandomHeight() }" class="singer-item">
+            <div class="scroll-track-right" style="animation: scroll-right 120s linear 0s infinite ;">
+                <div v-for="singer in secondRowSingers" :key="'row2-' + singer.id" :style="{ height: singer.height }"
+                    class="singer-item">
                     <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
                     <div class="singer-overlay">
                         <div class="singer-name">
@@ -98,7 +95,7 @@ function getRandomHeight() {
                 </div>
                 <!-- 重复数据实现无缝循环 -->
                 <div v-for="singer in secondRowSingers" :key="'row2-dup-' + singer.id"
-                    :style="{ height: getRandomHeight() }" class="singer-item">
+                    :style="{ height: singer.height }" class="singer-item">
                     <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
                     <div class="singer-overlay">
                         <div class="singer-name">
@@ -167,7 +164,7 @@ function getRandomHeight() {
 .singer-item {
     flex-shrink: 0;
     width: 96px;
-    margin-right: 8px;
+
     position: relative;
     overflow: hidden;
     border-radius: 0.5rem;
