@@ -36,7 +36,6 @@ import MusicRankingList from './components/musicRankingList.vue';
 
 <style scoped>
 .home {
-  max-width: 1200px;
   margin: 0 auto;
 }
 

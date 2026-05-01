@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 interface Singer {
     name: string;
@@ -7,7 +7,7 @@ interface Singer {
     id: number;
 }
 
-const firstRowSingers = ref<Singer[]>([
+const singers = ref<Singer[]>([
     { id: 1, name: 'Taylor', imageUrl: 'https://picsum.photos/96/96?random=20' },
     { id: 2, name: '周杰伦', imageUrl: 'https://picsum.photos/96/80?random=21' },
     { id: 3, name: 'Adele', imageUrl: 'https://picsum.photos/96/112?random=22' },
@@ -20,9 +20,6 @@ const firstRowSingers = ref<Singer[]>([
     { id: 10, name: '林忆莲', imageUrl: 'https://picsum.photos/96/76?random=29' },
     { id: 11, name: '王菲', imageUrl: 'https://picsum.photos/96/96?random=40' },
     { id: 12, name: '张学友', imageUrl: 'https://picsum.photos/96/88?random=41' },
-])
-
-const secondRowSingers = ref<Singer[]>([
     { id: 16, name: 'Ariana', imageUrl: 'https://picsum.photos/96/80?random=45' },
     { id: 17, name: '李荣浩', imageUrl: 'https://picsum.photos/96/96?random=46' },
     { id: 18, name: 'Dua Lipa', imageUrl: 'https://picsum.photos/96/108?random=47' },
@@ -35,59 +32,78 @@ const secondRowSingers = ref<Singer[]>([
     { id: 25, name: '莫文蔚', imageUrl: 'https://picsum.photos/96/88?random=54' },
     { id: 26, name: 'Shawn Mendes', imageUrl: 'https://picsum.photos/96/96?random=55' },
     { id: 27, name: '张杰', imageUrl: 'https://picsum.photos/96/80?random=56' },
+    { id: 28, name: 'Coldplay', imageUrl: 'https://picsum.photos/96/96?random=57' },
+    { id: 29, name: '陈奕迅', imageUrl: 'https://picsum.photos/96/84?random=58' },
+    { id: 30, name: 'Maroon 5', imageUrl: 'https://picsum.photos/96/100?random=59' },
+    { id: 31, name: '李宇春', imageUrl: 'https://picsum.photos/96/92?random=60' },
+    { id: 32, name: 'Justin Bieber', imageUrl: 'https://picsum.photos/96/108?random=61' },
+    { id: 33, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/76?random=62' },
+    { id: 34, name: 'G.E.M.邓紫棋', imageUrl: 'https://picsum.photos/96/96?random=63' },
+    { id: 35, name: 'Adele', imageUrl: 'https://picsum.photos/96/88?random=64' },
+    { id: 36, name: 'Bruno Mars', imageUrl: 'https://picsum.photos/96/80?random=65' },
+    { id: 37, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/96?random=66' },
+    { id: 38, name: '周杰伦', imageUrl: 'https://picsum.photos/96/84?random=67' },
+    { id: 39, name: '张学友', imageUrl: 'https://picsum.photos/96/100?random=68' },
 ])
 
-//生成一个值区间为20-30vh的随机数
-function getRamdonHeight() {
-    return {
-        height: Math.floor(Math.random() * (50 + 1)) + 50 + 'px'
-    }
+// 分成两行显示
+const firstRowSingers = computed(() => singers.value.slice(0, 16))
+const secondRowSingers = computed(() => singers.value.slice(16))
+
+function getRandomHeight() {
+    return Math.floor(Math.random() * (50 + 1)) + 50 + 'px'
 }
-
-
 </script>
 
 <template>
-    <div class="mt-8 opacity-90">
+    <div class="mt-8 opacity-90 -m-5">
         <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
 
-        <!-- 第一行 -->
-        <div class="grid grid-cols-12 gap-0 w-full items-end">
-            <div
-                :style="getRamdonHeight()"
-                class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-                v-for="singer in firstRowSingers"
-                :key="singer.id"
-            >
-                <img
-                    :src="singer.imageUrl"
-                    :alt="singer.name"
-                    class="w-full h-full object-cover singer-image"
-                >
-                <div class="singer-overlay">
-                    <div class="singer-name">
-                        <p>{{ singer.name }}</p>
+        <!-- 第一行 - 向左滚动 -->
+        <div class="mb-4 relative" style="overflow: hidden;">
+            <div class="scroll-track" style="animation: scroll-left 10s linear infinite;">
+                <div v-for="singer in firstRowSingers" :key="'row1-' + singer.id" :style="{ height: getRandomHeight() }"
+                    class="singer-item">
+                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
+                    <div class="singer-overlay">
+                        <div class="singer-name">
+                            <p>{{ singer.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 重复数据实现无缝循环 -->
+                <div v-for="singer in firstRowSingers" :key="'row1-dup-' + singer.id"
+                    :style="{ height: getRandomHeight() }" class="singer-item">
+                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
+                    <div class="singer-overlay">
+                        <div class="singer-name">
+                            <p>{{ singer.name }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 第二行 -->
-        <div class="grid grid-cols-12 gap-0 w-full items-start mt-4">
-            <div
-                :style="getRamdonHeight()"
-                class="mt-auto group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-                v-for="singer in secondRowSingers"
-                :key="singer.id"
-            >
-                <img
-                    :src="singer.imageUrl"
-                    :alt="singer.name"
-                    class="w-full h-full object-cover singer-image"
-                >
-                <div class="singer-overlay">
-                    <div class="singer-name">
-                        <p>{{ singer.name }}</p>
+        <!-- 第二行 - 向右滚动 -->
+        <div class="relative" style="overflow: hidden;">
+            <div class="scroll-track-right" style="animation: scroll-left 10s linear infinite; animation-delay: -5s;">
+                <div v-for="singer in secondRowSingers" :key="'row2-' + singer.id"
+                    :style="{ height: getRandomHeight() }" class="singer-item">
+                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
+                    <div class="singer-overlay">
+                        <div class="singer-name">
+                            <p>{{ singer.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 重复数据实现无缝循环 -->
+                <div v-for="singer in secondRowSingers" :key="'row2-dup-' + singer.id"
+                    :style="{ height: getRandomHeight() }" class="singer-item">
+                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
+                    <div class="singer-overlay">
+                        <div class="singer-name">
+                            <p>{{ singer.name }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -95,14 +111,82 @@ function getRamdonHeight() {
     </div>
 </template>
 
+<style>
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes scroll-right {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes scroll-right-opposite {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+</style>
+
 <style scoped>
+.scroll-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+}
+
+.scroll-track:hover {
+    animation-play-state: paused;
+}
+
+.scroll-track-right {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+}
+
+.scroll-track-right:hover {
+    animation-play-state: paused;
+}
+
+.singer-item {
+    flex-shrink: 0;
+    width: 96px;
+    margin-right: 8px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    transition: box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.singer-item:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+}
+
 .singer-image {
     transition: all 0.7s ease-out;
     transform: scale(1);
     filter: brightness(100%);
 }
 
-.group:hover .singer-image {
+.singer-item:hover .singer-image {
     transform: scale(1.1);
     filter: brightness(110%);
 }
@@ -118,7 +202,7 @@ function getRamdonHeight() {
     -webkit-backdrop-filter: blur(0px);
 }
 
-.group:hover .singer-overlay {
+.singer-item:hover .singer-overlay {
     opacity: 1;
     transform: translateY(0);
     backdrop-filter: blur(2px);
@@ -138,7 +222,7 @@ function getRamdonHeight() {
     transition: all 0.3s ease-out;
 }
 
-.group:hover .singer-name {
+.singer-item:hover .singer-name {
     transform: translateY(0);
     opacity: 1;
 }
