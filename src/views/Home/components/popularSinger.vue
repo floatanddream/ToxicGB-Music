@@ -1,226 +1,256 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { getHotArtists } from '@/api/artist'
+import { EVENTS } from '@/constants/events'
+import emitter from '@/utils/eventBus'
+import { ref, computed, onMounted } from 'vue'
 
 interface Singer {
-    name: string;
-    imageUrl: string;
-    id: number;
-    height: string;
+  name: string
+  imageUrl: string
+  id: number
+  height: string
 }
 
-const singers = ref<Singer[]>([
-    { id: 1, name: 'Taylor', imageUrl: 'https://picsum.photos/96/96?random=20', height: '80px' },
-    { id: 2, name: '周杰伦', imageUrl: 'https://picsum.photos/96/80?random=21', height: '65px' },
-    { id: 3, name: 'Adele', imageUrl: 'https://picsum.photos/96/112?random=22', height: '95px' },
-    { id: 4, name: 'Bruno', imageUrl: 'https://picsum.photos/96/88?random=23', height: '72px' },
-    { id: 5, name: '林俊杰', imageUrl: 'https://picsum.photos/96/104?random=24', height: '88px' },
-    { id: 6, name: '邓紫棋', imageUrl: 'https://picsum.photos/96/92?random=25', height: '76px' },
-    { id: 7, name: 'Ed Sheeran', imageUrl: 'https://picsum.photos/96/100?random=26', height: '84px' },
-    { id: 8, name: '蔡依林', imageUrl: 'https://picsum.photos/96/84?random=27', height: '68px' },
-    { id: 9, name: 'Rihanna', imageUrl: 'https://picsum.photos/96/108?random=28', height: '92px' },
-    { id: 10, name: '林忆莲', imageUrl: 'https://picsum.photos/96/76?random=29', height: '62px' },
-    { id: 11, name: '王菲', imageUrl: 'https://picsum.photos/96/96?random=40', height: '80px' },
-    { id: 12, name: '张学友', imageUrl: 'https://picsum.photos/96/88?random=41', height: '72px' },
-    { id: 16, name: 'Ariana', imageUrl: 'https://picsum.photos/96/80?random=45', height: '65px' },
-    { id: 17, name: '李荣浩', imageUrl: 'https://picsum.photos/96/96?random=46', height: '80px' },
-    { id: 18, name: 'Dua Lipa', imageUrl: 'https://picsum.photos/96/108?random=47', height: '92px' },
-    { id: 19, name: '薛之谦', imageUrl: 'https://picsum.photos/96/84?random=48', height: '68px' },
-    { id: 20, name: 'Billie Eilish', imageUrl: 'https://picsum.photos/96/92?random=49', height: '76px' },
-    { id: 21, name: '张惠妹', imageUrl: 'https://picsum.photos/96/100?random=50', height: '84px' },
-    { id: 22, name: 'The Weeknd', imageUrl: 'https://picsum.photos/96/112?random=51', height: '95px' },
-    { id: 23, name: '田馥甄', imageUrl: 'https://picsum.photos/96/76?random=52', height: '62px' },
-    { id: 24, name: 'Post Malone', imageUrl: 'https://picsum.photos/96/104?random=53', height: '88px' },
-    { id: 25, name: '莫文蔚', imageUrl: 'https://picsum.photos/96/88?random=54', height: '72px' },
-    { id: 26, name: 'Shawn Mendes', imageUrl: 'https://picsum.photos/96/96?random=55', height: '80px' },
-    { id: 27, name: '张杰', imageUrl: 'https://picsum.photos/96/80?random=56', height: '65px' },
-    { id: 28, name: 'Coldplay', imageUrl: 'https://picsum.photos/96/96?random=57', height: '80px' },
-    { id: 29, name: '陈奕迅', imageUrl: 'https://picsum.photos/96/84?random=58', height: '68px' },
-    { id: 30, name: 'Maroon 5', imageUrl: 'https://picsum.photos/96/100?random=59', height: '84px' },
-    { id: 31, name: '李宇春', imageUrl: 'https://picsum.photos/96/92?random=60', height: '76px' },
-    { id: 32, name: 'Justin Bieber', imageUrl: 'https://picsum.photos/96/108?random=61', height: '92px' },
-    { id: 33, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/76?random=62', height: '62px' },
-    { id: 34, name: 'G.E.M.邓紫棋', imageUrl: 'https://picsum.photos/96/96?random=63', height: '80px' },
-    { id: 35, name: 'Adele', imageUrl: 'https://picsum.photos/96/88?random=64', height: '72px' },
-    { id: 36, name: 'Bruno Mars', imageUrl: 'https://picsum.photos/96/80?random=65', height: '65px' },
-    { id: 37, name: 'Taylor Swift', imageUrl: 'https://picsum.photos/96/96?random=66', height: '80px' },
-    { id: 38, name: '周杰伦', imageUrl: 'https://picsum.photos/96/84?random=67', height: '68px' },
-    { id: 39, name: '张学友', imageUrl: 'https://picsum.photos/96/100?random=68', height: '84px' },
-])
+// 生成值为70-100的随机数
+const generateRandomHeight = () => {
+  return Math.floor(Math.random() * 31) + 70 + 'px'
+}
+
+const getTopSingers = async () => {
+  const res = await getHotArtists()
+  singers.value = res.artists.map((artist: any) => ({
+    name: artist.name,
+    imageUrl: `${artist.picUrl}?param=128y128`,
+    id: artist.id,
+    height: generateRandomHeight(),
+  }))
+}
+
+const handleArtistClick = (artist: Singer) => {
+  emitter.emit(EVENTS.ARTIST_CLICK, artist)
+}
+
+const singers = ref<Singer[]>([])
 
 // 分成两行显示
-const firstRowSingers = computed(() => singers.value.slice(0, 16))
-const secondRowSingers = computed(() => singers.value.slice(16))
+const firstRowSingers = computed(() => singers.value.slice(0, 15))
+const secondRowSingers = computed(() => singers.value.slice(15, 35))
+
+onMounted(() => {
+  getTopSingers()
+})
 </script>
 
 <template>
-    <div class="mt-8 opacity-90 -m-5">
-        <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
+  <div class="mt-8 opacity-90 -m-5">
+    <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
 
-        <!-- 第一行 - 向左滚动 -->
-        <div class="mb-4 relative" style="overflow: hidden;">
-            <div class="scroll-track" style="animation: scroll-left 120s linear 0s infinite ;">
-                <div v-for="singer in firstRowSingers" :key="'row1-' + singer.id" :style="{ height: singer.height }"
-                    class="singer-item">
-                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
-                    <div class="singer-overlay">
-                        <div class="singer-name">
-                            <p>{{ singer.name }}</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- 重复数据实现无缝循环 -->
-                <div v-for="singer in firstRowSingers" :key="'row1-dup-' + singer.id" :style="{ height: singer.height }"
-                    class="singer-item">
-                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
-                    <div class="singer-overlay">
-                        <div class="singer-name">
-                            <p>{{ singer.name }}</p>
-                        </div>
-                    </div>
-                </div>
+    <!-- 第一行 - 向左滚动 -->
+    <div class="mb-4 relative" style="overflow: hidden">
+      <div class="scroll-track" style="animation: scroll-left 120s linear 0s infinite">
+        <div
+          v-for="singer in firstRowSingers"
+          :key="'row1-' + singer.id"
+          :style="{ height: singer.height }"
+          class="singer-item"
+          @click="handleArtistClick(singer)"
+        >
+          <img
+            :src="singer.imageUrl"
+            :alt="singer.name"
+            class="w-full h-full object-cover singer-image"
+          />
+          <div class="singer-overlay">
+            <div class="singer-name">
+              <p>{{ singer.name }}</p>
             </div>
+          </div>
         </div>
-
-        <!-- 第二行 - 向右滚动 -->
-        <div class="relative" style="overflow: hidden;">
-            <div class="scroll-track-right" style="animation: scroll-right 120s linear 0s infinite ;">
-                <div v-for="singer in secondRowSingers" :key="'row2-' + singer.id" :style="{ height: singer.height }"
-                    class="singer-item">
-                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
-                    <div class="singer-overlay">
-                        <div class="singer-name">
-                            <p>{{ singer.name }}</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- 重复数据实现无缝循环 -->
-                <div v-for="singer in secondRowSingers" :key="'row2-dup-' + singer.id"
-                    :style="{ height: singer.height }" class="singer-item">
-                    <img :src="singer.imageUrl" :alt="singer.name" class="w-full h-full object-cover singer-image">
-                    <div class="singer-overlay">
-                        <div class="singer-name">
-                            <p>{{ singer.name }}</p>
-                        </div>
-                    </div>
-                </div>
+        <!-- 重复数据实现无缝循环 -->
+        <div
+          v-for="singer in firstRowSingers"
+          :key="'row1-dup-' + singer.id"
+          :style="{ height: singer.height }"
+          class="singer-item"
+          @click="handleArtistClick(singer)"
+        >
+          <img
+            :src="singer.imageUrl"
+            :alt="singer.name"
+            class="w-full h-full object-cover singer-image"
+          />
+          <div class="singer-overlay">
+            <div class="singer-name">
+              <p>{{ singer.name }}</p>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+
+    <!-- 第二行 - 向右滚动 -->
+    <div class="relative" style="overflow: hidden">
+      <div class="scroll-track-right" style="animation: scroll-right 120s linear 0s infinite">
+        <div
+          v-for="singer in secondRowSingers"
+          :key="'row2-' + singer.id"
+          :style="{ height: singer.height }"
+          class="singer-item"
+          @click="handleArtistClick(singer)"
+        >
+          <img
+            :src="singer.imageUrl"
+            :alt="singer.name"
+            class="w-full h-full object-cover singer-image"
+          />
+          <div class="singer-overlay">
+            <div class="singer-name">
+              <p>{{ singer.name }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- 重复数据实现无缝循环 -->
+        <div
+          v-for="singer in secondRowSingers"
+          :key="'row2-dup-' + singer.id"
+          :style="{ height: singer.height }"
+          class="singer-item"
+          @click="handleArtistClick(singer)"
+        >
+          <img
+            :src="singer.imageUrl"
+            :alt="singer.name"
+            class="w-full h-full object-cover singer-image"
+          />
+          <div class="singer-overlay">
+            <div class="singer-name">
+              <p>{{ singer.name }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style>
 @keyframes scroll-left {
-    0% {
-        transform: translateX(0);
-    }
+  0% {
+    transform: translateX(0);
+  }
 
-    100% {
-        transform: translateX(-50%);
-    }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 @keyframes scroll-right {
-    0% {
-        transform: translateX(-50%);
-    }
+  0% {
+    transform: translateX(-50%);
+  }
 
-    100% {
-        transform: translateX(0);
-    }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @keyframes scroll-right-opposite {
-    0% {
-        transform: translateX(-50%);
-    }
+  0% {
+    transform: translateX(-50%);
+  }
 
-    100% {
-        transform: translateX(0);
-    }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>
 
 <style scoped>
 .scroll-track {
-    display: flex;
-    width: max-content;
-    will-change: transform;
+  display: flex;
+  width: max-content;
+  will-change: transform;
 }
 
 .scroll-track:hover {
-    animation-play-state: paused;
+  animation-play-state: paused;
 }
 
 .scroll-track-right {
-    display: flex;
-    width: max-content;
-    will-change: transform;
+  display: flex;
+  width: max-content;
+  will-change: transform;
 }
 
 .scroll-track-right:hover {
-    animation-play-state: paused;
+  animation-play-state: paused;
 }
 
 .singer-item {
-    flex-shrink: 0;
-    width: 96px;
+  flex-shrink: 0;
+  width: 96px;
 
-    position: relative;
-    overflow: hidden;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    transition: box-shadow 0.3s;
-    cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  transition: box-shadow 0.3s;
+  cursor: pointer;
 }
 
 .singer-item:hover {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
 }
 
 .singer-image {
-    transition: all 0.7s ease-out;
-    transform: scale(1);
-    filter: brightness(100%);
+  transition: all 0.7s ease-out;
+  transform: scale(1);
+  filter: brightness(100%);
 }
 
 .singer-item:hover .singer-image {
-    transform: scale(1.1);
-    filter: brightness(110%);
+  transform: scale(1.1);
+  filter: brightness(110%);
 }
 
 .singer-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
-    transition: all 0.5s ease-out;
-    opacity: 0;
-    transform: translateY(20px);
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    transparent 100%
+  );
+  transition: all 0.5s ease-out;
+  opacity: 0;
+  transform: translateY(20px);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 
 .singer-item:hover .singer-overlay {
-    opacity: 1;
-    transform: translateY(0);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+  opacity: 1;
+  transform: translateY(0);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .singer-name {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    color: white;
-    font-size: 0.875rem;
-    font-weight: 500;
-    drop-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    transform: translateY(20px);
-    opacity: 0;
-    transition: all 0.3s ease-out;
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  drop-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s ease-out;
 }
 
 .singer-item:hover .singer-name {
-    transform: translateY(0);
-    opacity: 1;
+  transform: translateY(0);
+  opacity: 1;
 }
 </style>
