@@ -49,7 +49,7 @@ onMounted(() => {
     <div class="relative" style="overflow: hidden">
       <div
         class="scroll-track flex-wrap-reverse"
-        style="animation: scroll-left 120s linear 0s infinite"
+        style="animation: scroll-left 300s linear 0s infinite"
       >
         <div
           v-for="singer in firstRowSingers"
@@ -93,7 +93,7 @@ onMounted(() => {
 
     <!-- 第二行 - 向右滚动 -->
     <div class="relative" style="overflow: hidden">
-      <div class="scroll-track-right" style="animation: scroll-right 120s linear 0s infinite">
+      <div class="scroll-track-right" style="animation: scroll-right 300s linear 0s infinite">
         <div
           v-for="singer in secondRowSingers"
           :key="'row2-' + singer.id"
@@ -192,7 +192,7 @@ onMounted(() => {
 .singer-item {
   flex-shrink: 0;
   width: 6vw;
-
+  margin: 0 0.5rem;
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem;
