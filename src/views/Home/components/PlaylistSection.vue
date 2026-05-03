@@ -112,14 +112,11 @@
                   </h3>
 
                   <!-- 描述 -->
-                  <p class="playlist-description">
-                    {{ playlist.description }}
-                    <!-- <DescriptionWithDialog
-                      title="歌单简介"
-                      trigger-text="详细"
-                      :text="playlist?.description"
-                    /> -->
-                  </p>
+                  <DescriptionWithDialog
+                    title="歌单简介"
+                    trigger-text="详细"
+                    :text="playlist.description"
+                  />
 
                   <!-- 统计信息 -->
                   <div class="playlist-stats">
@@ -231,6 +228,10 @@ const pressedButton = ref<'left' | 'right' | null>(null)
 const getPlaylists = async () => {
   const res = await getExquisitePlaylists({})
   playlists.value = res.playlists?.map(transformToPlaylist)
+  currentIndex.value = 0
+  offset.value = 0
+  await nextTick()
+  updateLayout()
 }
 
 const handlePress = (type) => {
