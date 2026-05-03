@@ -5,65 +5,102 @@
       <p class="text-secondary mt-2">发现属于你的音乐世界</p>
     </div>
 
-    <div class="playlist-carousel" @mouseenter="showButtons = true" @mouseleave="showButtons = false">
+    <div
+      class="playlist-carousel"
+      @mouseenter="showButtons = true"
+      @mouseleave="showButtons = false"
+    >
       <!-- 左按钮 -->
-      <button class="carousel-button left-button" @click="() => { scrollLeft(); handlePress('left') }"
-        :disabled="isAtStart" :class="[
-          { 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered },
-          { 'pressed': isButtonPressed && pressedButton === 'left' }
-        ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false;">
-        <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button
+        class="carousel-button left-button"
+        @click="
+          () => {
+            scrollLeft()
+            handlePress('left')
+          }
+        "
+        :disabled="isAtStart"
+        :class="[
+          {
+            'opacity-100': showButtons || isButtonHovered,
+            'opacity-0': !showButtons && !isButtonHovered,
+          },
+          { pressed: isButtonPressed && pressedButton === 'left' },
+        ]"
+        @mouseenter="isButtonHovered = true"
+        @mouseleave="isButtonHovered = false"
+      >
+        <svg
+          class="button-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
 
       <!-- 视口容器 -->
       <div class="playlist-viewport" ref="viewportContainer">
-        <div class="playlist-scroll-container" ref="scrollContainer" :style="{ transform: `translateX(-${offset}px)` }">
+        <div
+          class="playlist-scroll-container"
+          ref="scrollContainer"
+          :style="{ transform: `translateX(-${offset}px)` }"
+        >
           <div class="playlist-flex-container">
             <div v-for="playlist in playlists" :key="playlist.id" class="playlist-card-wrapper">
               <!-- 背景光效 -->
               <div class="playlist-glow" :class="{ active: hoveredPlaylist === playlist.id }" />
 
               <!-- 主卡片 -->
-              <div class="playlist-card group" @mouseenter="hoveredPlaylist = playlist.id"
-                @mouseleave="hoveredPlaylist = null" :class="{
+              <div
+                class="playlist-card group"
+                @mouseenter="hoveredPlaylist = playlist.id"
+                @mouseleave="hoveredPlaylist = null"
+                :class="{
                   'scale-105 shadow-2xl': hoveredPlaylist === playlist.id,
-                  'ring-2 ring-primary/30': playlist.isPremium
-                }">
+                }"
+              >
                 <!-- 封面区域 -->
                 <div class="cover-wrapper">
                   <!-- 封面图片 -->
-                  <img :src="playlist.coverUrl" :alt="playlist.name" class="playlist-cover" />
+                  <img :src="playlist.cover" :alt="playlist.title" class="playlist-cover" />
 
                   <!-- 渐变遮罩 -->
                   <div class="cover-overlay" />
 
                   <!-- 播放按钮 -->
                   <div class="play-button-container">
-                    <Button size="icon" class="play-button-main" @click.stop="playPlaylist(playlist)">
-                      <PlayIcon class="w-6 h-6  ml-0.5" />
+                    <Button
+                      size="icon"
+                      class="play-button-main"
+                      @click.stop="playPlaylist(playlist)"
+                    >
+                      <PlayIcon class="w-6 h-6 ml-0.5" />
                     </Button>
                   </div>
 
                   <!-- 喜欢按钮 -->
                   <div class="like-button-container">
-                    <Button variant="ghost" size="icon" class="like-button" :class="{ 'scale-110': playlist.isLiked }"
-                      @click.stop="toggleLike(playlist)">
-                      <HeartIcon class="w-4 h-4 text-white transition-all duration-300"
-                        :class="{ 'fill-red-500 text-red-500 scale-110': playlist.isLiked }" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="like-button"
+                      :class="{ 'scale-110': playlist.isLiked }"
+                      @click.stop="toggleLike(playlist)"
+                    >
+                      <HeartIcon
+                        class="w-4 h-4 text-white transition-all duration-300"
+                        :class="{ 'fill-red-500 text-red-500 scale-110': playlist.isLiked }"
+                      />
                     </Button>
-                  </div>
-
-                  <!-- 优质标识 -->
-                  <div v-if="playlist.isPremium" class="premium-badge">
-                    优质
                   </div>
 
                   <!-- 播放数量 -->
                   <div class="play-count">
-                    <UsersIcon class="w-3 h-3" />
-                    <span>{{ formatPlayCount(playlist.playCount) }}</span>
+                    <Play class="w-3 h-3" />
+                    <span>{{ playlist.playCount }}</span>
                   </div>
                 </div>
 
@@ -71,12 +108,17 @@
                 <div class="playlist-info">
                   <!-- 标题 -->
                   <h3 class="playlist-title">
-                    {{ playlist.name }}
+                    {{ playlist.title }}
                   </h3>
 
                   <!-- 描述 -->
                   <p class="playlist-description">
                     {{ playlist.description }}
+                    <!-- <DescriptionWithDialog
+                      title="歌单简介"
+                      trigger-text="详细"
+                      :text="playlist?.description"
+                    /> -->
                   </p>
 
                   <!-- 统计信息 -->
@@ -86,29 +128,39 @@
                       <span>{{ playlist.songCount }} 首歌曲</span>
                     </div>
                     <div class="flex items-center gap-2">
-                      <ClockIcon class="w-3 h-3" />
-                      <span>{{ playlist.duration }}</span>
+                      <HeartIcon class="w-3 h-3" />
+                      <span>{{ playlist.likeCount }}</span>
                     </div>
                   </div>
 
                   <!-- 操作按钮 -->
                   <div class="playlist-actions">
-                    <Button variant="secondary" size="sm" class="play-button" @click.stop="playPlaylist(playlist)">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      class="play-button"
+                      @click.stop="playPlaylist(playlist)"
+                    >
                       <PlayIcon class="w-3 h-3 mr-1" />
                       播放
                     </Button>
-                    <Button variant="outline" size="icon" class="action-button" @click.stop="addToLibrary(playlist)">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      class="action-button"
+                      @click.stop="addToLibrary(playlist)"
+                    >
                       <PlusIcon class="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" class="action-button" @click.stop="sharePlaylist(playlist)">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      class="action-button"
+                      @click.stop="sharePlaylist(playlist)"
+                    >
                       <Share2Icon class="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-
-                <!-- 进度条（如果正在播放） -->
-                <div v-if="playlist.isPlaying" class="progress-bar">
-                  <div class="progress-fill" />
                 </div>
               </div>
             </div>
@@ -116,12 +168,32 @@
         </div>
       </div>
 
-      <button class="carousel-button right-button" @click="() => { scrollRight(); handlePress('right') }"
-        :disabled="isAtEnd" :class="[
-          { 'opacity-100': showButtons || isButtonHovered, 'opacity-0': !showButtons && !isButtonHovered },
-          { 'pressed': isButtonPressed && pressedButton === 'right' }
-        ]" @mouseenter="isButtonHovered = true" @mouseleave="isButtonHovered = false">
-        <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button
+        class="carousel-button right-button"
+        @click="
+          () => {
+            scrollRight()
+            handlePress('right')
+          }
+        "
+        :disabled="isAtEnd"
+        :class="[
+          {
+            'opacity-100': showButtons || isButtonHovered,
+            'opacity-0': !showButtons && !isButtonHovered,
+          },
+          { pressed: isButtonPressed && pressedButton === 'right' },
+        ]"
+        @mouseenter="isButtonHovered = true"
+        @mouseleave="isButtonHovered = false"
+      >
+        <svg
+          class="button-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
@@ -130,40 +202,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, onUnmounted } from 'vue';
+import { ref, onMounted, nextTick, computed, onUnmounted } from 'vue'
 import {
   PlayIcon,
   HeartIcon,
   PlusIcon,
-  ClockIcon,
   MusicIcon,
   UsersIcon,
   Share2Icon,
-} from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
+  Play,
+} from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import type { Playlist } from '@/types/musicTypes'
+import { getExquisitePlaylists } from '@/api/playlist'
+import { transformToPlaylist } from '@/utils/dataTransformer'
+import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue'
 
-interface Playlist {
-  id: number;
-  name: string;
-  description: string;
-  coverUrl: string;
-  songCount: number;
-  duration: string;
-  playCount: number;
-  isLiked: boolean;
-  isPremium: boolean;
-  isPlaying: boolean;
+const hoveredPlaylist = ref<number | null>(null)
+const scrollContainer = ref<HTMLElement | null>(null)
+const viewportContainer = ref<HTMLElement | null>(null)
+const offset = ref(0)
+const currentIndex = ref(0)
+const showButtons = ref(false)
+const isButtonHovered = ref(false)
+const isButtonPressed = ref(false)
+const pressedButton = ref<'left' | 'right' | null>(null)
+
+const getPlaylists = async () => {
+  const res = await getExquisitePlaylists({})
+  playlists.value = res.playlists?.map(transformToPlaylist)
 }
-
-const hoveredPlaylist = ref<number | null>(null);
-const scrollContainer = ref<HTMLElement | null>(null);
-const viewportContainer = ref<HTMLElement | null>(null);
-const offset = ref(0);
-const currentIndex = ref(0);
-const showButtons = ref(false);
-const isButtonHovered = ref(false);
-const isButtonPressed = ref(false);
-const pressedButton = ref<'left' | 'right' | null>(null);
 
 const handlePress = (type) => {
   pressedButton.value = type
@@ -175,244 +243,88 @@ const handlePress = (type) => {
   }, 150) // 动画时间
 }
 
-const playlists = ref<Playlist[]>([
-  {
-    id: 1,
-    name: '华语流行精选',
-    description: '最新华语流行歌曲合集，包含当下最热门单曲',
-    coverUrl: 'https://picsum.photos/200/200?random=10',
-    songCount: 24,
-    duration: '1小时23分',
-    playCount: 125000,
-    isLiked: true,
-    isPremium: true,
-    isPlaying: false,
-  },
-  {
-    id: 2,
-    name: '欧美热单',
-    description: 'Billboard 热门单曲，紧跟国际音乐潮流',
-    coverUrl: 'https://picsum.photos/200/200?random=11',
-    songCount: 18,
-    duration: '1小时15分',
-    playCount: 98000,
-    isLiked: false,
-    isPremium: false,
-    isPlaying: true,
-  },
-  {
-    id: 3,
-    name: '轻音乐时光',
-    description: '放松身心的轻音乐，适合工作学习时聆听',
-    coverUrl: 'https://picsum.photos/200/200?random=12',
-    songCount: 32,
-    duration: '2小时08分',
-    playCount: 87000,
-    isLiked: true,
-    isPremium: true,
-    isPlaying: false,
-  },
-  {
-    id: 4,
-    name: '摇滚力量',
-    description: '经典摇滚歌曲，感受音乐的力量',
-    coverUrl: 'https://picsum.photos/200/200?random=13',
-    songCount: 21,
-    duration: '1小时45分',
-    playCount: 156000,
-    isLiked: false,
-    isPremium: false,
-    isPlaying: false,
-  },
-  {
-    id: 5,
-    name: '电子音乐',
-    description: '最新电子音乐，适合运动健身时播放',
-    coverUrl: 'https://picsum.photos/200/200?random=14',
-    songCount: 28,
-    duration: '1小时52分',
-    playCount: 203000,
-    isLiked: false,
-    isPremium: true,
-    isPlaying: false,
-  },
-  {
-    id: 6,
-    name: '怀旧经典',
-    description: '重温经典老歌，找回青春记忆',
-    coverUrl: 'https://picsum.photos/200/200?random=15',
-    songCount: 35,
-    duration: '2小时31分',
-    playCount: 67000,
-    isLiked: true,
-    isPremium: false,
-    isPlaying: false,
-  },
-  {
-    id: 7,
-    name: '流行金曲',
-    description: '流行音乐经典之作',
-    coverUrl: 'https://picsum.photos/200/200?random=16',
-    songCount: 26,
-    duration: '1小时38分',
-    playCount: 178000,
-    isLiked: false,
-    isPremium: false,
-    isPlaying: false,
-  },
-  {
-    id: 8,
-    name: '爵士风情',
-    description: '经典爵士音乐合集',
-    coverUrl: 'https://picsum.photos/200/200?random=17',
-    songCount: 22,
-    duration: '1小时29分',
-    playCount: 95000,
-    isLiked: true,
-    isPremium: true,
-    isPlaying: false,
-  },
-  {
-    id: 9,
-    name: '民谣风',
-    description: '清新民谣歌曲，感受自然的旋律',
-    coverUrl: 'https://picsum.photos/200/200?random=18',
-    songCount: 19,
-    duration: '1小时12分',
-    playCount: 45000,
-    isLiked: false,
-    isPremium: false,
-    isPlaying: false,
-  },
-  {
-    id: 10,
-    name: '说唱潮流',
-    description: '最新说唱音乐，感受街头文化',
-    coverUrl: 'https://picsum.photos/200/200?random=19',
-    songCount: 25,
-    duration: '1小时35分',
-    playCount: 134000,
-    isLiked: true,
-    isPremium: true,
-    isPlaying: false,
-  },
-  {
-    id: 11,
-    name: '古典之美',
-    description: '经典古典音乐，享受高雅艺术',
-    coverUrl: 'https://picsum.photos/200/200?random=20',
-    songCount: 16,
-    duration: '2小时05分',
-    playCount: 32000,
-    isLiked: false,
-    isPremium: true,
-    isPlaying: false,
-  },
-  {
-    id: 12,
-    name: 'R&B节奏',
-    description: '动感R&B音乐，随节奏摇摆',
-    coverUrl: 'https://picsum.photos/200/200?random=21',
-    songCount: 23,
-    duration: '1小时32分',
-    playCount: 89000,
-    isLiked: true,
-    isPremium: false,
-    isPlaying: false,
-  },
-]);
+const playlists = ref<Playlist[]>([])
 
-const cardWidth = ref(1); // 默认宽度，避免初始为0
-const visibleCards = ref(0);
+const cardWidth = ref(1) // 默认宽度，避免初始为0
+const visibleCards = ref(0)
 const maxOffset = computed(() => {
-  if (!scrollContainer.value || cardWidth.value === 0) return 0;
-  const cardSpacing = cardWidth.value + 24; // 24px gap
-  const totalWidth = playlists.value.length * cardSpacing;
-  const viewportWidth = viewportContainer.value?.clientWidth || 0;
-  return Math.max(0, totalWidth - viewportWidth);
-});
+  if (!scrollContainer.value || cardWidth.value === 0) return 0
+  const cardSpacing = cardWidth.value + 24 // 24px gap
+  const totalWidth = playlists.value.length * cardSpacing
+  const viewportWidth = viewportContainer.value?.clientWidth || 0
+  return Math.max(0, totalWidth - viewportWidth)
+})
 
 const maxIndex = computed(() => {
-  if (cardWidth.value === 0) return 0;
-  const cardSpacing = cardWidth.value + 24;
-  return Math.max(0, Math.ceil(maxOffset.value / cardSpacing));
-});
+  if (cardWidth.value === 0) return 0
+  const cardSpacing = cardWidth.value + 24
+  return Math.max(0, Math.ceil(maxOffset.value / cardSpacing))
+})
 
-const isAtStart = computed(() => currentIndex.value === 0);
-const isAtEnd = computed(() => cardWidth.value > 0 && currentIndex.value >= maxIndex.value);
+const isAtStart = computed(() => currentIndex.value === 0)
+const isAtEnd = computed(() => cardWidth.value > 0 && currentIndex.value >= maxIndex.value)
 
 const updateLayout = () => {
   if (scrollContainer.value && viewportContainer.value) {
     // 直接获取卡片包装器的宽度
-    const cardWrapper = scrollContainer.value.querySelector('.playlist-card-wrapper');
+    const cardWrapper = scrollContainer.value.querySelector('.playlist-card-wrapper')
     if (cardWrapper) {
-      const cardRect = cardWrapper.getBoundingClientRect();
-      cardWidth.value = cardRect.width;
+      const cardRect = cardWrapper.getBoundingClientRect()
+      cardWidth.value = cardRect.width
     }
-    const cardSpacing = cardWidth.value + 24;
-    visibleCards.value = Math.max(1, Math.floor(viewportContainer.value.clientWidth / cardSpacing));
+    const cardSpacing = cardWidth.value + 24
+    visibleCards.value = Math.max(1, Math.floor(viewportContainer.value.clientWidth / cardSpacing))
   }
-};
+}
 
 const scrollLeft = () => {
   if (currentIndex.value > 0) {
-    const step = 3; // 每次滚动3个卡片
-    currentIndex.value = Math.max(0, currentIndex.value - step);
-    offset.value = currentIndex.value * (cardWidth.value + 24);
+    const step = 3 // 每次滚动3个卡片
+    currentIndex.value = Math.max(0, currentIndex.value - step)
+    offset.value = currentIndex.value * (cardWidth.value + 24)
   }
-};
+}
 
 const scrollRight = () => {
   if (scrollContainer.value && !isAtEnd.value) {
-    const step = 3; // 每次滚动3个卡片
-    currentIndex.value = Math.min(maxIndex.value, currentIndex.value + step);
-    offset.value = currentIndex.value * (cardWidth.value + 24);
+    const step = 3 // 每次滚动3个卡片
+    currentIndex.value = Math.min(maxIndex.value, currentIndex.value + step)
+    offset.value = currentIndex.value * (cardWidth.value + 24)
   }
-};
+}
 
 const toggleLike = (playlist: Playlist) => {
-  playlist.isLiked = !playlist.isLiked;
-};
+  playlist.isLiked = !playlist.isLiked
+}
 
 const playPlaylist = (playlist: Playlist) => {
-  playlists.value.forEach(p => (p.isPlaying = false));
-  playlist.isPlaying = true;
   // 这里可以添加实际的播放逻辑
-};
+}
 
 const addToLibrary = (playlist: Playlist) => {
   // 添加到音乐库逻辑
-};
+}
 
 const sharePlaylist = (playlist: Playlist) => {
   // 分享逻辑
-};
-
-const formatPlayCount = (count: number): string => {
-  if (count >= 100000) {
-    return `${(count / 10000).toFixed(0)}万`;
-  }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}k`;
-  }
-  return count.toString();
-};
+}
 
 onMounted(() => {
+  getPlaylists()
   const initLayout = () => {
     if (scrollContainer.value && scrollContainer.value.children.length > 0) {
-      updateLayout();
+      updateLayout()
     } else {
-      setTimeout(initLayout, 50);
+      setTimeout(initLayout, 50)
     }
-  };
-  nextTick(initLayout);
-  window.addEventListener('resize', updateLayout);
-});
+  }
+  nextTick(initLayout)
+  window.addEventListener('resize', updateLayout)
+})
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateLayout);
-});
+  window.removeEventListener('resize', updateLayout)
+})
 </script>
 
 <style scoped>
@@ -424,7 +336,7 @@ onUnmounted(() => {
   font-size: 2.25rem;
   line-height: 2.5rem;
   letter-spacing: -0.025em;
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -451,7 +363,9 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease, opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition:
+    all 0.3s ease,
+    opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 20;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -480,7 +394,10 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease, opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition:
+    all 0.3s ease,
+    opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 20;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -574,7 +491,7 @@ onUnmounted(() => {
   position: absolute;
   inset: -1rem;
   border-radius: 1rem;
-  background: linear-gradient(135deg, hsl(var(--primary)/0.3) 0%, transparent 70%);
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.3) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.5s ease;
   filter: blur(1rem);
@@ -602,7 +519,7 @@ onUnmounted(() => {
 .playlist-card:hover {
   transform: scale(1.05);
   box-shadow: 0 20px 25px rgba(0, 0, 0, 0.25);
-  border-color: hsl(var(--primary)/0.3);
+  border-color: hsl(var(--primary) / 0.3);
   z-index: 2;
 }
 
@@ -626,7 +543,12 @@ onUnmounted(() => {
 .cover-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -661,7 +583,7 @@ onUnmounted(() => {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
-.dark .play-button-main{
+.dark .play-button-main {
   color: #fff;
 }
 
@@ -704,7 +626,9 @@ onUnmounted(() => {
   font-weight: 600;
   padding: 0.375rem 0.875rem;
   border-radius: 9999px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(251, 191, 36, 0.3);
   z-index: 10;
   letter-spacing: 0.025em;
   backdrop-filter: blur(4px);
@@ -715,15 +639,21 @@ onUnmounted(() => {
 
 @keyframes premium-pulse {
   0% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(251, 191, 36, 0.3);
   }
 
   50% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(251, 191, 36, 0.5);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(251, 191, 36, 0.5);
   }
 
   100% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(251, 191, 36, 0.3);
   }
 }
 
@@ -795,7 +725,7 @@ onUnmounted(() => {
   margin: 0;
 }
 
-.playlist-stats>div {
+.playlist-stats > div {
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -870,7 +800,9 @@ onUnmounted(() => {
   font-weight: 600;
   padding: 0.375rem 0.875rem;
   border-radius: 9999px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(251, 191, 36, 0.3);
   z-index: 10;
   letter-spacing: 0.025em;
   backdrop-filter: blur(4px);
@@ -881,15 +813,21 @@ onUnmounted(() => {
 
 @keyframes premium-pulse {
   0% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(251, 191, 36, 0.3);
   }
 
   50% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(251, 191, 36, 0.5);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(251, 191, 36, 0.5);
   }
 
   100% {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(251, 191, 36, 0.3);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(251, 191, 36, 0.3);
   }
 }
 
@@ -910,7 +848,7 @@ onUnmounted(() => {
   margin: 0;
 }
 
-.playlist-stats>div {
+.playlist-stats > div {
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -960,7 +898,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 0.25rem;
-  background-color: hsl(var(--primary)/0.3);
+  background-color: hsl(var(--primary) / 0.3);
   z-index: 10;
 }
 
