@@ -10,19 +10,19 @@ import { registerToastMessages } from '@/utils/eventBusHandler/toastEventHandler
 import { useUserStore } from './stores/user'
 import { usePlayerStore } from './stores/playerStore'
 
+const app = createApp(App)
 
-const app = createApp(App);
+app.use(createPinia())
+app.use(router)
 
-app.use(createPinia());
-app.use(router);
+const userStore = useUserStore()
+const player = usePlayerStore()
+player.init()
+userStore.init()
 
-const userStore = useUserStore();
-const player = usePlayerStore();
-player.init();
-userStore.init();
+registerClickEvents(router)
+registerPlayEvents(player)
+registerToastMessages()
 
-registerClickEvents(router);
-registerPlayEvents(player);
-registerToastMessages();
-
-app.mount('#app');
+app.mount('#app')
+console.log('App mounted successfully')
