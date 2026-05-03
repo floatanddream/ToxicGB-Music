@@ -136,10 +136,10 @@
                       variant="secondary"
                       size="sm"
                       class="play-button"
-                      @click.stop="playPlaylist(playlist)"
+                      @click.stop="emitter.emit(EVENTS.PLAYLIST_CLICK, playlist)"
                     >
-                      <PlayIcon class="w-3 h-3 mr-1" />
-                      播放
+                      <FileMusic class="w-3 h-3 mr-1" />
+                      详细
                     </Button>
                     <Button
                       variant="outline"
@@ -208,12 +208,15 @@ import {
   UsersIcon,
   Share2Icon,
   Play,
+  FileMusic,
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import type { Playlist } from '@/types/musicTypes'
 import { getExquisitePlaylists } from '@/api/playlist'
 import { transformToPlaylist } from '@/utils/dataTransformer'
 import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
 
 const hoveredPlaylist = ref<number | null>(null)
 const scrollContainer = ref<HTMLElement | null>(null)
