@@ -13,7 +13,7 @@ interface Singer {
 
 // 生成值为70-100的随机数
 const generateRandomHeight = () => {
-  return Math.floor(Math.random() * 31) + 70 + 'px'
+  return Math.floor(Math.random() * 31) + 100 + 'px'
 }
 
 const getTopSingers = async () => {
@@ -46,8 +46,11 @@ onMounted(() => {
     <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
 
     <!-- 第一行 - 向左滚动 -->
-    <div class="mb-4 relative" style="overflow: hidden">
-      <div class="scroll-track" style="animation: scroll-left 120s linear 0s infinite">
+    <div class="relative" style="overflow: hidden">
+      <div
+        class="scroll-track flex-wrap-reverse"
+        style="animation: scroll-left 120s linear 0s infinite"
+      >
         <div
           v-for="singer in firstRowSingers"
           :key="'row1-' + singer.id"
@@ -188,7 +191,7 @@ onMounted(() => {
 
 .singer-item {
   flex-shrink: 0;
-  width: 96px;
+  width: 6vw;
 
   position: relative;
   overflow: hidden;
