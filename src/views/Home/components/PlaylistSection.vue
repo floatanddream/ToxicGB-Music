@@ -75,7 +75,7 @@
                     <Button
                       size="icon"
                       class="play-button-main"
-                      @click.stop="playPlaylist(playlist)"
+                      @click.stop="getPlaylistSongAndPlay(playlist)"
                     >
                       <PlayIcon class="w-6 h-6 ml-0.5" />
                     </Button>
@@ -205,18 +205,18 @@ import {
   HeartIcon,
   PlusIcon,
   MusicIcon,
-  UsersIcon,
   Share2Icon,
   Play,
   FileMusic,
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import type { Playlist } from '@/types/musicTypes'
-import { getExquisitePlaylists } from '@/api/playlist'
-import { transformToPlaylist } from '@/utils/dataTransformer'
+import { getExquisitePlaylists, getPlaylistAllTracks } from '@/api/playlist'
+import { transformToPlaylist, transformToSong } from '@/utils/dataTransformer'
 import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
+import { MESSAGE_TYPE } from '@/constants/messages'
 
 const hoveredPlaylist = ref<number | null>(null)
 const scrollContainer = ref<HTMLElement | null>(null)
@@ -237,10 +237,10 @@ const getPlaylists = async () => {
   updateLayout()
 }
 
-const handlePress = (type) => {
-  pressedButton.value = type
-  isButtonPressed.value = true
-
+const getPlaylistSongAndPlay = async (playlist: Playlist) => {
+  const songRes = await getPlaylistAllTracks({ id: playlist.id })
+  emitter.emit(EVENTS.PLAY_ALL, songRes.songs.map(transformToSong))
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌单"${playlist.title}"所有歌曲`)
   setTimeout(() => {
     isButtonPressed.value = false
     pressedButton.value = null

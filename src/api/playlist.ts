@@ -5,7 +5,7 @@ export async function getPlaylistDetail(playlistId: string) {
 }
 
 export interface PlaylistParams {
-  id: string
+  id: string | number
   limit?: number
   offset?: number
   before?: number
@@ -36,4 +36,9 @@ export async function getExquisitePlaylists(params: {
   return await request.get(
     `/top/playlist?order=${order}&cat=${cat}&limit=${limit}&offset=${offset}`,
   )
+}
+
+export async function getPlaylistAllTracks(params: PlaylistParams) {
+  const { id, limit = 0, offset = 0 } = params
+  return await request.get(`/playlist/track/all?id=${id}&limit=${limit}&offset=${offset}`)
 }
