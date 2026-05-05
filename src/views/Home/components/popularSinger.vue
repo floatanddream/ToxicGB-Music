@@ -43,7 +43,7 @@ onMounted(() => {
 
 <template>
   <div class="mt-8 opacity-90 -m-5">
-    <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6">热门歌手</h2>
+    <h2 class="text-2xl font-bold text-primary drop-shadow-md mb-6 pl-5">热门歌手</h2>
 
     <!-- 第一行 - 向左滚动 -->
     <div class="relative" style="overflow: hidden">
