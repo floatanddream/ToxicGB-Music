@@ -16,8 +16,7 @@ import { Toaster } from '@/components/ui/sonner'
 
 const userStore = useUserStore();
 const playerStore = usePlayerStore();
-const { currentSong, playing } = storeToRefs(playerStore);
-const isFullScreen = ref(false);
+const { currentSong, playing, isFullScreen } = storeToRefs(playerStore);
 
 const imageUrl = computed(()=>{
   return playing.value ? currentSong.value?.cover : userStore.user?.avatarUrl
@@ -41,6 +40,7 @@ onMounted(() => {
   emitter.on(EVENTS.SCROOL_TOP,handleScrollTop);
   emitter.on(EVENTS.TOGGLE_FULLSCREEN,(val) => {
     isFullScreen.value = val as boolean;
+    
   });
   const savedTheme = localStorage.getItem('theme');
   const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

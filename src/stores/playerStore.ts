@@ -10,6 +10,7 @@ export const usePlayerStore = defineStore('player', () => {
   const playlist = ref<Song[]>([]);
   const currentSong = ref<Song | null>(null);
   const currentIndex = ref<number>(0);
+  const isFullScreen = ref(false);
 
   const mode = ref<PlayMode>('loop');
 
@@ -252,11 +253,16 @@ export const usePlayerStore = defineStore('player', () => {
     };
   };
 
+  const setFullPlayer = (e : boolean) =>{
+    isFullScreen.value = e;
+  }
+
   watch(currentIndex, () => {
     preloadNextSong();
   });
 
   return {
+    isFullScreen,
     volume,
     playlist,
     currentSong,
@@ -281,6 +287,7 @@ export const usePlayerStore = defineStore('player', () => {
     setMode,
     setVolume,
     switchSong,
+    setFullPlayer,
   };
 });
 
