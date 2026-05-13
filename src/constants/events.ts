@@ -9,4 +9,5 @@ export const EVENTS = {
   INSERT_NEXT: 'insert-next',
   INSERT_AND_PLAY: 'insert-and-play',
   SWITCH_SONG: 'switch-song',
+  TOGGLE_FULLSCREEN: 'toggle-fullscreen',
 }

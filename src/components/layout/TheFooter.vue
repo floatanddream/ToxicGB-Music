@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
-import { FastForward, Pause, Play, Rewind, ListMusic } from 'lucide-vue-next'
+import { FastForward, Pause, Play, Rewind, ListMusic, Maximize2 } from 'lucide-vue-next'
 import ArtistDivider from '../common/musicComponents/artistDivider.vue';
 import { storeToRefs } from 'pinia';
 import { formatTime } from '@/utils/format';
 import PlaylistPanel from '../common/PlaylistPanel.vue';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 
 const playerStore = usePlayerStore();
 
@@ -108,6 +110,9 @@ const volume = ref(70)
         </button>
         <button class="icon-btn" @click="isPlaylistOpen = !isPlaylistOpen">
           <ListMusic :size="20" />
+        </button>
+        <button class="icon-btn" @click="emitter.emit(EVENTS.TOGGLE_FULLSCREEN, true)">
+          <Maximize2 :size="18" />
         </button>
       </div>
     </div>

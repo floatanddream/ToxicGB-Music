@@ -2,6 +2,7 @@
 import TheHeader from './TheHeader.vue'
 import TheSidebar from './TheSidebar.vue'
 import TheFooter from './TheFooter.vue'
+import FullScreenPlayer from './FullScreenPlayer.vue'
 import { BackgroundRender } from '@applemusic-like-lyrics/vue';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
@@ -16,6 +17,7 @@ import { Toaster } from '@/components/ui/sonner'
 const userStore = useUserStore();
 const playerStore = usePlayerStore();
 const { currentSong, playing } = storeToRefs(playerStore);
+const isFullScreen = ref(false);
 
 const imageUrl = computed(()=>{
   return playing.value ? currentSong.value?.cover : userStore.user?.avatarUrl
@@ -37,6 +39,9 @@ const handleScrollTop: () => void = () => {
 // Dark mode initialization
 onMounted(() => {
   emitter.on(EVENTS.SCROOL_TOP,handleScrollTop);
+  emitter.on(EVENTS.TOGGLE_FULLSCREEN,(val) => {
+    isFullScreen.value = val as boolean;
+  });
   const savedTheme = localStorage.getItem('theme');
   const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -48,22 +53,26 @@ onMounted(() => {
 });
 onUnmounted(()=>{
   emitter.off(EVENTS.SCROOL_TOP);
+  emitter.off(EVENTS.TOGGLE_FULLSCREEN);
 });
 </script>
 
 <template>
-  
+
   <div class="layout-container">
     <Toaster :duration="3000" :position="'top-center'" />
     <div class="full-page-background">
       <BackgroundRender :renderer="MeshGradientRenderer" :fps="90" :render-scale="1" :album="imageUrl" />
     </div>
-    <TheHeader class="header" />
-    <TheSidebar class="sidebar" />
-      <main ref="mainRef" class="main  " style="border-radius: 0%;"> 
-          <slot /> 
+    <TheHeader v-if="!isFullScreen" class="header" />
+    <TheSidebar v-if="!isFullScreen" class="sidebar" />
+      <main v-if="!isFullScreen" ref="mainRef" class="main  " style="border-radius: 0%;">
+          <slot />
     </main>
-    <TheFooter class="footer" />
+    <TheFooter v-if="!isFullScreen" class="footer" />
+    <Transition name="fullscreen">
+      <FullScreenPlayer v-if="isFullScreen" />
+    </Transition>
   </div>
 </template>
 
@@ -136,5 +145,17 @@ onUnmounted(()=>{
   right: 0;
   z-index: 99;
   /* Background handled by child component (TheFooter.vue) */
+}
+
+/* Fullscreen transition */
+.fullscreen-enter-active,
+.fullscreen-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fullscreen-enter-from,
+.fullscreen-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
 }
 </style>
