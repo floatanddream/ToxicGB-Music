@@ -86,7 +86,7 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <template>
-  <div class="playlist-panel glass-abc" @click.stop>
+  <div class="playlist-panel glass-component" @click.stop>
     <!-- 头部 -->
     <div class="playlist-header">
       <div class="flex items-center gap-3">

@@ -112,7 +112,7 @@ const handleSwitchSong = (song: Song) => {
 </script>
 
 <template>
-  <div class="fullscreen-player glass-abc">
+  <div class="fullscreen-player glass-component">
     <!-- Left Panel: Album Cover -->
     <div class="left-panel">
       <div class="cover-container">

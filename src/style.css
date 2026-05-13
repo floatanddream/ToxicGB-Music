@@ -385,7 +385,7 @@ body {
   ring: 2px solid var(--primary-color, #3b82f6);
   ring-offset: 2px;
 }
-.glass-abc {
+.glass-component {
   background: var(--glass-bg);
   backdrop-filter: blur(18px) saturate(200%) brightness(1.2) contrast(1.05);
   -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(1.2) contrast(1.05);
@@ -393,7 +393,7 @@ body {
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
 }
 
-.dark .glass-abc {
+.dark .glass-component {
   background: rgba(17, 25, 40, 0.35);
   border-color: rgba(255, 255, 255, 0.08);
 }
