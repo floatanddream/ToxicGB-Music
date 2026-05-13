@@ -86,7 +86,7 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <template>
-  <div class="playlist-panel" @click.stop>
+  <div class="playlist-panel glass-abc" @click.stop>
     <!-- 头部 -->
     <div class="playlist-header">
       <div class="flex items-center gap-3">
@@ -138,17 +138,6 @@ watch(() => props.visible, (newVal) => {
   border-radius: 12px;
   margin: 10px;
   overflow: hidden;
-
-  background: var(--glass-bg);
-  backdrop-filter: blur(18px) saturate(200%) brightness(1.2) contrast(1.05);
-  -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(1.2) contrast(1.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
-}
-
-.dark .playlist-panel {
-  background: rgba(17, 25, 40, 0.35);
-  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .playlist-header {
