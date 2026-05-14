@@ -123,6 +123,11 @@ const handleSwitchSong = (song: Song) => {
         />
         <div class="cover-reflection"></div>
       </div>
+      <div class="song-control">
+         <div class="song-progress">
+            
+         </div>
+      </div>
     </div>
 
     <!-- Right Panel: Song Info & Queue -->
@@ -130,7 +135,6 @@ const handleSwitchSong = (song: Song) => {
       <div class="song-info">
         <h1 class="song-title">{{ currentSong?.title || '未播放' }}</h1>
         <div class="artist-name" v-if="currentSong?.artist">
-          <ArtistDivider :artists="currentSong.artist" />
         </div>
         <p class="album-name" v-if="currentSong?.album">{{ currentSong.album.title }}</p>
       </div>
@@ -161,65 +165,7 @@ const handleSwitchSong = (song: Song) => {
       </div>
     </div>
 
-    <!-- Bottom Controls -->
-    <div class="bottom-controls">
-      <div class="controls-left">
-        <button class="control-btn volume-btn" @click="handleToggleMute">
-          <VolumeX v-if="isMuted" />
-          <Volume2 v-else />
-        </button>
-        <div class="volume-slider-container">
-          <div class="volume-bar">
-            <div class="volume-fill" :style="{ width: `${localVolume}%` }"></div>
-            <input
-              type="range"
-              class="volume-input"
-              min="0"
-              max="100"
-              :value="localVolume"
-              @input="handleVolumeChange"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="controls-center">
-        <button class="control-btn mode-btn" @click="cycleMode" :title="mode">
-          <component :is="modeIcon" :size="20" />
-        </button>
-        <button class="control-btn skip-btn" @click="handlePrev">
-          <SkipBack :size="24" />
-        </button>
-        <button class="control-btn play-btn" @click="handleTogglePlay">
-          <Pause v-if="playing" :size="28" />
-          <Play v-else :size="28" />
-        </button>
-        <button class="control-btn skip-btn" @click="handleNext">
-          <SkipForward :size="24" />
-        </button>
-        <button class="control-btn queue-btn" @click="() => {}">
-          <ListMusic :size="20" />
-        </button>
-      </div>
-
-      <div class="controls-right">
-        <div class="progress-section">
-          <span class="time-text">{{ formatTime(currentTime) }}</span>
-          <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: `${progress}%` }"></div>
-            <input
-              type="range"
-              class="progress-input"
-              min="0"
-              :max="duration || 100"
-              :value="currentTime"
-              @input="handleSeek"
-            />
-          </div>
-          <span class="time-text">{{ formatTime(duration) }}</span>
-        </div>
-      </div>
-    </div>
+   
 
     <!-- Close Button -->
     <button class="close-btn" @click="handleClose">
@@ -246,6 +192,7 @@ const handleSwitchSong = (song: Song) => {
 /* Left Panel */
 .left-panel {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 60px 40px;
@@ -370,243 +317,5 @@ const handleSwitchSong = (song: Song) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Bottom Controls */
-.bottom-controls {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 40px;
-  background: rgba(0, 0, 0, 0.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.controls-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.controls-center {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.controls-right {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.control-btn {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.control-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.play-btn {
-  background: #fa233b;
-  color: #fff;
-  width: 56px;
-  height: 56px;
-}
-
-.play-btn:hover {
-  background: #d91a2e;
-  transform: scale(1.05);
-}
-
-.skip-btn {
-  color: #fff;
-}
-
-.mode-btn,
-.volume-btn,
-.queue-btn {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.mode-btn:hover,
-.volume-btn:hover,
-.queue-btn:hover {
-  color: #fff;
-}
-
-/* Volume Slider */
-.volume-slider-container {
-  width: 100px;
-}
-
-.volume-bar {
-  position: relative;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.volume-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: #fa233b;
-  border-radius: 2px;
-}
-
-.volume-input {
-  position: absolute;
-  top: -4px;
-  left: 0;
-  width: 100%;
-  height: 12px;
-  background: transparent;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  -webkit-appearance: none;
-  opacity: 0;
-}
-
-.volume-input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #fa233b;
-}
-
-/* Progress Section */
-.progress-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.progress-bar {
-  flex: 1;
-  position: relative;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.progress-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: #fa233b;
-  border-radius: 2px;
-  transition: width 0.1s linear;
-}
-
-.progress-input {
-  position: absolute;
-  top: -4px;
-  left: 0;
-  width: 100%;
-  height: 12px;
-  background: transparent;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  -webkit-appearance: none;
-  opacity: 0;
-}
-
-.progress-input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #fa233b;
-}
-
-.time-text {
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.6);
-  min-width: 40px;
-}
-
-/* Close Button */
-.close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  padding: 12px;
-  border-radius: 50%;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .fullscreen-player {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto auto;
-  }
-
-  .left-panel {
-    padding: 40px 20px;
-  }
-
-  .cover-container {
-    max-width: 250px;
-  }
-
-  .right-panel {
-    padding: 20px;
-  }
-
-  .song-title {
-    font-size: 24px;
-  }
-
-  .bottom-controls {
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px 20px;
-  }
-
-  .controls-left,
-  .controls-right {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .progress-section {
-    max-width: 100%;
-  }
 }
 </style>

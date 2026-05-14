@@ -2,7 +2,7 @@
 import TheHeader from './TheHeader.vue'
 import TheSidebar from './TheSidebar.vue'
 import TheFooter from './TheFooter.vue'
-import FullScreenPlayer from './FullScreenPlayer.vue'
+import FullScreenPlayer from '@/views/FullscreenPlayer/FullScreenPlayer.vue';
 import { BackgroundRender } from '@applemusic-like-lyrics/vue';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
