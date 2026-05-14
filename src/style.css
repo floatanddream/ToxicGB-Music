@@ -386,7 +386,7 @@ body {
   ring-offset: 2px;
 }
 .glass-component {
-  background: var(--glass-bg);
+  /* background: var(--glass-bg); */
   backdrop-filter: blur(18px) saturate(200%) brightness(1.2) contrast(1.05);
   -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(1.2) contrast(1.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
