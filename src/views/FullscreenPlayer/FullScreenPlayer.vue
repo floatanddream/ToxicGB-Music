@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { storeToRefs } from 'pinia'
 import { formatTime } from '@/utils/format'
@@ -20,6 +20,7 @@ import {
 import ArtistDivider from '@/components/common/musicComponents/artistDivider.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
+import { Progress } from '@/components/ui/progress'
 
 const playerStore = usePlayerStore()
 const { currentSong, playing, currentTime, duration, playlist, currentIndex, mode, volume } = storeToRefs(playerStore)
@@ -44,9 +45,25 @@ const handleNext = () => {
   playerStore.next()
 }
 
-const handleSeek = (e: Event) => {
+const tempSeekValue = ref(currentTime.value)
+const isDragging = ref(false)
+
+watch(currentTime, (newTime) => {
+  if (!isDragging.value) {
+    tempSeekValue.value = newTime
+  }
+})
+
+const handleSeekInput = (e: Event) => {
+  isDragging.value = true
   const target = e.target as HTMLInputElement
-  playerStore.seek(Number(target.value))
+  const value = Number(target.value)
+  tempSeekValue.value = value
+  playerStore.seek(value)
+}
+
+const handleSeekChange = () => {
+  isDragging.value = false
 }
 
 const handleVolumeChange = (e: Event) => {
@@ -125,7 +142,19 @@ const handleSwitchSong = (song: Song) => {
       </div>
       <div class="song-control">
          <div class="song-progress">
-            
+            <Progress
+              :model-value="(tempSeekValue / duration) * 100"
+              class="progress-component"
+            />
+            <input
+              type="range"
+              class="progress-input"
+              min="0"
+              :max="duration"
+              :value="tempSeekValue"
+              @input="handleSeekInput"
+              @change="handleSeekChange"
+            />
          </div>
       </div>
     </div>
@@ -317,5 +346,52 @@ const handleSwitchSong = (song: Song) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 进度条容器 */
+.song-control {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 40px;
+}
+
+.song-progress {
+  position: relative;
+  width: 100%;
+}
+
+.progress-component {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.progress-component :deep([data-slot="progress-indicator"]) {
+  background: rgba(255, 255, 255, 1);
+  transition: none;
+}
+
+.progress-input {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  opacity: 0;
+}
+
+.progress-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
 }
 </style>
