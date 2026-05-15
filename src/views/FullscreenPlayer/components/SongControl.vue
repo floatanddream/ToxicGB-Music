@@ -84,7 +84,7 @@ watch(() => props.currentTime, (newTime) => {
   <div class="song-control">
     <div
       ref="progressRef"
-      class="progress-bar"
+      class="progress-bar "
       :class="{ dragging: isDragging }"
       @mousedown="handleMouseDown"
       @touchstart.prevent="handleTouchStart"
@@ -134,7 +134,7 @@ watch(() => props.currentTime, (newTime) => {
 
 .progress-fill {
   height: 100%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 6px;
   position: relative;
   transition: background 0.15s ease;
@@ -142,7 +142,7 @@ watch(() => props.currentTime, (newTime) => {
 
 .progress-bar:hover .progress-fill,
 .progress-bar.dragging .progress-fill {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 
