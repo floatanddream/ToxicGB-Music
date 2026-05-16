@@ -2,17 +2,17 @@
 import { ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { FastForward, Pause, Play, Rewind, ListMusic, Maximize2 } from 'lucide-vue-next'
-import ArtistDivider from '../common/musicComponents/artistDivider.vue';
-import { storeToRefs } from 'pinia';
-import { formatTime } from '@/utils/format';
-import PlaylistPanel from '../common/PlaylistPanel.vue';
-import emitter from '@/utils/eventBus';
-import { EVENTS } from '@/constants/events';
+import ArtistDivider from '../common/musicComponents/artistDivider.vue'
+import { storeToRefs } from 'pinia'
+import { formatTime } from '@/utils/format'
+import PlaylistPanel from '../common/PlaylistPanel.vue'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
 
-const playerStore = usePlayerStore();
+const playerStore = usePlayerStore()
 
-const { currentSong, currentTime, duration, playing } = storeToRefs(playerStore);
-const isPlaylistOpen = ref(false);
+const { currentSong, currentTime, duration, playing } = storeToRefs(playerStore)
+const isPlaylistOpen = ref(false)
 
 const progress = computed(() => {
   if (!duration || duration.value === 0 || !currentTime) return 0
@@ -40,7 +40,7 @@ const volume = ref(70)
   <footer class="player-footer">
     <div class="player-container">
       <!-- 左侧：歌曲信息 -->
-      <div class="song-section">
+      <div @click="emitter.emit(EVENTS.TOGGLE_FULLSCREEN, true)" class="song-section">
         <img
           :src="currentSong?.cover || 'https://picsum.photos/50/50?random=1'"
           :alt="currentSong?.title || '专辑封面'"
@@ -86,9 +86,21 @@ const volume = ref(70)
       <!-- 右侧：音量 & 播放列表 -->
       <div class="volume-section">
         <button class="icon-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+            <path
+              d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+            />
           </svg>
         </button>
         <div class="volume-bar">
@@ -103,9 +115,19 @@ const volume = ref(70)
           />
         </div>
         <button class="icon-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <polygon points="10 8 16 12 10 16 10 8"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10 8 16 12 10 16 10 8" />
           </svg>
         </button>
         <button class="icon-btn" @click="isPlaylistOpen = !isPlaylistOpen">
@@ -165,6 +187,7 @@ const volume = ref(70)
   gap: 12px;
   width: 280px;
   flex: 0 0 auto;
+  cursor: pointer;
 }
 
 .album-cover {
@@ -249,7 +272,9 @@ const volume = ref(70)
   width: 42px;
   height: 42px;
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
