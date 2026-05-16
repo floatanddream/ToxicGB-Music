@@ -24,7 +24,7 @@ const handleSeek = (time: number) => {
 <template>
   <div class="song-control">
     <div class="songInfo">
-      <div class="songName text-xl">{{ playerStore.currentSong?.title }}</div>
+      <div class="songName text-3xl font-bold">{{ playerStore.currentSong?.title }}</div>
       <ArtistDivider :artists="playerStore.currentSong?.artist || []" />
     </div>
     <div class="progressBar">
