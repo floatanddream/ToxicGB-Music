@@ -118,6 +118,7 @@ const handleSwitchSong = (song: Song) => {
       <SongControl
         :duration="duration"
         :current-time="currentTime"
+        :is-playing="playing"
         @seek="handleSeek"
       />
     </div>
