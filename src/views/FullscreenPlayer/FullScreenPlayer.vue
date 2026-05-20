@@ -11,7 +11,7 @@ import AlbumCover from './components/AlbumCover.vue'
 import UpNextQueue from './components/UpNextQueue.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
-import { parseLrc, type LyricLine } from '@applemusic-like-lyrics/lyric'
+import { parseLrc, parseYrc, type LyricLine } from '@applemusic-like-lyrics/lyric'
 import { getSongLyric } from '@/api/lyric'
 import { LyricPlayer } from '@applemusic-like-lyrics/vue'
 import "@applemusic-like-lyrics/core/style.css";
@@ -55,8 +55,8 @@ const handleSwitchSong = (song: Song) => {
 }
 
 const testParseLrc = async () => {
-  const lyricRes = await getSongLyric('2714278534');
-  lyricData.value = parseLrc(lyricRes?.lrc?.lyric)
+  const lyricRes = await getSongLyric('1973665667');
+  lyricData.value = parseYrc(lyricRes?.yrc?.lyric)
 }
 
 onMounted(() => {
