@@ -1,29 +1,23 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { storeToRefs } from 'pinia'
-import { formatTime } from '@/utils/format'
 import type { Song } from '@/types/player'
 import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
-  Repeat,
-  Repeat1,
-  Shuffle,
   X,
-  ListMusic,
 } from 'lucide-vue-next'
 import SongControl from './components/SongControl.vue'
 import AlbumCover from './components/AlbumCover.vue'
 import UpNextQueue from './components/UpNextQueue.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
+import { parseLrc, type LyricLine } from '@applemusic-like-lyrics/lyric'
+import { getSongLyric } from '@/api/lyric'
+import { LyricPlayer } from '@applemusic-like-lyrics/vue'
+import "@applemusic-like-lyrics/core/style.css";
 
 const playerStore = usePlayerStore()
+const lyricData = shallowRef<LyricLine[]>([]);
 const { currentSong, playing, currentTime, duration, playlist, currentIndex, mode, volume } =
   storeToRefs(playerStore)
 
@@ -34,8 +28,6 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
-const localVolume = ref(volume.value * 100)
-
 const handleSeek = (time: number) => {
   playerStore.seek(time)
 }
@@ -43,8 +35,6 @@ const handleSeek = (time: number) => {
 const handleClose = () => {
   emitter.emit(EVENTS.TOGGLE_FULLSCREEN, false)
 }
-
-const isMuted = computed(() => localVolume.value === 0)
 
 const upNextSongs = computed(() => {
   const songs = playlist.value
@@ -64,8 +54,14 @@ const handleSwitchSong = (song: Song) => {
   playerStore.switchSong(song)
 }
 
+const testParseLrc = async () => {
+  const lyricRes = await getSongLyric('2714278534');
+  lyricData.value = parseLrc(lyricRes?.lrc?.lyric)
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
+  testParseLrc()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
@@ -90,7 +86,13 @@ onBeforeUnmount(() => {
 
     <!-- Right Panel: Song Info & Queue -->
     <div class="right-panel">
-      <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" />
+      <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
+  <LyricPlayer
+    class="lyric-player"
+    :lyric-lines="lyricData"
+    :current-time="currentTime*1000"
+    :playing="playerStore.playing"
+  />
     </div>
 
     <!-- Close Button -->
@@ -126,10 +128,15 @@ onBeforeUnmount(() => {
 
 /* Right Panel */
 .right-panel {
+  position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 60px 40px;
+  /* padding: 60px 40px; */
   overflow-y: auto;
+}
+.lyric-player{
+  height: 100%;
 }
 </style>
