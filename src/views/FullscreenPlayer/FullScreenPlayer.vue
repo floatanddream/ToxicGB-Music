@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
     <div class="right-panel">
       <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
       <LyricPlayer class="lyric-player" :lyric-lines="lyricData" :current-time="currentTime * 1000"
-        :playing="playerStore.playing" />
+        :playing="playerStore.playing && playerStore.isFullScreen" />
     </div>
 
     <!-- Close Button -->
