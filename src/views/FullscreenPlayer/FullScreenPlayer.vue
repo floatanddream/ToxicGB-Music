@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { storeToRefs } from 'pinia'
 import type { Song } from '@/types/player'
@@ -15,6 +15,7 @@ import { parseLrc, parseYrc, type LyricLine } from '@applemusic-like-lyrics/lyri
 import { getSongLyric } from '@/api/lyric'
 import { LyricPlayer } from '@applemusic-like-lyrics/vue'
 import "@applemusic-like-lyrics/core/style.css";
+import { extractLyrics } from '@/utils/misc'
 
 const playerStore = usePlayerStore()
 const lyricData = shallowRef<LyricLine[]>([]);
@@ -55,9 +56,13 @@ const handleSwitchSong = (song: Song) => {
 }
 
 const testParseLrc = async () => {
-  const lyricRes = await getSongLyric('1973665667');
-  lyricData.value = parseYrc(lyricRes?.yrc?.lyric)
+  const lyricRes = await getSongLyric(playerStore.currentSong?.id);
+  console.log(extractLyrics(lyricRes))
+  lyricData.value = extractLyrics(lyricRes);
 }
+watch(() => playerStore.currentSong?.id,() => {
+  testParseLrc()
+});
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
