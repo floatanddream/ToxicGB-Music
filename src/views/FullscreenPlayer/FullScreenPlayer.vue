@@ -72,31 +72,20 @@ onBeforeUnmount(() => {
   <div class="fullscreen-player glass-component">
     <!-- Left Panel: Album Cover -->
     <div class="left-panel">
-      <AlbumCover
-        :cover="currentSong?.cover || 'https://picsum.photos/400/400?random=1'"
-        :title="currentSong?.title || 'Album Cover'"
-      />
-      <SongControl
-        :duration="duration"
-        :current-time="currentTime"
-        :is-playing="playing"
-        @seek="handleSeek"
-      />
+      <AlbumCover :cover="currentSong?.cover || 'https://picsum.photos/400/400?random=1'"
+        :title="currentSong?.title || 'Album Cover'" />
+      <SongControl :duration="duration" :current-time="currentTime" :is-playing="playing" @seek="handleSeek" />
     </div>
 
     <!-- Right Panel: Song Info & Queue -->
     <div class="right-panel">
       <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
-  <LyricPlayer
-    class="lyric-player"
-    :lyric-lines="lyricData"
-    :current-time="currentTime*1000"
-    :playing="playerStore.playing"
-  />
+      <LyricPlayer class="lyric-player" :lyric-lines="lyricData" :current-time="currentTime * 1000"
+        :playing="playerStore.playing" />
     </div>
 
     <!-- Close Button -->
-    <button class="close-btn" @click="handleClose">
+    <button class="close-btn fixed" @click="handleClose">
       <X :size="24" />
     </button>
   </div>
@@ -111,13 +100,14 @@ onBeforeUnmount(() => {
   bottom: 0;
   z-index: 1000;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 4fr 6fr;
   grid-template-rows: 1fr auto;
   color: #fff;
 }
 
 /* Left Panel */
 .left-panel {
+  height: 85%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,9 +124,12 @@ onBeforeUnmount(() => {
   flex-direction: column;
   justify-content: center;
   /* padding: 60px 40px; */
-  overflow-y: auto;
+  /* overflow-y: hidden; */
 }
-.lyric-player{
-  height: 100%;
+
+.lyric-player {
+  transform: translateY(-20vh);
+  height:120vh;
+  /* overflow-y: hidden; */
 }
 </style>
