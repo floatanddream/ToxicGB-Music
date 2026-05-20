@@ -30,7 +30,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 }
 
 const handleSeek = (time: number) => {
-  playerStore.seek(time)
+  playerStore.seek(time / 1000);
 }
 
 const handleClose = () => {
@@ -85,7 +85,7 @@ onBeforeUnmount(() => {
     <!-- Right Panel: Song Info & Queue -->
     <div class="right-panel">
       <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
-      <LyricPlayer class="lyric-player" :lyric-lines="lyricData" :current-time="currentTime * 1000"
+      <LyricPlayer @line-click="(e) => {handleSeek(e.line?.lyricLine?.startTime)}" class="lyric-player" :lyric-lines="lyricData" :current-time="currentTime * 1000"
         :playing="playerStore.playing && playerStore.isFullScreen" :align-position="0.3" />
     </div>
 
