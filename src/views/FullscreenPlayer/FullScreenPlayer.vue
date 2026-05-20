@@ -11,7 +11,7 @@ import AlbumCover from './components/AlbumCover.vue'
 import UpNextQueue from './components/UpNextQueue.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
-import { parseLrc, parseYrc, type LyricLine } from '@applemusic-like-lyrics/lyric'
+import { type LyricLine } from '@applemusic-like-lyrics/lyric'
 import { getSongLyric } from '@/api/lyric'
 import { LyricPlayer } from '@applemusic-like-lyrics/vue'
 import "@applemusic-like-lyrics/core/style.css";
@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
     <div class="right-panel">
       <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
       <LyricPlayer class="lyric-player" :lyric-lines="lyricData" :current-time="currentTime * 1000"
-        :playing="playerStore.playing && playerStore.isFullScreen" />
+        :playing="playerStore.playing && playerStore.isFullScreen" :align-position="0.3" />
     </div>
 
     <!-- Close Button -->
@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
 
 /* Left Panel */
 .left-panel {
-  height: 85%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -133,8 +133,8 @@ onBeforeUnmount(() => {
 }
 
 .lyric-player {
-  transform: translateY(-20vh);
-  height:120vh;
+  /* transform: translateY(-20vh); */
+  height:100vh; 
   /* overflow-y: hidden; */
 }
 </style>
