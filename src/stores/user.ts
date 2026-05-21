@@ -10,7 +10,6 @@ import {
 import type { Playlist, Song } from '@/types/musicTypes'
 import { transformToPlaylist } from '@/utils/dataTransformer'
 import emitter from '@/utils/eventBus'
-import { EVENTS } from '@/constants/events'
 import { MESSAGE_TYPE } from '@/constants/messages'
 
 interface UserState {
@@ -20,7 +19,7 @@ interface UserState {
   lastFetchTime: number
   _userCreatePlaylist: Playlist[] | null // 改名前缀加 _
   _userSubPlaylist: Playlist[] | null // 改名前缀加 _
-  _userLikeList: Array<number | string> | null
+  userLikeListSet: Set<number | string>
   userSubCount: userSimpleInfo | null
 }
 
@@ -49,7 +48,7 @@ export const useUserStore = defineStore('user', {
     lastFetchTime: 0,
     _userCreatePlaylist: null,
     _userSubPlaylist: null,
-    _userLikeList: [],
+    userLikeListSet: new Set(),
     userSubCount: null,
   }),
 
@@ -66,7 +65,7 @@ export const useUserStore = defineStore('user', {
 
     userSubPlaylist: (state): Playlist[] => state._userSubPlaylist || [],
 
-    userLikeListSet: (state): Set<number | string> => new Set(state._userLikeList || []),
+    isSongLiked: (state) => (songId: string): boolean => state.userLikeListSet.has(songId),
   },
 
   actions: {
@@ -81,6 +80,7 @@ export const useUserStore = defineStore('user', {
         this.loaded = data.loaded
         this._userCreatePlaylist = data.userCreatePlaylist
         this._userSubPlaylist = data.userSubPlaylist
+        this.userLikeListSet = new Set(data.userLikeListSet || [])
       } catch {
         this.resetUser()
       }
@@ -90,21 +90,27 @@ export const useUserStore = defineStore('user', {
       const isAlreadyLike = this.userLikeListSet.has(song.id)
       if (isAlreadyLike) {
         // 取消喜欢
-        const res = await likeMusic(song.id, !isAlreadyLike) 
+        const res = await likeMusic(song.id, !isAlreadyLike)
         if (res?.code === 200 || res?.code === '200') {
-          this._userLikeList = (this._userLikeList || []).filter((item) => item !== song.id)
-          emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS,'已取消喜欢' )
+          // 创建新 Set 触发响应式更新
+          const newSet = new Set(this.userLikeListSet)
+          newSet.delete(song.id)
+          this.userLikeListSet = newSet
+          emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS, '已取消喜欢')
         } else {
-          emitter.emit(MESSAGE_TYPE.TOAST_ERROR,'取消喜欢失败')
+          emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '取消喜欢失败')
         }
       } else {
         // 添加喜欢
-        const res = await likeMusic(song.id, !isAlreadyLike) 
+        const res = await likeMusic(song.id, !isAlreadyLike)
         if (res?.code === 200 || res?.code === '200') {
-          this._userLikeList = [...(this._userLikeList || []), song.id]
-          emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS,'喜欢歌曲成功')
+          // 创建新 Set 触发响应式更新
+          const newSet = new Set(this.userLikeListSet)
+          newSet.add(song.id)
+          this.userLikeListSet = newSet
+          emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS, '喜欢歌曲成功')
         } else {
-          emitter.emit(MESSAGE_TYPE.TOAST_ERROR,'喜欢歌曲失败' )
+          emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '喜欢歌曲失败')
         }
       }
     },
@@ -124,7 +130,7 @@ export const useUserStore = defineStore('user', {
         const userSimpleInfoRes = await getUserSimpleIInfo()
         const userLikeListRes = await getLikeMusic(res.account.id)
 
-        this._userLikeList = userLikeListRes.ids
+        this.userLikeListSet = new Set(userLikeListRes.ids.map(id => id.toString()))
         this.user = res.profile
         this.account = res.account
         this.loaded = true
@@ -170,6 +176,7 @@ export const useUserStore = defineStore('user', {
           user: this.user,
           account: this.account,
           lastFetchTime: this.lastFetchTime,
+          userLikeListSet: [...this.userLikeListSet],
         }),
       )
     },

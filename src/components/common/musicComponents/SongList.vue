@@ -15,6 +15,9 @@ const playerStore = usePlayerStore();
 const userStore = useUserStore();
 const { userLikeListSet } = storeToRefs(userStore)
 
+// 通过 computed 追踪 userLikeListSet 的变化
+const isSongLiked = computed(() => (songId: number | string) => userLikeListSet.value.has(Number(songId)))
+
 const props = defineProps<{
   songs: Song[];
 }>();
@@ -138,7 +141,7 @@ const playSong = (song: Song) => {
           <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button variant="ghost" size="icon" @click="emitter.emit(EVENTS.USER_LIKE_MUSIC,song)">
                <HeartIcon class="w-4 h-4 text-white transition-all duration-300"
-                :class="[ userLikeListSet.value.has(Number(song.id)) ? 'fill-red-500 text-red-500 scale-110' : '' ]" />
+                :class="[ userStore.isSongLiked(song.id) ? 'fill-red-500 text-red-500 scale-110' : '' ]" />
             </Button>
             <Button @click="handleInsertSong(song)" variant="ghost" size="icon">
               <ListPlusIcon class="h-4 w-4" />

@@ -32,4 +32,5 @@ app.mount('#app')
 //开发环境暴露到全局
 if (import.meta.env.DEV) {
   window.__EMITTER__ = emitter
+  window.userStore = userStore
 }
