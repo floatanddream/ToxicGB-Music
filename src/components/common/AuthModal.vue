@@ -3,6 +3,8 @@ import { ref, defineAsyncComponent, computed, watch } from 'vue';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon } from 'lucide-vue-next';
+import emitter from '@/utils/eventBus';
+import { EVENTS } from '@/constants/events';
 
 
 type AuthMode = 'login' | 'register' | 'forgot-password' | 'qrcode';
@@ -90,10 +92,9 @@ const handleForgotPassword = async (email: string) => {
   }
 };
 
-const handleQRCodeLoginSuccess = (cookie: string) => {
+const handleLoginSuccess = (cookie: string) => {
   try {
-    console.log('二维码登录成功，cookie:', cookie);
-    // 可以在这里保存cookie到localStorage等
+    emitter.emit(EVENTS.USER_LOGIN);
     closeAuthModal();
   } catch (error) {
     console.error('二维码登录成功处理失败:', error);
@@ -112,7 +113,7 @@ defineExpose({
       'login-mode': authMode === 'login',
       'register-mode': authMode === 'register',
       'forgot-mode': authMode === 'forgot-password'
-    }" class="change-container glass-container max-w-md p-8 rounded-2xl z-500 overflow-hidden ">
+    }" class="change-container absolute! glass-container max-w-md p-8 rounded-2xl z-500 overflow-hidden ">
       <!-- 头部 -->
       <DialogHeader class="relative">
         <!-- 返回按钮 -->
@@ -138,7 +139,7 @@ defineExpose({
         </transition>
       </DialogHeader>
 
-      <div class="form-container relative min-h-75">
+      <div class="form-container  min-h-75">
         <!-- Dynamic component with smooth transitions -->
         <transition name="scale" mode="out-in" @before-enter="beforeEnter" @after-leave="afterLeave">
           <component
@@ -152,7 +153,7 @@ defineExpose({
               authMode === 'register' ? handleRegister($event) : handleForgotPassword($event)
             )"
             @forgot-password="setAuthMode('forgot-password')"
-            @login-success="handleQRCodeLoginSuccess"
+            @login-success="handleLoginSuccess"
             @switch-to-password="setAuthMode('login')"
           />
         </transition>

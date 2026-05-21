@@ -113,7 +113,7 @@ const startCheckStatus = (key: string) => {
     } else if (status.code === 803) {
       // 登录成功
       qrCodeStatus.value = 'success';
-      qrCodeMessage.value = '登录成功！正在跳转...';
+      qrCodeMessage.value = '登录成功！正在跳转...'
       clearCheckInterval();
 
       if (status.cookie) {

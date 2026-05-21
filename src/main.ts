@@ -9,6 +9,7 @@ import { registerPlayEvents } from '@/utils/eventBusHandler/playEventHandler'
 import { registerToastMessages } from '@/utils/eventBusHandler/toastEventHandler'
 import { useUserStore } from './stores/user'
 import { usePlayerStore } from './stores/playerStore'
+import { registerUserEvent } from './utils/eventBusHandler/userEventHandler'
 
 const app = createApp(App)
 
@@ -23,6 +24,7 @@ userStore.init()
 registerClickEvents(router)
 registerPlayEvents(player)
 registerToastMessages()
+registerUserEvent(userStore)
 
 app.mount('#app')
 console.log('App mounted successfully')
