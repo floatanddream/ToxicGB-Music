@@ -72,7 +72,7 @@ const initTheme = () => {
 
 onMounted(() => {
   initTheme()
-  userStore.ensureUser()
+  // userStore.ensureUser()
 })
 
 defineProps<{
