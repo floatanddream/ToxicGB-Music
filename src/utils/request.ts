@@ -1,4 +1,6 @@
 import ky, { HTTPError } from 'ky'
+const baseURL = import.meta.env.VITE_GLOB_API_URL
+
 
 /**
  * 自定义类型（适配你的后端）
@@ -200,11 +202,13 @@ export function createClient(options?: any) {
   return client
 }
 
+
+
 /**
  * 默认实例
  */
 const request = createClient({
-  baseURL: 'http://127.0.0.1:3000',
+  baseURL: `${baseURL}`,
   timeout: 10000,
   retry: 2,
 })
