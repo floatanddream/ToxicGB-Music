@@ -31,5 +31,5 @@ export async function getLikeMusic(uid: number|string) {
 
 //喜欢音乐
 export async function likeMusic(id: number | string, like: boolean) {
-  return await request.post(`/like?timestamp=${new Date().getTime()}`,{sendCookie:true, like , id:Number(id)})
+  return await request.post(`/like?timestamp=${new Date().getTime()}&id=${id}&like=${like}`,{sendCookie:true})
 }
