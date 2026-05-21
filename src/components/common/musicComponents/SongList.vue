@@ -7,7 +7,7 @@ import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { MESSAGE_TYPE } from '@/constants/messages';
 import { usePlayerStore } from '@/stores/playerStore';
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, type ComponentPublicInstance } from 'vue';
 
 const playerStore = usePlayerStore();
 
@@ -21,6 +21,18 @@ const displayCount = ref(DISPLAY_BATCH_SIZE);
 const loadingMore = ref(false);
 const loadMoreTrigger = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
+
+// 存储所有 cover 的引用
+const coverImgRefs = ref<HTMLImageElement[]>([]);
+
+// 设置引用的方法，在组件销毁时图片纹理缓存能够正常的GC
+const setCoverRef = (el: Element | ComponentPublicInstance | null) => {
+  if (el instanceof HTMLImageElement && !coverImgRefs.value.includes(el)) {
+    coverImgRefs.value.push(el);
+  }
+};
+
+
 
 // 计算需要显示的歌曲
 const displayedSongs = computed(() => {
@@ -68,6 +80,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   observer?.disconnect();
+  // 清空 coverImgRefs 数组
+  coverImgRefs.value.forEach(img => {
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  });
+  coverImgRefs.value.length = 0;
 });
 
 const handleInsertSong = (song: Song) => {
@@ -94,7 +111,8 @@ const playSong = (song: Song) => {
           </div>
 
           <!-- 封面 -->
-          <img :src="song.cover" :alt="song.title" class="w-12 h-12 rounded-lg object-cover" />
+          <img   :ref="setCoverRef"
+ :src="song.cover" :alt="song.title" class="w-12 h-12 rounded-lg object-cover" />
 
           <!-- 歌曲信息 -->
           <div class="flex-1 min-w-0">
