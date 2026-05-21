@@ -7,9 +7,13 @@ import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
 import { MESSAGE_TYPE } from '@/constants/messages';
 import { usePlayerStore } from '@/stores/playerStore';
+import { useUserStore } from '@/stores/user';
 import { ref, computed, onMounted, onBeforeUnmount, type ComponentPublicInstance } from 'vue';
+import { storeToRefs } from 'pinia';
 
 const playerStore = usePlayerStore();
+const userStore = useUserStore();
+const { userLikeListSet } = storeToRefs(userStore)
 
 const props = defineProps<{
   songs: Song[];
@@ -111,8 +115,7 @@ const playSong = (song: Song) => {
           </div>
 
           <!-- 封面 -->
-          <img   :ref="setCoverRef"
- :src="song.cover" :alt="song.title" class="w-12 h-12 rounded-lg object-cover" />
+          <img :ref="setCoverRef" :src="song.cover" :alt="song.title" class="w-12 h-12 rounded-lg object-cover" />
 
           <!-- 歌曲信息 -->
           <div class="flex-1 min-w-0">
@@ -133,8 +136,9 @@ const playSong = (song: Song) => {
 
           <!-- 操作按钮 -->
           <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon">
-              <HeartIcon class="h-4 w-4" />
+            <Button variant="ghost" size="icon" @click="emitter.emit(EVENTS.USER_LIKE_MUSIC,song)">
+               <HeartIcon class="w-4 h-4 text-white transition-all duration-300"
+                :class="[ userLikeListSet.value.has(Number(song.id)) ? 'fill-red-500 text-red-500 scale-110' : '' ]" />
             </Button>
             <Button @click="handleInsertSong(song)" variant="ghost" size="icon">
               <ListPlusIcon class="h-4 w-4" />
