@@ -57,7 +57,7 @@ export const useUserStore = defineStore('user', {
 
     userSubPlaylist: (state): Playlist[] => state._userSubPlaylist || [],
 
-    userLikeList: (state): Array<number | string> => state._userLikeList || [],
+    userLikeListSet: (state): Set<number | string> => new Set(state._userLikeList || []),
   },
 
   actions: {
