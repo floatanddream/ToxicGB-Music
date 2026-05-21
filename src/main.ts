@@ -10,6 +10,7 @@ import { registerToastMessages } from '@/utils/eventBusHandler/toastEventHandler
 import { useUserStore } from './stores/user'
 import { usePlayerStore } from './stores/playerStore'
 import { registerUserEvent } from './utils/eventBusHandler/userEventHandler'
+import emitter from './utils/eventBus'
 
 const app = createApp(App)
 
@@ -27,4 +28,8 @@ registerToastMessages()
 registerUserEvent(userStore)
 
 app.mount('#app')
-console.log('App mounted successfully')
+
+//开发环境暴露到全局
+if (import.meta.env.DEV) {
+  window.__EMITTER__ = emitter
+}
