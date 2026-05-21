@@ -23,3 +23,8 @@ export async function fetchUserFolloweds(uid: number|string, limit = 150, offset
 export async function getUserSimpleIInfo() {
   return await request.post(`/user/subcount`,{sendCookie:true})
 }
+
+//用户喜欢的音乐
+export async function getLikeMusic(uid: number|string) {
+  return await request.post(`/likelist?uid=${uid}`,{sendCookie:true})
+}

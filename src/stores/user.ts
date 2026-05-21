@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { User, Account, userSimpleInfo } from '@/types/user'
-import { fetchUserPlaylist, getUserFromCookie, getUserSimpleIInfo } from '@/api/user'
+import { fetchUserPlaylist, getLikeMusic, getUserFromCookie, getUserSimpleIInfo } from '@/api/user'
 import type { Playlist } from '@/types/musicTypes'
 import { transformToPlaylist } from '@/utils/dataTransformer'
 
@@ -11,6 +11,7 @@ interface UserState {
   lastFetchTime: number
   _userCreatePlaylist: Playlist[] | null // 改名前缀加 _
   _userSubPlaylist: Playlist[] | null // 改名前缀加 _
+  _userLikeList:Array<number | string> | null
   userSubCount: userSimpleInfo | null;
 }
 
@@ -39,6 +40,7 @@ export const useUserStore = defineStore('user', {
     lastFetchTime: 0,
     _userCreatePlaylist: null,
     _userSubPlaylist: null,
+    _userLikeList:[],
     userSubCount: null,
   }),
 
@@ -54,6 +56,8 @@ export const useUserStore = defineStore('user', {
     userCreatePlaylist: (state): Playlist[] => state._userCreatePlaylist || [],
 
     userSubPlaylist: (state): Playlist[] => state._userSubPlaylist || [],
+
+    userLikeList: (state): Array<number | string> => state._userLikeList || [],
   },
 
   actions: {
@@ -84,9 +88,11 @@ export const useUserStore = defineStore('user', {
       }
       try {
         const res = await getUserFromCookie()
-        const { userCreate, userSub } = await getUserPlaylist(res.account.id)
-        const userSimpleInfoRes = await getUserSimpleIInfo()
-
+        const { userCreate, userSub } = await getUserPlaylist(res.account.id);
+        const userSimpleInfoRes = await getUserSimpleIInfo();
+        const userLikeListRes = await getLikeMusic(res.account.id);
+        
+        this._userLikeList = userLikeListRes.ids
         this.user = res.profile
         this.account = res.account
         this.loaded = true
