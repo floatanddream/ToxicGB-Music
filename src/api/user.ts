@@ -28,3 +28,8 @@ export async function getUserSimpleIInfo() {
 export async function getLikeMusic(uid: number|string) {
   return await request.post(`/likelist?uid=${uid}`,{sendCookie:true})
 }
+
+//喜欢音乐
+export async function likeMusic(id: number | string, like: boolean) {
+  return await request.post(`/like`,{sendCookie:true, like , id})
+}

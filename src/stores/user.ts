@@ -1,8 +1,17 @@
 import { defineStore } from 'pinia'
 import type { User, Account, userSimpleInfo } from '@/types/user'
-import { fetchUserPlaylist, getLikeMusic, getUserFromCookie, getUserSimpleIInfo } from '@/api/user'
-import type { Playlist } from '@/types/musicTypes'
+import {
+  fetchUserPlaylist,
+  getLikeMusic,
+  getUserFromCookie,
+  getUserSimpleIInfo,
+  likeMusic,
+} from '@/api/user'
+import type { Playlist, Song } from '@/types/musicTypes'
 import { transformToPlaylist } from '@/utils/dataTransformer'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
+import { MESSAGE_TYPE } from '@/constants/messages'
 
 interface UserState {
   user: User | null
@@ -11,8 +20,8 @@ interface UserState {
   lastFetchTime: number
   _userCreatePlaylist: Playlist[] | null // 改名前缀加 _
   _userSubPlaylist: Playlist[] | null // 改名前缀加 _
-  _userLikeList:Array<number | string> | null
-  userSubCount: userSimpleInfo | null;
+  _userLikeList: Array<number | string> | null
+  userSubCount: userSimpleInfo | null
 }
 
 const getUserPlaylist = async (userId: number) => {
@@ -40,7 +49,7 @@ export const useUserStore = defineStore('user', {
     lastFetchTime: 0,
     _userCreatePlaylist: null,
     _userSubPlaylist: null,
-    _userLikeList:[],
+    _userLikeList: [],
     userSubCount: null,
   }),
 
@@ -77,6 +86,29 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    async toggleLikeMusic(song: Song) {
+      const isAlreadyLike = this.userLikeListSet.has(song.id)
+      if (isAlreadyLike) {
+        // 取消喜欢
+        const res = await likeMusic(song.id, !isAlreadyLike) 
+        if (res?.code === 200 || res?.code === '200') {
+          this._userLikeList = (this._userLikeList || []).filter((item) => item !== song.id)
+          emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS,'已取消喜欢' )
+        } else {
+          emitter.emit(MESSAGE_TYPE.TOAST_ERROR,'取消喜欢失败')
+        }
+      } else {
+        // 添加喜欢
+        const res = await likeMusic(song.id, !isAlreadyLike) 
+        if (res?.code === 200 || res?.code === '200') {
+          this._userLikeList = [...(this._userLikeList || []), song.id]
+          emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS,'喜欢歌曲成功')
+        } else {
+          emitter.emit(MESSAGE_TYPE.TOAST_ERROR,'喜欢歌曲失败' )
+        }
+      }
+    },
+
     async fetchUser(force = false) {
       const token = localStorage.getItem('cookie')
       if (!token) {
@@ -88,10 +120,10 @@ export const useUserStore = defineStore('user', {
       }
       try {
         const res = await getUserFromCookie()
-        const { userCreate, userSub } = await getUserPlaylist(res.account.id);
-        const userSimpleInfoRes = await getUserSimpleIInfo();
-        const userLikeListRes = await getLikeMusic(res.account.id);
-        
+        const { userCreate, userSub } = await getUserPlaylist(res.account.id)
+        const userSimpleInfoRes = await getUserSimpleIInfo()
+        const userLikeListRes = await getLikeMusic(res.account.id)
+
         this._userLikeList = userLikeListRes.ids
         this.user = res.profile
         this.account = res.account
@@ -99,8 +131,8 @@ export const useUserStore = defineStore('user', {
         this.lastFetchTime = Date.now()
         this._userCreatePlaylist = userCreate
         this._userSubPlaylist = userSub
-        const { code, ...userSimpleInfo } = userSimpleInfoRes;
-        this.userSubCount = userSimpleInfo;
+        const { code, ...userSimpleInfo } = userSimpleInfoRes
+        this.userSubCount = userSimpleInfo
         this.persist()
       } catch (error) {
         console.error('token 失效或获取用户失败', error)
@@ -144,4 +176,4 @@ export const useUserStore = defineStore('user', {
   },
 })
 
-export type userStore = ReturnType<typeof useUserStore>;
+export type userStore = ReturnType<typeof useUserStore>
