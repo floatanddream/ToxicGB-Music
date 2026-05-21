@@ -78,7 +78,8 @@ onBeforeUnmount(() => {
     <!-- Left Panel: Album Cover -->
     <div class="left-panel">
       <AlbumCover :cover="currentSong?.cover || 'https://picsum.photos/400/400?random=1'"
-        :title="currentSong?.title || 'Album Cover'" />
+        :title="currentSong?.title || 'Album Cover'"
+        :playing="playing" />
       <SongControl :duration="duration" :current-time="currentTime" :is-playing="playing" @seek="handleSeek" />
     </div>
 

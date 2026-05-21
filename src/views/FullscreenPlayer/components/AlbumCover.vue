@@ -1,7 +1,8 @@
 <script setup lang="ts">
 defineProps<{
-  cover: string
-  title: string
+  cover: string,
+  title: string,
+  playing: boolean,
 }>()
 </script>
 
@@ -11,6 +12,7 @@ defineProps<{
       :src="cover"
       :alt="title"
       class="album-cover"
+      :style="playing ? {scale:1} : {scale:0.8}"
     />
     <div class="cover-reflection"></div>
   </div>
@@ -29,6 +31,8 @@ defineProps<{
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  /* 添加动画 */
+  transition:  0.5s cubic-bezier(0, 1.08, 1, 1);
 }
 
 .cover-reflection {
