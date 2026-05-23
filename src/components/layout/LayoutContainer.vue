@@ -13,6 +13,7 @@ import { storeToRefs } from 'pinia';
 import { usePlayerStore } from '@/stores/playerStore';
 import 'vue-sonner/style.css'
 import { Toaster } from '@/components/ui/sonner'
+import Menu from '../misc/Menu.vue';
 
 const userStore = useUserStore();
 const playerStore = usePlayerStore();
@@ -67,7 +68,9 @@ onUnmounted(()=>{
     <TheHeader v-if="!isFullScreen" class="header" />
     <TheSidebar v-if="!isFullScreen" class="sidebar" />
       <main v-if="!isFullScreen" ref="mainRef" class="main  " style="border-radius: 0%;">
-          <slot />
+          <Menu>
+            <slot />
+          </Menu>
     </main>
     <TheFooter v-if="!isFullScreen" class="footer" />
     <Transition name="fullscreen">
