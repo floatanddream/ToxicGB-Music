@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SkipBack, Pause, Play, SkipForward, Fullscreen } from 'lucide-vue-next'
+import { SkipBack, Pause, Play, SkipForward, Fullscreen, ListPlus } from 'lucide-vue-next'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -9,6 +9,9 @@ import {
 } from '@/components/ui/context-menu'
 import { usePlayerStore } from '@/stores/playerStore'
 import { storeToRefs } from 'pinia'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
+import { MESSAGE_TYPE } from '@/constants/messages'
 
 const playerStore = usePlayerStore()
 const { playing } = storeToRefs(playerStore)
@@ -27,6 +30,12 @@ const handleNext = () => {
 
 const handleClickPlayer = () => {
   playerStore.setFullPlayer(!playerStore.isFullScreen)
+}
+
+const handleCollectCurrentSong = () => {
+  
+  playerStore.currentSong ? emitter.emit(EVENTS.USER_COLLECT_SONG,playerStore.currentSong) : 
+  emitter.emit(MESSAGE_TYPE.TOAST_ERROR,'当前无正在播放歌曲')
 }
 </script>
 
@@ -56,6 +65,15 @@ const handleClickPlayer = () => {
         <Fullscreen class="size-4" />
         <span>打开播放器</span>
       </ContextMenuItem>
+
+       <ContextMenuSeparator />
+
+       <ContextMenuItem @click="handleCollectCurrentSong">
+        <ListPlus class="size-4" />
+        <span>将当前播放歌曲收藏</span>
+      </ContextMenuItem>
+
     </ContextMenuContent>
+
   </ContextMenu>
 </template>
