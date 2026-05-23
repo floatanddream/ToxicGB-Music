@@ -4,6 +4,7 @@ import { Heart, Plus, Loader2 } from 'lucide-vue-next'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -16,6 +17,7 @@ import type { Playlist, Song } from '@/types/musicTypes'
 import request from '@/utils/request'
 import emitter from '@/utils/eventBus'
 import { MESSAGE_TYPE } from '@/constants/messages'
+import { EVENTS } from '@/constants/events'
 
 const userStore = useUserStore()
 const { userCreatePlaylist, isLogin } = storeToRefs(userStore)
@@ -25,8 +27,6 @@ const currentSong = ref<Song | null>(null)
 const loading = ref(false)
 const addingPlaylist = ref<Playlist | null>(null)
 
-const COLLECT_SONG_EVENT = 'collect-song-to-playlist'
-
 const handleCollectSong = (song: unknown) => {
   currentSong.value = song as Song
   open.value = true
@@ -34,11 +34,11 @@ const handleCollectSong = (song: unknown) => {
 
 
 onMounted(() => {
-  emitter.on(COLLECT_SONG_EVENT, handleCollectSong)
+  emitter.on(EVENTS.USER_COLLECT_SONG, handleCollectSong)
 })
 
 onUnmounted(() => {
-  emitter.off(COLLECT_SONG_EVENT, handleCollectSong)
+  emitter.off(EVENTS.USER_COLLECT_SONG, handleCollectSong)
 })
 
 const addSongToPlaylist = async (playlist : Playlist) => {
@@ -52,6 +52,7 @@ const addSongToPlaylist = async (playlist : Playlist) => {
   addingPlaylist.value = playlist;
 
   try {
+    console.log('歌单名字', playlist.title, '歌曲名字', currentSong.value?.title)
     const res = await request.post(
       `/playlist/tracks?pid=${playlist.id}&tracks=${currentSong.value!.id}`,
       { sendCookie: true }
@@ -77,6 +78,7 @@ const addSongToPlaylist = async (playlist : Playlist) => {
     <DialogContent class="change-container absolute! glass-container max-w-md p-8 rounded-2xl z-500 overflow-hidden ">
       <DialogHeader>
         <DialogTitle>收藏到歌单</DialogTitle>
+        <DialogDescription class="sr-only">选择要收藏的歌单</DialogDescription>
       </DialogHeader>
       <ScrollArea class="max-h-150 mt-4">
         <div v-if="userCreatePlaylist.length > 0" class="space-y-2">
