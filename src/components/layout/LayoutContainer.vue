@@ -14,6 +14,7 @@ import { usePlayerStore } from '@/stores/playerStore';
 import 'vue-sonner/style.css'
 import { Toaster } from '@/components/ui/sonner'
 import Menu from '../misc/Menu.vue';
+import CollectSongToPlaylistDialog from '../common/musicComponents/collectSongToPlaylistDialog.vue';
 
 const userStore = useUserStore();
 const playerStore = usePlayerStore();
@@ -73,6 +74,7 @@ onUnmounted(()=>{
           </Menu>
     </main>
     <TheFooter v-if="!isFullScreen" class="footer" />
+    <CollectSongToPlaylistDialog />
     <Transition name="fullscreen">
       <FullScreenPlayer v-if="isFullScreen" />
     </Transition>
