@@ -65,7 +65,10 @@ export const useUserStore = defineStore('user', {
 
     userSubPlaylist: (state): Playlist[] => state._userSubPlaylist || [],
 
-    isSongLiked: (state) => (songId: string): boolean => state.userLikeListSet.has(songId),
+    isSongLiked:
+      (state) =>
+      (song: Song): boolean =>
+        state.userLikeListSet.has(song.id),
   },
 
   actions: {
@@ -130,7 +133,9 @@ export const useUserStore = defineStore('user', {
         const userSimpleInfoRes = await getUserSimpleIInfo()
         const userLikeListRes = await getLikeMusic(res.account.id)
 
-        this.userLikeListSet = new Set(userLikeListRes.ids.map(id => id.toString()))
+        this.userLikeListSet = new Set(
+          userLikeListRes.ids.map((id: number | string) => id.toString()),
+        )
         this.user = res.profile
         this.account = res.account
         this.loaded = true
