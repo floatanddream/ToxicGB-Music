@@ -42,3 +42,17 @@ export async function getPlaylistAllTracks(params: PlaylistParams) {
   const { id, limit = 0, offset = 0 } = params
   return await request.get(`/playlist/track/all?id=${id}&limit=${limit}&offset=${offset}`)
 }
+
+// 对歌单添加或删除歌曲
+// 说明 : 调用此接口 , 可以添加歌曲到歌单或者从歌单删除某首歌曲 ( 需要登录 )
+// 必选参数 :
+// op: 从歌单增加单曲为 add, 删除为 del
+// pid: 歌单 id tracks: 歌曲 id,可多个,用逗号隔开
+// 接口地址 : /playlist/tracks
+// 调用例子 : /playlist/tracks?op=add&pid=24381616&tracks=347231 
+
+export async function modifyPlaylistTracks(playlistId :string | number,
+  songId :string | number
+  , op: 'add' | 'del') {
+  return await request.post(`/playlist/tracks?op=${op}&pid=${playlistId}&tracks=${songId}`,{ sendCookie: true})
+}

@@ -18,6 +18,7 @@ import request from '@/utils/request'
 import emitter from '@/utils/eventBus'
 import { MESSAGE_TYPE } from '@/constants/messages'
 import { EVENTS } from '@/constants/events'
+import { modifyPlaylistTracks } from '@/api/playlist'
 
 const userStore = useUserStore()
 const { userCreatePlaylist, isLogin } = storeToRefs(userStore)
@@ -53,19 +54,16 @@ const addSongToPlaylist = async (playlist : Playlist) => {
 
   try {
     console.log('歌单名字', playlist.title, '歌曲名字', currentSong.value?.title)
-    const res = await request.post(
-      `/playlist/tracks?pid=${playlist.id}&tracks=${currentSong.value!.id}`,
-      { sendCookie: true }
-    )
+    const res = await modifyPlaylistTracks(playlist.id,currentSong.value?.id!,'add')
 
-    if (res.code === 200 || res.code === '200') {
+    if (res.body?.code === 200 || res.body?.code === '200') {
       emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS, '已收藏到歌单')
       open.value = false
     } else {
-      emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '收藏失败')
+      emitter.emit(MESSAGE_TYPE.TOAST_ERROR, res.body?.message || '收藏失败')
     }
-  } catch {
-    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '收藏失败')
+  } catch (err: any) {
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, err?.body?.message || '收藏失败')
   } finally {
     loading.value = false
     addingPlaylist.value = null
@@ -77,7 +75,7 @@ const addSongToPlaylist = async (playlist : Playlist) => {
   <Dialog v-model:open="open">
     <DialogContent class="change-container absolute! glass-container max-w-md p-8 rounded-2xl z-500 overflow-hidden ">
       <DialogHeader>
-        <DialogTitle>收藏到歌单</DialogTitle>
+        <DialogTitle>收藏歌曲《{{ currentSong?.title }}》到歌单</DialogTitle>
         <DialogDescription class="sr-only">选择要收藏的歌单</DialogDescription>
       </DialogHeader>
       <ScrollArea class="max-h-150 mt-4">
