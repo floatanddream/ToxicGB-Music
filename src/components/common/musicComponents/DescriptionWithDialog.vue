@@ -56,7 +56,7 @@ interface Props {
 withDefaults(defineProps<Props>(), {
   title: '简介',
   triggerText: '详细',
-  dialogContentClass: 'max-w-2xl max-h-[80vh] z-500 overflow-hidden',
+  dialogContentClass: 'max-w-2xl max-h-[80vh] z-500 absolute! overflow-hidden glass-container',
   scrollAreaClass: 'h-[calc(80vh-120px)]',
   lineClamp: 2,
 })
