@@ -12,10 +12,10 @@ import UpNextQueue from './components/UpNextQueue.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import { type LyricLine } from '@applemusic-like-lyrics/lyric'
-import { getSongLyric } from '@/api/lyric'
+import { getSongLyric, getTTMLLyric } from '@/api/lyric'
 import { LyricPlayer } from '@applemusic-like-lyrics/vue'
 import "@applemusic-like-lyrics/core/style.css";
-import { extractLyrics } from '@/utils/misc'
+import { extractLeagcyLyrics, extractTTMLLyrics } from '@/utils/misc'
 
 const playerStore = usePlayerStore()
 const lyricData = shallowRef<LyricLine[]>([]);
@@ -55,18 +55,44 @@ const handleSwitchSong = (song: Song) => {
   playerStore.switchSong(song)
 }
 
-const testParseLrc = async () => {
-  const lyricRes = await getSongLyric(playerStore.currentSong?.id);
-  console.log(extractLyrics(lyricRes))
-  lyricData.value = extractLyrics(lyricRes);
+const fetchLyric = async () => {
+  try {
+    // 同时发起两个请求
+    const [ttmlLyricRes, lyricRes] = await Promise.all([
+      getTTMLLyric(playerStore.currentSong?.id!),
+      getSongLyric(playerStore.currentSong?.id!)
+    ]);
+
+    // 优先使用 TTML 歌词
+    if (ttmlLyricRes) {
+      lyricData.value = extractTTMLLyrics(ttmlLyricRes);
+      console.log('TTML歌词:', extractTTMLLyrics(ttmlLyricRes));
+    } else {
+      // TTML 为空时使用普通歌词
+      lyricData.value = extractLeagcyLyrics(lyricRes);
+      console.log('普通歌词:', extractLeagcyLyrics(lyricRes));
+    }
+  } catch (error) {
+    // TTML 请求失败（如404），回退到普通歌词
+    console.warn('TTML歌词获取失败，使用普通歌词:', error);
+
+    try {
+      const lyricRes = await getSongLyric(playerStore.currentSong?.id!);
+      lyricData.value = extractLeagcyLyrics(lyricRes);
+      console.log('回退到普通歌词:', extractLeagcyLyrics(lyricRes));
+    } catch (lyricError) {
+      // 连普通歌词也获取失败
+      console.error('所有歌词获取失败:', lyricError);
+    }
+  }
 }
-watch(() => playerStore.currentSong?.id,() => {
-  testParseLrc()
+watch(() => playerStore.currentSong?.id, () => {
+  fetchLyric()
 });
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
-  testParseLrc()
+  fetchLyric()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
@@ -78,15 +104,15 @@ onBeforeUnmount(() => {
     <!-- Left Panel: Album Cover -->
     <div class="left-panel">
       <AlbumCover :cover="currentSong?.cover || 'https://picsum.photos/400/400?random=1'"
-        :title="currentSong?.title || 'Album Cover'"
-        :playing="playing" />
+        :title="currentSong?.title || 'Album Cover'" :playing="playing" />
       <SongControl :duration="duration" :current-time="currentTime" :is-playing="playing" @seek="handleSeek" />
     </div>
 
     <!-- Right Panel: Song Info & Queue -->
     <div class="right-panel">
       <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
-      <LyricPlayer @line-click="(e) => {handleSeek(e.line?.lyricLine?.startTime)}" class="lyric-player" :lyric-lines="lyricData" :current-time="currentTime * 1000"
+      <LyricPlayer @line-click="(e) => { handleSeek(e.line?.lyricLine?.startTime) }" class="lyric-player"
+        :lyric-lines="lyricData" :current-time="currentTime * 1000"
         :playing="playerStore.playing && playerStore.isFullScreen" :align-position="0.3" />
     </div>
 
@@ -135,7 +161,7 @@ onBeforeUnmount(() => {
 
 .lyric-player {
   /* transform: translateY(-20vh); */
-  height:100vh; 
+  height: 100vh;
   /* overflow-y: hidden; */
 }
 </style>

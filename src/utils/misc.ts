@@ -1,4 +1,4 @@
-import { parseLrc, parseYrc, type LyricLine } from "@applemusic-like-lyrics/lyric";
+import { parseLrc, parseTTML, parseYrc, type LyricLine } from "@applemusic-like-lyrics/lyric";
 
 export const shouldTruncate = (text: string | undefined) => {
   return text && text.length > 100;
@@ -22,7 +22,7 @@ export const formatTimestampToDate = (timestamp: number | undefined): string => 
  * @param {Object} data - 包含歌词数据的对象
  * @returns {LyricLine[]} 解析后的歌词数据
  */
-export const extractLyrics = (data :any):LyricLine[] => {
+export const extractLeagcyLyrics = (data :any):LyricLine[] => {
     // 检查yrc是否存在且有内容
     if (data?.yrc?.lyric && data.yrc.version > 0) {
         return parseYrc(data?.yrc?.lyric);
@@ -34,4 +34,8 @@ export const extractLyrics = (data :any):LyricLine[] => {
     }
     // 都没有歌词数据
     return [];
+}
+
+export const extractTTMLLyrics = (data :any):LyricLine[] => {
+    return parseTTML(data).lines || [];
 }
