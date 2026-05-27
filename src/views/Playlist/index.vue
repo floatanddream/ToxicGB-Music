@@ -6,7 +6,7 @@ import PlaylistContent from './components/PlaylistContent.vue';
 import type { Song, User } from '@/types/musicTypes';
 import type { Playlist } from '@/types/playlist';
 import type { CommentListResponse } from '@/types/comment';
-import { getPlaylistComments, getPlaylistDetail, getPlaylistSubscribers } from '@/api/playlist';
+import { getPlaylistComments, getPlaylistDetail, getPlaylistSubscribers, modifyPlaylistTracks } from '@/api/playlist';
 import { transformCommentListResponse, transformPlaylistDetail, transformToUser } from '@/utils/dataTransformer';
 import emitter from '@/utils/eventBus';
 import { EVENTS } from '@/constants/events';
@@ -35,9 +35,15 @@ const userStore = useUserStore();
 const isUserCreatePlayList = computed(()=> userStore.isUserCreatedPlaylist(playlistDetail.value!));
 provide('isUserCreatePlayList', isUserCreatePlayList)
 
-const handleDeleteSong = (song:Song) => {
-  if (playlistDetail.value) {
-    playlistDetail.value.tracks = playlistDetail.value.tracks?.filter((item) => item.id !== song.id);
+const handleDeleteSong = async (song: Song) => {
+  if (!playlistDetail.value) return
+
+  try {
+    await modifyPlaylistTracks(playlistDetail.value.id, song.id, 'del')
+    playlistDetail.value.tracks = playlistDetail.value.tracks?.filter((item) => item.id !== song.id)
+    emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS, '已从歌单删除')
+  } catch (err: any) {
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, err?.body?.message || '删除失败')
   }
 }
 provide('deleteSong',handleDeleteSong)

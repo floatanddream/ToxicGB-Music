@@ -23,7 +23,7 @@ const props = defineProps<{
 }>();
 
 const isUserCreatePlayList = inject('isUserCreatePlayList', false)
-const deletePlaylistPageSong = inject('deleteSong',()=>{})
+const deletePlaylistPageSong = inject<(song: Song) => void>('deleteSong', () => {})
 
 // 分段加载配置
 const DISPLAY_BATCH_SIZE = 20; // 每次渲染的数量
@@ -156,7 +156,7 @@ const handleAddSongToUserPlaylist = (song: Song) => {
                <BookmarkPlus  class="h-4 w-4" />
             </Button>
 
-            <Button variant="ghost" size="icon">
+            <Button v-if="isUserCreatePlayList" variant="ghost" size="icon" @click.stop="deletePlaylistPageSong(song)">
               <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
                <Trash2Icon  class="h-4 w-4" />
             </Button>
