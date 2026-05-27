@@ -7,6 +7,7 @@ import DescriptionWithDialog from '@/components/common/musicComponents/Descripti
 
 defineProps<{
   playlist: Playlist;
+  isUserCreatePlayList: boolean;
 }>();
 
 defineEmits<{
@@ -56,7 +57,7 @@ defineEmits<{
             <PlayIcon class="h-5 w-5 mr-2 font-text-primary" />
             <span class="font-text-primary">{{ `播放全部` }}</span>
           </Button>
-          <Button variant="outline" size="lg" @click="$emit('toggle-like')">
+          <Button v-if="!isUserCreatePlayList" variant="outline" size="lg" @click="$emit('toggle-like')">
             <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': playlist?.subscribed }" />
             {{ playlist?.subscribed ? '已收藏' : '收藏' }}
           </Button>
