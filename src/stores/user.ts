@@ -8,6 +8,7 @@ import {
   likeMusic,
 } from '@/api/user'
 import type { Playlist, Song } from '@/types/musicTypes'
+import type { Playlist as FullPlaylist } from '@/types/playlist'
 import { transformToPlaylist } from '@/utils/dataTransformer'
 import emitter from '@/utils/eventBus'
 import { MESSAGE_TYPE } from '@/constants/messages'
@@ -53,6 +54,7 @@ export const useUserStore = defineStore('user', {
   }),
 
   getters: {
+
     isLogin: (state): boolean => !!state.user,
 
     userId: (state): number | null => state.user?.userId || null,
@@ -69,6 +71,10 @@ export const useUserStore = defineStore('user', {
       (state) =>
       (song: Song): boolean =>
         state.userLikeListSet.has(song.id),
+    
+    isUserCreatedPlaylist: (state) =>
+      (playlist: Playlist | FullPlaylist): boolean =>
+        state._userCreatePlaylist!.some((item) => item.id === playlist.id),
   },
 
   actions: {
