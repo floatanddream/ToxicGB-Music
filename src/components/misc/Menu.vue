@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SkipBack, Pause, Play, SkipForward, Fullscreen, ListPlus } from 'lucide-vue-next'
+import { SkipBack, Pause, Play, SkipForward, Fullscreen, ListPlus, DiscAlbum, UserCircle2Icon } from 'lucide-vue-next'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -12,6 +12,7 @@ import { storeToRefs } from 'pinia'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import { MESSAGE_TYPE } from '@/constants/messages'
+import { type Artist } from '@/types/musicTypes'
 
 const playerStore = usePlayerStore()
 const { playing } = storeToRefs(playerStore)
@@ -32,11 +33,19 @@ const handleClickPlayer = () => {
   playerStore.setFullPlayer(!playerStore.isFullScreen)
 }
 
+const handleClickAlbum = () => {
+  emitter.emit(EVENTS.ALBUM_CLICK, playerStore.currentSong?.album)
+}
+
 const handleCollectCurrentSong = () => {
-  
   playerStore.currentSong ? emitter.emit(EVENTS.USER_COLLECT_SONG,playerStore.currentSong) : 
   emitter.emit(MESSAGE_TYPE.TOAST_ERROR,'当前无正在播放歌曲')
 }
+
+const handleClickArtist = (artist : Artist) => {
+  emitter.emit(EVENTS.ARTIST_CLICK, artist)
+}
+
 </script>
 
 <template>
@@ -68,10 +77,24 @@ const handleCollectCurrentSong = () => {
 
        <ContextMenuSeparator />
 
-       <ContextMenuItem @click="handleCollectCurrentSong">
+       <ContextMenuItem v-if="playerStore.currentSong" @click="handleClickAlbum">
+        <DiscAlbum class="size-4" />
+        <span>查看歌曲专辑《{{ playerStore.currentSong?.album.title }}》</span>
+      </ContextMenuItem>
+
+      <ContextMenuItem v-if="playerStore.currentSong" 
+      v-for="artist in playerStore.currentSong?.artist" 
+      @click="handleClickArtist(artist)">
+        <UserCircle2Icon class="size-4" />
+        <span>查看歌曲歌手:{{ artist.name }}</span>
+      </ContextMenuItem>
+
+       <ContextMenuItem v-if="playerStore.currentSong" @click="handleCollectCurrentSong">
         <ListPlus class="size-4" />
         <span>将当前播放歌曲收藏</span>
       </ContextMenuItem>
+
+      
 
     </ContextMenuContent>
 
