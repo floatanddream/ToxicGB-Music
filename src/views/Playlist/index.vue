@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import PlaylistHeader from './components/PlaylistHeader.vue';
 import PlaylistContent from './components/PlaylistContent.vue';
@@ -33,6 +33,7 @@ const subscribersHasMore = ref(false);
 
 const userStore = useUserStore();
 const isUserCreatePlayList = computed(()=> userStore.isUserCreatedPlaylist(playlistDetail.value!));
+provide('isUserCreatePlayList', isUserCreatePlayList)
 
 const fetchPlaylistDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);

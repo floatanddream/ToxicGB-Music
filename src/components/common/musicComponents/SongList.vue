@@ -8,7 +8,7 @@ import { EVENTS } from '@/constants/events';
 import { MESSAGE_TYPE } from '@/constants/messages';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useUserStore } from '@/stores/user';
-import { ref, computed, onMounted, onBeforeUnmount, type ComponentPublicInstance } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, type ComponentPublicInstance, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const playerStore = usePlayerStore();
@@ -21,6 +21,9 @@ const isSongLiked = computed(() => (songId: number | string) => userLikeListSet.
 const props = defineProps<{
   songs: Song[];
 }>();
+
+const isUserCreatePlayList = inject('isUserCreatePlayList', false)
+
 
 // 分段加载配置
 const DISPLAY_BATCH_SIZE = 20; // 每次渲染的数量
