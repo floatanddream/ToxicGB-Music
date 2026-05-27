@@ -20,7 +20,6 @@ const isSongLiked = computed(() => (songId: number | string) => userLikeListSet.
 
 const props = defineProps<{
   songs: Song[];
-  isUserCreatePlayList?: boolean;
 }>();
 
 // 分段加载配置

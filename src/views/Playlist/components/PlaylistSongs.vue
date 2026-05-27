@@ -4,13 +4,12 @@ import SongsContainer from '@/components/common/pageComponents/songsContainer.vu
 
 const props = defineProps<{
   songs: Song[];
-  isUserCreatePlayList: boolean;
 }>();
 </script>
 
 <template>
   <div class="playlist-songs">
-    <SongsContainer :isUserCreatePlayList="isUserCreatePlayList" title="歌单歌曲" :songs="songs" />
+    <SongsContainer title="歌单歌曲" :songs="songs" />
     <div class="songs-footer mt-6 text-center">
       <p class="text-sm text-gray-500 dark:text-gray-400">
         最后更新: {{ new Date().toLocaleDateString() }}

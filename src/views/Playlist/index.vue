@@ -32,7 +32,7 @@ const subscribersOffset = ref(0);
 const subscribersHasMore = ref(false);
 
 const userStore = useUserStore();
-const isUserCreatePlayList = computed(() => userStore.isUserCreatedPlaylist(playlistDetail.value!));
+const isUserCreatePlayList = computed(()=> userStore.isUserCreatedPlaylist(playlistDetail.value!));
 
 const fetchPlaylistDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
@@ -48,8 +48,8 @@ const fetchPlaylistDetail = async () => {
 }
 
 const playAll = () => {
-  emitter.emit(EVENTS.PLAY_ALL, playlistDetail.value?.tracks);
-  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌单"${playlistDetail.value?.name}"所有歌曲`);
+  emitter.emit(EVENTS.PLAY_ALL,playlistDetail.value?.tracks);
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO,`开始播放歌单"${playlistDetail.value?.name}"所有歌曲`);
 };
 
 const handleTabChange = (newTab: string) => {
@@ -146,7 +146,7 @@ const fetchPlaylistSubscribers = async () => {
   }
 }
 
-watch(() => playlistId.value, async (newId) => {
+watch(()=> playlistId.value, async (newId) => {
   if (newId) {
     await fetchPlaylistDetail();
   }
@@ -166,15 +166,14 @@ onMounted(() => {
 
       <div v-else :key="playlistId" class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
         <!-- 歌单头部信息 -->
-        <PlaylistHeader v-if="playlistDetail" :playlist="playlistDetail" :isUserCreatePlayList="isUserCreatePlayList"
-          @play-all="playAll" />
+        <PlaylistHeader v-if="playlistDetail" 
+        :playlist="playlistDetail" 
+        :isUserCreatePlayList="isUserCreatePlayList"
+        @play-all="playAll" />
         <!-- 歌单内容区域 -->
-        <PlaylistContent v-if="playlistDetail" :isUserCreatePlayList="isUserCreatePlayList"
-          @active-tab-change="handleTabChange" @load-more-comments="handleLoadMoreComments"
-          @load-more-subscribers="handleLoadMoreSubscribers" :songs="playlistDetail?.tracks || []"
-          :comments-loading="commentsLoading" :comments-loading-more="commentsLoadingMore" :comments="playlistComments"
-          :subscribers="playlistSubscribers" :subscribers-loading="subscribersLoading"
-          :subscribers-loading-more="subscribersLoadingMore" :subscribers-has-more="subscribersHasMore" />
+        <PlaylistContent v-if="playlistDetail" @active-tab-change="handleTabChange" @load-more-comments="handleLoadMoreComments" @load-more-subscribers="handleLoadMoreSubscribers"
+          :songs="playlistDetail?.tracks || []" :comments-loading="commentsLoading" :comments-loading-more="commentsLoadingMore" :comments="playlistComments"
+          :subscribers="playlistSubscribers" :subscribers-loading="subscribersLoading" :subscribers-loading-more="subscribersLoadingMore" :subscribers-has-more="subscribersHasMore" />
       </div>
     </Transition>
   </div>

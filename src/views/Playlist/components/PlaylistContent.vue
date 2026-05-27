@@ -32,7 +32,6 @@ const props = defineProps<{
   subscribersLoading: boolean;
   subscribersLoadingMore: boolean;
   subscribersHasMore: boolean;
-  isUserCreatePlayList: boolean;
 }>();
 </script>
 
@@ -44,9 +43,7 @@ const props = defineProps<{
     <!-- 标签页内容 -->
     <Transition name="fade-slide" mode="out-in">
       <!-- 歌曲标签页 -->
-      <PlaylistSongs v-if="activeTab === 'songs'" key="songs" 
-      :songs="songs"
-      :isUserCreatePlayList="isUserCreatePlayList" />
+      <PlaylistSongs v-if="activeTab === 'songs'" key="songs" :songs="songs" />
 
       <!-- 评论标签页 -->
       <PlaylistComments v-else-if="activeTab === 'comments'" key="comments" :loading="commentsLoading" :loading-more="commentsLoadingMore" :comments="comments" @load-more="handleLoadMoreComments" />
