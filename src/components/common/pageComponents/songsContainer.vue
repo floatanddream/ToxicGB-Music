@@ -4,6 +4,7 @@ import type { Song } from '@/types/musicTypes';
 const props = defineProps<{
   songs: Song[];
   title: string;
+  isUserCreatePlayList: boolean;
 }>();
 
 </script>
@@ -24,7 +25,7 @@ const props = defineProps<{
           </div> -->
         </div>
         <!-- 使用SongList组件 -->
-        <SongList :songs="props?.songs" />
+        <SongList :isUserCreatePlayList="isUserCreatePlayList" :songs="props?.songs" />
 </template>
 
 <style scoped>
