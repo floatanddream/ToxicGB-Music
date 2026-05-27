@@ -35,6 +35,13 @@ const userStore = useUserStore();
 const isUserCreatePlayList = computed(()=> userStore.isUserCreatedPlaylist(playlistDetail.value!));
 provide('isUserCreatePlayList', isUserCreatePlayList)
 
+const handleDeleteSong = (song:Song) => {
+  if (playlistDetail.value) {
+    playlistDetail.value.tracks = playlistDetail.value.tracks?.filter((item) => item.id !== song.id);
+  }
+}
+provide('deleteSong',handleDeleteSong)
+
 const fetchPlaylistDetail = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
   loading.value = true;

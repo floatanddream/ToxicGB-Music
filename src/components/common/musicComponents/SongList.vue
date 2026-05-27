@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlayIcon, HeartIcon, ListPlusIcon, MoreVerticalIcon, Loader2Icon, BookmarkPlus } from 'lucide-vue-next';
+import { PlayIcon, HeartIcon, ListPlusIcon, MoreVerticalIcon, Loader2Icon, BookmarkPlus, Trash2Icon } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import type { Song, Artist, Album } from '@/types/musicTypes';
 import ArtistDivider from './artistDivider.vue';
@@ -23,7 +23,7 @@ const props = defineProps<{
 }>();
 
 const isUserCreatePlayList = inject('isUserCreatePlayList', false)
-
+const deletePlaylistPageSong = inject('deleteSong',()=>{})
 
 // 分段加载配置
 const DISPLAY_BATCH_SIZE = 20; // 每次渲染的数量
@@ -41,8 +41,6 @@ const setCoverRef = (el: Element | ComponentPublicInstance | null) => {
     coverImgRefs.value.push(el);
   }
 };
-
-
 
 // 计算需要显示的歌曲
 const displayedSongs = computed(() => {
@@ -156,6 +154,11 @@ const handleAddSongToUserPlaylist = (song: Song) => {
             <Button @click="handleAddSongToUserPlaylist(song)" variant="ghost" size="icon">
               <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
                <BookmarkPlus  class="h-4 w-4" />
+            </Button>
+
+            <Button variant="ghost" size="icon">
+              <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
+               <Trash2Icon  class="h-4 w-4" />
             </Button>
           </div>
         </div>

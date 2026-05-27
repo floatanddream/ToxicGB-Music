@@ -17,5 +17,6 @@ export const EVENTS = {
   // 用户事件
   USER_LOGIN: 'user-login',
   USER_LIKE_MUSIC: 'user-like-music',
-  USER_COLLECT_SONG: 'user-collect-song'
+  USER_COLLECT_SONG: 'user-collect-song',
+  USER_DELETE_SONG: 'user-delete-song'
 }
