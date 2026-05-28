@@ -9,3 +9,7 @@ export const getSongUrl = async (id: number | string) => {
         timestamp:new Date().getTime(),
     });
 }
+
+export const checkUrl = async (url:  string) => {
+    return await request.head(url);
+}
