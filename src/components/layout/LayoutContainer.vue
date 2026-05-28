@@ -68,7 +68,7 @@ onUnmounted(()=>{
     </div>
     <TheHeader v-if="!isFullScreen" class="header" />
     <TheSidebar v-if="!isFullScreen" class="sidebar" />
-      <main v-if="!isFullScreen" ref="mainRef" class="main  " style="border-radius: 0%;">
+      <main v-show="!isFullScreen" ref="mainRef" class="main  " style="border-radius: 0%;">
           <Menu>
             <slot />
           </Menu>
