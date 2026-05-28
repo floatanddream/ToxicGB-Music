@@ -19,13 +19,41 @@ const playlists = ref<Playlist[]>([]);
 const follows = ref<User[]>([]);
 const followeds = ref<User[]>([]);
 const songRecord = ref<UserSongRecord[]>([]);
+const songRecordLoading = ref(false);
+const recordDisplay = ref<'week' | 'all'>('week');
 const loading = ref(false);
+
+const fetchUserPlaylists = async (uid: string) => {
+  const playlistRes = await fetchUserPlaylist(uid);
+  const allPlaylists = playlistRes.playlist || [];
+  playlists.value = allPlaylists.map(transformToPlaylist);
+
+  const followsRes = await fetchUserFollows(uid);
+  follows.value = followsRes.follow.map(transformToUser);
+
+  const followedsRes = await fetchUserFolloweds(uid);
+  followeds.value = followedsRes.followeds.map(transformToUser);
+};
+
+const fetchUserSongRecord = async (uid: string) => {
+  songRecordLoading.value = true;
+  try {
+    const type = recordDisplay.value === 'week' ? 1 : 0;
+    const userSongHistory = await getUserSongRecord(uid, type);
+    const data = type === 1 ? userSongHistory.weekData : userSongHistory.allData;
+    songRecord.value = data?.map((item: UserSongRecord) => ({
+      ...item,
+      song: transformToSong(item.song),
+    })) || [];
+  } finally {
+    songRecordLoading.value = false;
+  }
+};
 
 const fetchUserData = async () => {
   emitter.emit(EVENTS.SCROOL_TOP);
   loading.value = true;
   try {
-    // 获取当前登录用户或指定用户
     const userIdToFetch = userId.value || 'self';
     const userRes = await getUser(userIdToFetch);
     const userInfo = userRes.profile;
@@ -35,28 +63,9 @@ const fetchUserData = async () => {
 
     const uid = userId.value || userInfo?.userId;
 
-    // 获取用户歌单
     if (uid) {
-      const playlistRes = await fetchUserPlaylist(uid);
-      const allPlaylists = playlistRes.playlist || [];
-      playlists.value = allPlaylists.map(transformToPlaylist);
-
-      // 获取关注列表
-      const followsRes = await fetchUserFollows(uid);
-      follows.value = followsRes.follow.map(transformToUser);
-
-      // 获取粉丝列表
-      const followedsRes = await fetchUserFolloweds(uid);
-      followeds.value = followedsRes.followeds.map(transformToUser);
-    }
-
-    // 获取用户播放历史
-    if(uid) {
-      const userSongHistory = await getUserSongRecord(userIdToFetch);
-      songRecord.value = userSongHistory.weekData?.map((item: UserSongRecord) =>({
-        ...item,
-        song: transformToSong(item.song)
-      }))
+      await fetchUserPlaylists(uid);
+      await fetchUserSongRecord(userIdToFetch);
     }
   } catch (error) {
     console.error('获取用户数据失败:', error);
@@ -68,6 +77,14 @@ const fetchUserData = async () => {
 // 用户切换时自动更新
 watch(() => route.query.id, () => {
   fetchUserData();
+});
+
+// 切换周/全部记录时重新获取
+watch(recordDisplay, () => {
+  const userIdToFetch = userId.value || userData.value?.userId;
+  if (userIdToFetch) {
+    fetchUserSongRecord(String(userIdToFetch));
+  }
 });
 
 onMounted(() => {
@@ -85,7 +102,7 @@ onMounted(() => {
       <div v-else :key="userId">
         <UserHeader v-if="userData" :user="userData" />
         <div class="user-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-          <UserContent v-if="userData" :songRecord="songRecord" :playlists="playlists" :follows="follows" :followeds="followeds" />
+          <UserContent v-if="userData" v-model:record-display="recordDisplay" :songRecord="songRecord" :songRecordLoading="songRecordLoading" :playlists="playlists" :follows="follows" :followeds="followeds" />
         </div>
       </div>
     </Transition>

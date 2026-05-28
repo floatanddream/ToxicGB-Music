@@ -5,13 +5,17 @@ import type { Playlist, User } from '@/types/musicTypes';
 import { type UserSongRecord } from '@/types/user.ts';
 import UserGrid from '@/components/common/pageComponents/UserGrid.vue';
 import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue';
+import SongRecordList from '@/components/common/musicComponents/SongRecordList.vue';
 
-const activeTab = ref<'playlists' | 'follows' | 'followeds'>('playlists');
+const activeTab = ref<'playlists' | 'follows' | 'followeds' | 'songHistory'>('playlists');
+const recordDisplay = defineModel<'week' | 'all'>('recordDisplay', { default: 'week' });
+
 defineProps<{
   playlists: Playlist[];
   follows: User[];
   followeds: User[];
   songRecord: UserSongRecord[];
+  songRecordLoading: boolean;
 }>();
 </script>
 
@@ -33,6 +37,11 @@ defineProps<{
       <!-- 粉丝 -->
       <div v-else-if="activeTab === 'followeds'" key="followeds" class="user-content">
         <UserGrid :users="followeds" />
+      </div>
+
+      <!-- 听歌历史 -->
+      <div v-else-if="activeTab === 'songHistory'" key="songHistory" class="user-content">
+        <SongRecordList v-model:record-display="recordDisplay" :song-records="songRecord" :loading="songRecordLoading" />
       </div>
     </Transition>
   </div>
