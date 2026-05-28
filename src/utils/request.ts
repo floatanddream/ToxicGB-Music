@@ -165,6 +165,11 @@ class HttpClient {
     return this.instance.delete(url, { json: data }).json()
   }
 
+  async head(url: string, params?: any): Promise<Response> {
+    const searchParams = params || {};
+    return ky.head(url, { searchParams });
+  }
+
   /**
    * 🔥 token 刷新逻辑
    */
