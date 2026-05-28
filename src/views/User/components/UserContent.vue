@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import UserTabs from './UserTabs.vue';
 import type { Playlist, User } from '@/types/musicTypes';
+import { type UserSongRecord } from '@/types/user.ts';
 import UserGrid from '@/components/common/pageComponents/UserGrid.vue';
 import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue';
 
@@ -10,6 +11,7 @@ defineProps<{
   playlists: Playlist[];
   follows: User[];
   followeds: User[];
+  songRecord: UserSongRecord[];
 }>();
 </script>
 

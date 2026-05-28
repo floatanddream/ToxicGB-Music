@@ -1,4 +1,5 @@
 import type { AvatarDetail } from "./artist"
+import type { Song } from "./musicTypes"
 
 export interface UserInfo {
   id: string
@@ -76,4 +77,10 @@ export interface userSimpleInfo {
   createDjRadioCount: number,
   createdPlaylistCount: number,
   subPlaylistCount: number,
+}
+
+export interface UserSongRecord {
+  song : Song,
+  playCount: number,
+  score: number,
 }

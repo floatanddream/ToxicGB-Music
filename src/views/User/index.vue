@@ -3,10 +3,10 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import UserHeader from './components/UserHeader.vue';
 import UserContent from './components/UserContent.vue';
-import type { User as UserInfo } from '@/types/user';
+import type { User as UserInfo, UserSongRecord } from '@/types/user';
 import type { Playlist, User } from '@/types/musicTypes';
-import { getUser, fetchUserPlaylist, fetchUserFollows, fetchUserFolloweds } from '@/api/user';
-import { transformToPlaylist, transformToUser } from '@/utils/dataTransformer';
+import { getUser, fetchUserPlaylist, fetchUserFollows, fetchUserFolloweds, getUserSongRecord } from '@/api/user';
+import { transformToPlaylist, transformToSong, transformToUser } from '@/utils/dataTransformer';
 import { Loader2 } from 'lucide-vue-next';
 import { EVENTS } from '@/constants/events';
 import emitter from '@/utils/eventBus';
@@ -18,6 +18,7 @@ const userData = ref<UserInfo>();
 const playlists = ref<Playlist[]>([]);
 const follows = ref<User[]>([]);
 const followeds = ref<User[]>([]);
+const songRecord = ref<UserSongRecord[]>([]);
 const loading = ref(false);
 
 const fetchUserData = async () => {
@@ -48,6 +49,15 @@ const fetchUserData = async () => {
       const followedsRes = await fetchUserFolloweds(uid);
       followeds.value = followedsRes.followeds.map(transformToUser);
     }
+
+    // 获取用户播放历史
+    if(uid) {
+      const userSongHistory = await getUserSongRecord(userIdToFetch);
+      songRecord.value = userSongHistory.weekData?.map((item: UserSongRecord) =>({
+        ...item,
+        song: transformToSong(item.song)
+      }))
+    }
   } catch (error) {
     console.error('获取用户数据失败:', error);
   } finally {
@@ -75,7 +85,7 @@ onMounted(() => {
       <div v-else :key="userId">
         <UserHeader v-if="userData" :user="userData" />
         <div class="user-content max-w-7xl mx-auto px-4 md:px-6 pb-8">
-          <UserContent v-if="userData" :playlists="playlists" :follows="follows" :followeds="followeds" />
+          <UserContent v-if="userData" :songRecord="songRecord" :playlists="playlists" :follows="follows" :followeds="followeds" />
         </div>
       </div>
     </Transition>

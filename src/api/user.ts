@@ -33,3 +33,17 @@ export async function getLikeMusic(uid: number|string) {
 export async function likeMusic(id: number | string, like: boolean) {
   return await request.post(`/like?timestamp=${new Date().getTime()}&id=${id}&like=${like}`,{sendCookie:true})
 }
+
+// 获取用户播放记录
+// 说明 : 登录后调用此接口 , 传入用户 id, 可获取用户播放记录
+
+// 必选参数 : uid : 用户 id
+
+// 可选参数 : type : type=1 时只返回 weekData, type=0 时返回 allData
+
+// 接口地址 : /user/record
+
+// 调用例子 : /user/record?uid=32953014&type=1
+export async function getUserSongRecord(uid: number|string, type = 1) {
+  return await request.post(`/user/record?uid=${uid}&type=${type}`,{sendCookie:true})
+}

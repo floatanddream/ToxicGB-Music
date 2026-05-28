@@ -7,6 +7,8 @@ import { ref, onMounted } from 'vue'
 import { MoonIcon, SunIcon } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { useUserStore } from '@/stores/user'
+import emitter from '@/utils/eventBus.ts'
+import { EVENTS } from '@/constants/events.ts'
 
 const isDarkMode = ref(false);
 const authModalRef = ref<InstanceType<typeof AuthModal> | null>(null);
@@ -23,6 +25,7 @@ const onClickAvatar = () => {
   if (authModalRef.value && !userStore.isLogin) {
     authModalRef.value.openAuthModal();
   }
+  emitter.emit(EVENTS.USER_CLICK,userStore.account)
 };
 
 const initTheme = () => {

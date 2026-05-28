@@ -6,6 +6,7 @@ const modelValue = defineModel<string>();
 
 const tabs: TabItem[] = [
   { label: '歌单', value: 'playlists' },
+  { label: '听歌历史', value: 'songHistory'},
   { label: '关注', value: 'follows' },
   { label: '粉丝', value: 'followeds' },
 ];
