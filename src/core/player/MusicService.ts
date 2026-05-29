@@ -22,10 +22,11 @@ async function fetchSong(song: Song): Promise<CachedSong> {
   }
 }
 
-async function checkUrlValidity(url : string) {
+export async function checkUrlValidity(url : string) {
   try {
     const response = await checkUrl(url);
     if (response.ok || response.status === 304) {
+      console.log(response)
       return true;
     } else {
       console.log('URL 无效，状态码:', response.status);

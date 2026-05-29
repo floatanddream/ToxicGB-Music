@@ -88,14 +88,16 @@ export const usePlayerStore = defineStore('player', () => {
   };
 
   /* ---------------- 🎵 播放控制 ---------------- */
-  const playByIndex = (index: number) => {
+  const playByIndex = async (index: number) => {
     if (index < 0 || index >= playlist.value.length) return;
 
     currentIndex.value = index;
     const song = playlist.value[index]!;
+    const fullSong = await getSong(song);
+    playlist.value[index] = fullSong;
 
-    currentSong.value = song;
-    player.playSong(song);
+    currentSong.value = fullSong;
+    player.playSong(fullSong);
 
     if (mode.value === 'random') {
       syncRandomIndex();
