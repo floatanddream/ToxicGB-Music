@@ -1,43 +1,82 @@
 <script setup lang="ts">
-
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import SearchInput from './components/SearchInput.vue';
-import SongList from '@/components/common/pageComponents/SongList.vue';
-import ArtistGrid from '@/components/common/pageComponents/ArtistGrid.vue';
-import AlbumGrid from '@/components/common/pageComponents/AlbumGrid.vue';
-import UserGrid from '@/components/common/pageComponents/UserGrid.vue';
-import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { SearchIcon, Loader2 } from 'lucide-vue-next';
-import { searchBySinger, searchByAlbum, searchByPlaylist, searchByUser, searchBySong } from '@/api/search';
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import SearchInput from './components/SearchInput.vue'
+import SongList from '@/components/common/pageComponents/SongList.vue'
+import ArtistGrid from '@/components/common/pageComponents/ArtistGrid.vue'
+import AlbumGrid from '@/components/common/pageComponents/AlbumGrid.vue'
+import UserGrid from '@/components/common/pageComponents/UserGrid.vue'
+import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue'
+import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SearchIcon, Loader2 } from 'lucide-vue-next'
+import {
+  searchBySinger,
+  searchByAlbum,
+  searchByPlaylist,
+  searchByUser,
+  searchBySong,
+} from '@/api/search'
 import * as MusicTypes from '@/types/musicTypes'
-import emitter from '@/utils/eventBus';
-import { EVENTS } from '@/constants/events';
-import { transformAlbums, transformToArtist, transformToPlaylist, transformToSong, transformToUser } from '@/utils/dataTransformer'
-const route = useRoute();
-const searchArtistData = ref<Array<MusicTypes.Artist>>([]);
-const searchAlbumData = ref<Array<MusicTypes.Album>>([]);
-const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([]);
-const searchUserData = ref<Array<MusicTypes.User>>([]);
-const searchSongData = ref<Array<MusicTypes.Song>>([]);
-const loading = ref(false);
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
+import { MESSAGE_TYPE } from '@/constants/messages'
+import {
+  transformAlbums,
+  transformToArtist,
+  transformToPlaylist,
+  transformToSong,
+  transformToUser,
+} from '@/utils/dataTransformer'
+
+const route = useRoute()
+const searchArtistData = ref<Array<MusicTypes.Artist>>([])
+const searchAlbumData = ref<Array<MusicTypes.Album>>([])
+const searchPlaylistData = ref<Array<MusicTypes.Playlist>>([])
+const searchUserData = ref<Array<MusicTypes.User>>([])
+const searchSongData = ref<Array<MusicTypes.Song>>([])
+
+// 分页状态（每 tab 一份）
+const songOffset = ref(0)
+const songHasMore = ref(true)
+const songLoading = ref(false)
+
+const albumOffset = ref(0)
+const albumHasMore = ref(true)
+const albumLoading = ref(false)
+
+const artistOffset = ref(0)
+const artistHasMore = ref(true)
+const artistLoading = ref(false)
+
+const playlistOffset = ref(0)
+const playlistHasMore = ref(true)
+const playlistLoading = ref(false)
+
+const userOffset = ref(0)
+const userHasMore = ref(true)
+const userLoading = ref(false)
+
+const PAGE_SIZE = 30
+
+const loading = ref(false)
 const searchStatus = ref({
   artist: false,
   album: false,
   playlist: false,
   user: false,
-  song: false
-});
+  song: false,
+})
 
 const allSearchCompleted = computed(() => {
-  return searchStatus.value.artist &&
+  return (
+    searchStatus.value.artist &&
     searchStatus.value.album &&
     searchStatus.value.playlist &&
     searchStatus.value.user &&
-    searchStatus.value.song;
-});
+    searchStatus.value.song
+  )
+})
 
 const resetSearchStatus = () => {
   searchStatus.value = {
@@ -45,69 +84,233 @@ const resetSearchStatus = () => {
     album: false,
     playlist: false,
     user: false,
-    song: false
-  };
-};
+    song: false,
+  }
+}
+
+const resetAllPaginationState = () => {
+  searchSongData.value = []
+  searchAlbumData.value = []
+  searchArtistData.value = []
+  searchPlaylistData.value = []
+  searchUserData.value = []
+
+  songOffset.value = 0
+  songHasMore.value = true
+  songLoading.value = false
+  albumOffset.value = 0
+  albumHasMore.value = true
+  albumLoading.value = false
+  artistOffset.value = 0
+  artistHasMore.value = true
+  artistLoading.value = false
+  playlistOffset.value = 0
+  playlistHasMore.value = true
+  playlistLoading.value = false
+  userOffset.value = 0
+  userHasMore.value = true
+  userLoading.value = false
+}
 
 const searchArtist = async (keywords: string) => {
   try {
-    const data = await searchBySinger(keywords as string);
-    searchArtistData.value = data.result.artists.map(transformToArtist);
+    const data = await searchBySinger(keywords, { limit: PAGE_SIZE, offset: artistOffset.value })
+    const items = (data?.result?.artists ?? []).map(transformToArtist)
+    searchArtistData.value = items
+    const total = data?.result?.artistCount ?? 0
+    artistHasMore.value = items.length > 0 && searchArtistData.value.length < total
+    artistOffset.value = items.length
   } catch (error) {
-    console.error('搜索歌手失败:', error);
-    searchArtistData.value = [];
+    console.error('搜索歌手失败:', error)
+    searchArtistData.value = []
+    artistHasMore.value = false
   } finally {
-    searchStatus.value.artist = true;
+    searchStatus.value.artist = true
   }
-};
+}
 const searchAlbum = async (keywords: string) => {
   try {
-    const data = await searchByAlbum(keywords as string);
-    searchAlbumData.value = data.result.albums.map((item: MusicTypes.RawAlbum) => transformAlbums(item, true));
+    const data = await searchByAlbum(keywords, { limit: PAGE_SIZE, offset: albumOffset.value })
+    const items = (data?.result?.albums ?? []).map((item: MusicTypes.RawAlbum) =>
+      transformAlbums(item, true),
+    )
+    searchAlbumData.value = items
+    const total = data?.result?.albumCount ?? 0
+    albumHasMore.value = items.length > 0 && searchAlbumData.value.length < total
+    albumOffset.value = items.length
   } catch (error) {
-    console.error('搜索专辑失败:', error);
-    searchAlbumData.value = [];
+    console.error('搜索专辑失败:', error)
+    searchAlbumData.value = []
+    albumHasMore.value = false
   } finally {
-    searchStatus.value.album = true;
+    searchStatus.value.album = true
   }
-};
+}
 const searchPlaylist = async (keywords: string) => {
   try {
-    const data = await searchByPlaylist(keywords as string);
-    searchPlaylistData.value = data.result.playlists.map(transformToPlaylist);
+    const data = await searchByPlaylist(keywords, {
+      limit: PAGE_SIZE,
+      offset: playlistOffset.value,
+    })
+    const items = (data?.result?.playlists ?? []).map(transformToPlaylist)
+    searchPlaylistData.value = items
+    const total = data?.result?.playlistCount ?? 0
+    playlistHasMore.value = items.length > 0 && searchPlaylistData.value.length < total
+    playlistOffset.value = items.length
   } catch (error) {
-    console.error('搜索歌单失败:', error);
-    searchPlaylistData.value = [];
+    console.error('搜索歌单失败:', error)
+    searchPlaylistData.value = []
+    playlistHasMore.value = false
   } finally {
-    searchStatus.value.playlist = true;
+    searchStatus.value.playlist = true
   }
-};
+}
 const searchUser = async (keywords: string) => {
   try {
-    const data = await searchByUser(keywords as string);
-    searchUserData.value = data.result.userprofiles.map(transformToUser);
+    const data = await searchByUser(keywords, { limit: PAGE_SIZE, offset: userOffset.value })
+    const items = (data?.result?.userprofiles ?? []).map(transformToUser)
+    searchUserData.value = items
+    const total = data?.result?.userprofileCount ?? 0
+    userHasMore.value = items.length > 0 && searchUserData.value.length < total
+    userOffset.value = items.length
   } catch (error) {
-    console.error('搜索用户失败:', error);
-    searchUserData.value = [];
+    console.error('搜索用户失败:', error)
+    searchUserData.value = []
+    userHasMore.value = false
   } finally {
-    searchStatus.value.user = true;
+    searchStatus.value.user = true
   }
-};
+}
 const searchSong = async (keywords: string) => {
   try {
-    const data = await searchBySong(keywords as string);
-    searchSongData.value = data.result.songs.map(transformToSong);
+    const data = await searchBySong(keywords, { limit: PAGE_SIZE, offset: songOffset.value })
+    const items = (data?.result?.songs ?? []).map(transformToSong)
+    searchSongData.value = items
+    const total = data?.result?.songCount ?? 0
+    songHasMore.value = items.length > 0 && searchSongData.value.length < total
+    songOffset.value = items.length
   } catch (error) {
-    console.error('搜索歌曲失败:', error);
-    searchSongData.value = [];
+    console.error('搜索歌曲失败:', error)
+    searchSongData.value = []
+    songHasMore.value = false
   } finally {
-    searchStatus.value.song = true;
+    searchStatus.value.song = true
   }
-};
+}
+
+// 追加加载方法
+const loadMoreSongs = async () => {
+  if (songLoading.value || !songHasMore.value || !searchQuery.value) return
+  songLoading.value = true
+  try {
+    const data = await searchBySong(searchQuery.value, {
+      limit: PAGE_SIZE,
+      offset: songOffset.value,
+    })
+    const items = (data?.result?.songs ?? []).map(transformToSong)
+    searchSongData.value.push(...items)
+    songOffset.value += items.length
+    const total = data?.result?.songCount ?? 0
+    songHasMore.value = items.length > 0 && searchSongData.value.length < total
+  } catch (error) {
+    console.error('追加歌曲失败:', error)
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '加载失败')
+  } finally {
+    songLoading.value = false
+  }
+}
+
+const loadMoreAlbums = async () => {
+  if (albumLoading.value || !albumHasMore.value || !searchQuery.value) return
+  albumLoading.value = true
+  try {
+    const data = await searchByAlbum(searchQuery.value, {
+      limit: PAGE_SIZE,
+      offset: albumOffset.value,
+    })
+    const items = (data?.result?.albums ?? []).map((item: MusicTypes.RawAlbum) =>
+      transformAlbums(item, true),
+    )
+    searchAlbumData.value.push(...items)
+    albumOffset.value += items.length
+    const total = data?.result?.albumCount ?? 0
+    albumHasMore.value = items.length > 0 && searchAlbumData.value.length < total
+  } catch (error) {
+    console.error('追加专辑失败:', error)
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '加载失败')
+  } finally {
+    albumLoading.value = false
+  }
+}
+
+const loadMoreArtists = async () => {
+  if (artistLoading.value || !artistHasMore.value || !searchQuery.value) return
+  artistLoading.value = true
+  try {
+    const data = await searchBySinger(searchQuery.value, {
+      limit: PAGE_SIZE,
+      offset: artistOffset.value,
+    })
+    const items = (data?.result?.artists ?? []).map(transformToArtist)
+    searchArtistData.value.push(...items)
+    artistOffset.value += items.length
+    const total = data?.result?.artistCount ?? 0
+    artistHasMore.value = items.length > 0 && searchArtistData.value.length < total
+  } catch (error) {
+    console.error('追加歌手失败:', error)
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '加载失败')
+  } finally {
+    artistLoading.value = false
+  }
+}
+
+const loadMorePlaylists = async () => {
+  if (playlistLoading.value || !playlistHasMore.value || !searchQuery.value) return
+  playlistLoading.value = true
+  try {
+    const data = await searchByPlaylist(searchQuery.value, {
+      limit: PAGE_SIZE,
+      offset: playlistOffset.value,
+    })
+    const items = (data?.result?.playlists ?? []).map(transformToPlaylist)
+    searchPlaylistData.value.push(...items)
+    playlistOffset.value += items.length
+    const total = data?.result?.playlistCount ?? 0
+    playlistHasMore.value = items.length > 0 && searchPlaylistData.value.length < total
+  } catch (error) {
+    console.error('追加歌单失败:', error)
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '加载失败')
+  } finally {
+    playlistLoading.value = false
+  }
+}
+
+const loadMoreUsers = async () => {
+  if (userLoading.value || !userHasMore.value || !searchQuery.value) return
+  userLoading.value = true
+  try {
+    const data = await searchByUser(searchQuery.value, {
+      limit: PAGE_SIZE,
+      offset: userOffset.value,
+    })
+    const items = (data?.result?.userprofiles ?? []).map(transformToUser)
+    searchUserData.value.push(...items)
+    userOffset.value += items.length
+    const total = data?.result?.userprofileCount ?? 0
+    userHasMore.value = items.length > 0 && searchUserData.value.length < total
+  } catch (error) {
+    console.error('追加用户失败:', error)
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '加载失败')
+  } finally {
+    userLoading.value = false
+  }
+}
+
 const handelSearchAllType = async () => {
-  emitter.emit(EVENTS.SCROOL_TOP);
-  loading.value = true;
-  resetSearchStatus();
+  emitter.emit(EVENTS.SCROOL_TOP)
+  loading.value = true
+  resetSearchStatus()
+  resetAllPaginationState()
 
   // 并行执行所有搜索
   Promise.all([
@@ -115,59 +318,62 @@ const handelSearchAllType = async () => {
     searchArtist(searchQuery.value),
     searchAlbum(searchQuery.value),
     searchPlaylist(searchQuery.value),
-    searchUser(searchQuery.value)
+    searchUser(searchQuery.value),
   ]).finally(() => {
-    loading.value = false;
-  });
-};
+    loading.value = false
+  })
+}
 
-watch(() => route.query.keywords, async (newKeywords) => {
-  searchQuery.value = newKeywords;
-  handelSearchAllType();
-});
+watch(
+  () => route.query.keywords,
+  async (newKeywords) => {
+    searchQuery.value = newKeywords
+    handelSearchAllType()
+  },
+)
 
-const searchQuery = ref();
-const activeTab = ref('songs');
-const isPlaying = ref(false);
+const searchQuery = ref()
+const activeTab = ref('songs')
+const isPlaying = ref(false)
 
 const handleSearch = (query: string) => {
-  searchQuery.value = query;
-  handelSearchAllType();
-};
+  searchQuery.value = query
+  handelSearchAllType()
+}
 
 const handlePlaySong = (song: MusicTypes.Song) => {
-  isPlaying.value = !isPlaying.value;
-  console.log('Playing song:', song.title);
-};
+  isPlaying.value = !isPlaying.value
+  console.log('Playing song:', song.title)
+}
 
 const handleArtistClick = (artist: MusicTypes.Artist) => {
-  console.log('Artist clicked:', artist.name);
-};
+  console.log('Artist clicked:', artist.name)
+}
 
 const handleAlbumClick = (album: MusicTypes.Album) => {
-  console.log('Album clicked:', album.title);
-};
+  console.log('Album clicked:', album.title)
+}
 
 const handleUserClick = (user: MusicTypes.User) => {
-  console.log('User clicked:', user.name);
-};
+  console.log('User clicked:', user.name)
+}
 
 const handleFollowUser = (user: MusicTypes.User) => {
-  console.log('Follow user:', user.name);
-};
+  console.log('Follow user:', user.name)
+}
 
 const handlePlaylistClick = (playlist: MusicTypes.Playlist) => {
-  console.log('Playlist clicked:', playlist.title);
-};
+  console.log('Playlist clicked:', playlist.title)
+}
 
 const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
-  console.log('Like playlist:', playlist.title);
-};
+  console.log('Like playlist:', playlist.title)
+}
 
 onMounted(() => {
   if (route.query.keywords) {
-    searchQuery.value = route.query.keywords as string;
-    handelSearchAllType();
+    searchQuery.value = route.query.keywords as string
+    handelSearchAllType()
   }
 })
 </script>
@@ -175,17 +381,16 @@ onMounted(() => {
 <template>
   <div class="glass-container min-h-screen">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
-      <div class="section-header flex flex-col mb-8 ">
+      <div class="section-header flex flex-col mb-8">
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
           <span
-            class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent">
+            class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent"
+          >
             <span v-if="searchQuery">{{ searchQuery }} 的搜索结果</span>
             <span v-else>搜索音乐</span>
           </span>
         </h1>
-        <p class="text-secondary mt-5 max-w-2xl">
-          发现你喜欢的音乐、歌手和专辑
-        </p>
+        <p class="text-secondary mt-5 max-w-2xl">发现你喜欢的音乐、歌手和专辑</p>
       </div>
       <div class="max-w-4xl mx-auto mb-8">
         <SearchInput @search="handleSearch" />
@@ -194,12 +399,12 @@ onMounted(() => {
       <div v-if="!searchQuery" class="search-empty-state">
         <div class="max-w-2xl mx-auto text-center py-16">
           <div
-            class="w-32 h-32 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            class="w-32 h-32 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"
+          >
             <SearchIcon class="w-16 h-16 text-gray-400" />
           </div>
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">输入关键词开始搜索</h2>
           <p class="text-gray-600 dark:text-gray-400 mb-6">搜索歌曲、歌手、专辑、歌单或用户</p>
-
         </div>
       </div>
 
@@ -211,45 +416,45 @@ onMounted(() => {
 
         <Tabs v-else v-model="activeTab" class="w-full">
           <div class="sticky top-10 z-20">
-            <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8 tab-back ">
+            <TabsList class="grid grid-cols-5 lg:w-[700px] mx-auto mb-8 tab-back">
               <TabsTrigger value="songs">
-                <div class="flex items-center gap-1 ">
-                  <span >歌曲</span>
-                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                <div class="flex items-center gap-1">
+                  <span>歌曲</span>
+                  <!-- <span class="text-xs text-gray-600 dark:text-gray-400">
                     ({{ searchSongData.length }})
-                  </span>
+                  </span> -->
                 </div>
               </TabsTrigger>
               <TabsTrigger value="artists">
                 <div class="flex items-center gap-1">
                   <span>歌手</span>
-                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                  <!-- <span class="text-xs text-gray-600 dark:text-gray-400">
                     ({{ searchArtistData.length }})
-                  </span>
+                  </span> -->
                 </div>
               </TabsTrigger>
               <TabsTrigger value="albums">
                 <div class="flex items-center gap-1">
                   <span>专辑</span>
-                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                  <!-- <span class="text-xs text-gray-600 dark:text-gray-400">
                     ({{ searchAlbumData.length }})
-                  </span>
+                  </span> -->
                 </div>
               </TabsTrigger>
               <TabsTrigger value="playlists">
                 <div class="flex items-center gap-1">
                   <span>歌单</span>
-                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                  <!-- <span class="text-xs text-gray-600 dark:text-gray-400">
                     ({{ searchPlaylistData.length }})
-                  </span>
+                  </span> -->
                 </div>
               </TabsTrigger>
               <TabsTrigger value="users">
                 <div class="flex items-center gap-1">
                   <span>用户</span>
-                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                  <!-- <span class="text-xs text-gray-600 dark:text-gray-400">
                     ({{ searchUserData.length }})
-                  </span>
+                  </span> -->
                 </div>
               </TabsTrigger>
             </TabsList>
@@ -259,23 +464,53 @@ onMounted(() => {
             <Transition name="fade-scale" mode="out-in">
               <div :key="activeTab">
                 <TabsContent value="songs" v-show="activeTab === 'songs'">
-                  <SongList :songs="searchSongData" />
+                  <InfiniteScroll
+                    :loading="songLoading"
+                    :has-more="songHasMore"
+                    @load-more="loadMoreSongs"
+                  >
+                    <SongList :songs="searchSongData" />
+                  </InfiniteScroll>
                 </TabsContent>
 
                 <TabsContent value="artists" v-show="activeTab === 'artists'">
-                  <ArtistGrid :artists="searchArtistData" />
+                  <InfiniteScroll
+                    :loading="artistLoading"
+                    :has-more="artistHasMore"
+                    @load-more="loadMoreArtists"
+                  >
+                    <ArtistGrid :artists="searchArtistData" />
+                  </InfiniteScroll>
                 </TabsContent>
 
                 <TabsContent value="albums" v-show="activeTab === 'albums'">
-                  <AlbumGrid :albums="searchAlbumData" />
+                  <InfiniteScroll
+                    :loading="albumLoading"
+                    :has-more="albumHasMore"
+                    @load-more="loadMoreAlbums"
+                  >
+                    <AlbumGrid :albums="searchAlbumData" />
+                  </InfiniteScroll>
                 </TabsContent>
 
                 <TabsContent value="playlists" v-show="activeTab === 'playlists'">
-                  <PlaylistGrid :playlists="searchPlaylistData" />
+                  <InfiniteScroll
+                    :loading="playlistLoading"
+                    :has-more="playlistHasMore"
+                    @load-more="loadMorePlaylists"
+                  >
+                    <PlaylistGrid :playlists="searchPlaylistData" />
+                  </InfiniteScroll>
                 </TabsContent>
 
                 <TabsContent value="users" v-show="activeTab === 'users'">
-                  <UserGrid :users="searchUserData" />
+                  <InfiniteScroll
+                    :loading="userLoading"
+                    :has-more="userHasMore"
+                    @load-more="loadMoreUsers"
+                  >
+                    <UserGrid :users="searchUserData" />
+                  </InfiniteScroll>
                 </TabsContent>
               </div>
             </Transition>
@@ -287,7 +522,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
 .fade-scale-enter-active {
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   transform-style: preserve-3d;
@@ -355,7 +589,7 @@ onMounted(() => {
   background-color: rgba(14, 165, 233, 0.1);
 }
 
-.glass-tab[data-state="active"] {
+.glass-tab[data-state='active'] {
   background-color: rgba(14, 165, 233, 0.2);
   color: #0ea5e9;
 }
@@ -364,13 +598,12 @@ onMounted(() => {
   background-color: rgba(14, 165, 233, 0.15);
 }
 
-.dark .glass-tab[data-state="active"] {
+.dark .glass-tab[data-state='active'] {
   background-color: rgba(14, 165, 233, 0.3);
 }
 
 /* 动画 */
 @keyframes float {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -387,7 +620,6 @@ onMounted(() => {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-
   .bg-circle-1,
   .bg-circle-2,
   .bg-circle-3 {

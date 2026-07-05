@@ -4,7 +4,6 @@ import {
   HeartIcon,
   ListPlusIcon,
   MoreVerticalIcon,
-  Loader2Icon,
   BookmarkPlus,
   Trash2Icon,
 } from 'lucide-vue-next'
@@ -17,10 +16,9 @@ import { MESSAGE_TYPE } from '@/constants/messages'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useUserStore } from '@/stores/user'
 import {
-  ref,
   computed,
-  onMounted,
   onBeforeUnmount,
+  ref,
   type ComponentPublicInstance,
   inject,
 } from 'vue'
@@ -42,13 +40,6 @@ const props = defineProps<{
 const isUserCreatePlayList = inject('isUserCreatePlayList', false)
 const deletePlaylistPageSong = inject<(song: Song) => void>('deleteSong', () => {})
 
-// 分段加载配置
-const DISPLAY_BATCH_SIZE = 20 // 每次渲染的数量
-const displayCount = ref(DISPLAY_BATCH_SIZE)
-const loadingMore = ref(false)
-const loadMoreTrigger = ref<HTMLElement | null>(null)
-let observer: IntersectionObserver | null = null
-
 // 存储所有 cover 的引用
 const coverImgRefs = ref<HTMLImageElement[]>([])
 
@@ -59,52 +50,7 @@ const setCoverRef = (el: Element | ComponentPublicInstance | null) => {
   }
 }
 
-// 计算需要显示的歌曲
-const displayedSongs = computed(() => {
-  return props.songs.slice(0, displayCount.value)
-})
-
-// 加载更多歌曲
-const loadMore = () => {
-  if (loadingMore.value || displayCount.value >= props.songs.length) {
-    return
-  }
-
-  loadingMore.value = true
-  // 模拟异步加载，给用户视觉反馈
-  requestAnimationFrame(() => {
-    displayCount.value += DISPLAY_BATCH_SIZE
-    loadingMore.value = false
-  })
-}
-
-// 设置 Intersection Observer
-const setupIntersectionObserver = () => {
-  observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          loadMore()
-        }
-      })
-    },
-    {
-      root: null,
-      rootMargin: '15%',
-      threshold: 1,
-    },
-  )
-}
-
-onMounted(() => {
-  if (loadMoreTrigger.value) {
-    setupIntersectionObserver()
-    observer?.observe(loadMoreTrigger.value)
-  }
-})
-
 onBeforeUnmount(() => {
-  observer?.disconnect()
   // 清空 coverImgRefs 数组
   coverImgRefs.value.forEach((img) => {
     img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
@@ -129,10 +75,9 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 
 <template>
   <div class="song-list-container glass-card rounded-2xl p-6">
-    <!-- <h2 class="text-2xl font-bold mb-6">歌曲列表</h2> -->
     <div class="space-y-2">
       <div
-        v-for="(song, index) in displayedSongs"
+        v-for="(song, index) in songs"
         :key="song.id"
         class="song-item group"
         @dblclick="playSong(song)"
@@ -188,7 +133,6 @@ const handleAddSongToUserPlaylist = (song: Song) => {
               <ListPlusIcon class="h-4 w-4" />
             </Button>
             <Button @click="handleAddSongToUserPlaylist(song)" variant="ghost" size="icon">
-              <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
               <BookmarkPlus class="h-4 w-4" />
             </Button>
 
@@ -198,19 +142,10 @@ const handleAddSongToUserPlaylist = (song: Song) => {
               size="icon"
               @click.stop="deletePlaylistPageSong(song)"
             >
-              <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
               <Trash2Icon class="h-4 w-4" />
             </Button>
           </div>
         </div>
-      </div>
-      <!-- 加载更多指示器 -->
-      <div
-        v-if="displayedSongs.length < songs.length"
-        ref="loadMoreTrigger"
-        class="flex items-center justify-center py-8"
-      >
-        <Loader2Icon class="h-6 w-6 animate-spin text-gray-400" />
       </div>
     </div>
   </div>
