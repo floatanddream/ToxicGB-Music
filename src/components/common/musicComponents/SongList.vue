@@ -1,65 +1,82 @@
 <script setup lang="ts">
-import { PlayIcon, HeartIcon, ListPlusIcon, MoreVerticalIcon, Loader2Icon, BookmarkPlus, Trash2Icon } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import type { Song, Artist, Album } from '@/types/musicTypes';
-import ArtistDivider from './artistDivider.vue';
-import emitter from '@/utils/eventBus';
-import { EVENTS } from '@/constants/events';
-import { MESSAGE_TYPE } from '@/constants/messages';
-import { usePlayerStore } from '@/stores/playerStore';
-import { useUserStore } from '@/stores/user';
-import { ref, computed, onMounted, onBeforeUnmount, type ComponentPublicInstance, inject } from 'vue';
-import { storeToRefs } from 'pinia';
+import {
+  PlayIcon,
+  HeartIcon,
+  ListPlusIcon,
+  MoreVerticalIcon,
+  Loader2Icon,
+  BookmarkPlus,
+  Trash2Icon,
+} from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import type { Song, Artist, Album } from '@/types/musicTypes'
+import ArtistDivider from './artistDivider.vue'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
+import { MESSAGE_TYPE } from '@/constants/messages'
+import { usePlayerStore } from '@/stores/playerStore'
+import { useUserStore } from '@/stores/user'
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  type ComponentPublicInstance,
+  inject,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 
-const playerStore = usePlayerStore();
-const userStore = useUserStore();
+const playerStore = usePlayerStore()
+const userStore = useUserStore()
 const { userLikeListSet } = storeToRefs(userStore)
 
 // 通过 computed 追踪 userLikeListSet 的变化
-const isSongLiked = computed(() => (songId: number | string) => userLikeListSet.value.has(Number(songId)))
+const isSongLiked = computed(
+  () => (songId: number | string) => userLikeListSet.value.has(Number(songId)),
+)
 
 const props = defineProps<{
-  songs: Song[];
-}>();
+  songs: Song[]
+}>()
 
 const isUserCreatePlayList = inject('isUserCreatePlayList', false)
 const deletePlaylistPageSong = inject<(song: Song) => void>('deleteSong', () => {})
 
 // 分段加载配置
-const DISPLAY_BATCH_SIZE = 20; // 每次渲染的数量
-const displayCount = ref(DISPLAY_BATCH_SIZE);
-const loadingMore = ref(false);
-const loadMoreTrigger = ref<HTMLElement | null>(null);
-let observer: IntersectionObserver | null = null;
+const DISPLAY_BATCH_SIZE = 20 // 每次渲染的数量
+const displayCount = ref(DISPLAY_BATCH_SIZE)
+const loadingMore = ref(false)
+const loadMoreTrigger = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
 
 // 存储所有 cover 的引用
-const coverImgRefs = ref<HTMLImageElement[]>([]);
+const coverImgRefs = ref<HTMLImageElement[]>([])
 
 // 设置引用的方法，在组件销毁时图片纹理缓存能够正常的GC
 const setCoverRef = (el: Element | ComponentPublicInstance | null) => {
   if (el instanceof HTMLImageElement && !coverImgRefs.value.includes(el)) {
-    coverImgRefs.value.push(el);
+    coverImgRefs.value.push(el)
   }
-};
+}
 
 // 计算需要显示的歌曲
 const displayedSongs = computed(() => {
-  return props.songs.slice(0, displayCount.value);
-});
+  return props.songs.slice(0, displayCount.value)
+})
 
 // 加载更多歌曲
 const loadMore = () => {
   if (loadingMore.value || displayCount.value >= props.songs.length) {
-    return;
+    return
   }
 
-  loadingMore.value = true;
+  loadingMore.value = true
   // 模拟异步加载，给用户视觉反馈
   requestAnimationFrame(() => {
-    displayCount.value += DISPLAY_BATCH_SIZE;
-    loadingMore.value = false;
-  });
-};
+    displayCount.value += DISPLAY_BATCH_SIZE
+    loadingMore.value = false
+  })
+}
 
 // 设置 Intersection Observer
 const setupIntersectionObserver = () => {
@@ -67,46 +84,46 @@ const setupIntersectionObserver = () => {
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          loadMore();
+          loadMore()
         }
-      });
+      })
     },
     {
       root: null,
       rootMargin: '15%',
       threshold: 1,
-    }
-  );
-};
+    },
+  )
+}
 
 onMounted(() => {
   if (loadMoreTrigger.value) {
-    setupIntersectionObserver();
-    observer?.observe(loadMoreTrigger.value);
+    setupIntersectionObserver()
+    observer?.observe(loadMoreTrigger.value)
   }
-});
+})
 
 onBeforeUnmount(() => {
-  observer?.disconnect();
+  observer?.disconnect()
   // 清空 coverImgRefs 数组
-  coverImgRefs.value.forEach(img => {
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-  });
-  coverImgRefs.value.length = 0;
-});
+  coverImgRefs.value.forEach((img) => {
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+  })
+  coverImgRefs.value.length = 0
+})
 
 const handleInsertSong = (song: Song) => {
-  emitter.emit(EVENTS.INSERT_NEXT, song);
+  emitter.emit(EVENTS.INSERT_NEXT, song)
   emitter.emit(MESSAGE_TYPE.TOAST_INFO, `已将歌曲 "${song.title}" 插入到下一首`)
 }
 
 const playSong = (song: Song) => {
-  emitter.emit(EVENTS.INSERT_AND_PLAY, song);
+  emitter.emit(EVENTS.INSERT_AND_PLAY, song)
   emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌曲 "${song.title}"`)
 }
 
 const handleAddSongToUserPlaylist = (song: Song) => {
-  emitter.emit(EVENTS.USER_COLLECT_SONG,song)
+  emitter.emit(EVENTS.USER_COLLECT_SONG, song)
 }
 </script>
 
@@ -114,16 +131,30 @@ const handleAddSongToUserPlaylist = (song: Song) => {
   <div class="song-list-container glass-card rounded-2xl p-6">
     <!-- <h2 class="text-2xl font-bold mb-6">歌曲列表</h2> -->
     <div class="space-y-2">
-      <div v-for="(song, index) in displayedSongs" :key="song.id" class="song-item group" @dblclick="playSong(song)">
-        <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+      <div
+        v-for="(song, index) in displayedSongs"
+        :key="song.id"
+        class="song-item group"
+        @dblclick="playSong(song)"
+      >
+        <div
+          class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
           <!-- 序号/播放按钮 -->
           <div class="w-8 h-8 flex items-center justify-center">
-            <span v-if="song.id !== playerStore.currentSong?.id" class="text-sm text-gray-500">{{ index + 1 }}</span>
+            <span v-if="song.id !== playerStore.currentSong?.id" class="text-sm text-gray-500">{{
+              index + 1
+            }}</span>
             <PlayIcon v-else class="h-5 w-5 text-red-500" />
           </div>
 
           <!-- 封面 -->
-          <img :ref="setCoverRef" :src="song.cover" :alt="song.title" class="w-12 h-12 rounded-lg object-cover" />
+          <img
+            :ref="setCoverRef"
+            :src="song.cover"
+            :alt="song.title"
+            class="w-12 h-12 rounded-lg object-cover"
+          />
 
           <!-- 歌曲信息 -->
           <div class="flex-1 min-w-0">
@@ -135,8 +166,11 @@ const handleAddSongToUserPlaylist = (song: Song) => {
                 <ArtistDivider v-if="song.artist" :artists="song.artist" />
               </span>
               <span>•</span>
-              <span class="truncate hover:text-red-500" @click.stop="emitter.emit(EVENTS.ALBUM_CLICK, song.album)">{{
-                song.album.title }}</span>
+              <span
+                class="truncate hover:text-red-500"
+                @click.stop="emitter.emit(EVENTS.ALBUM_CLICK, song.album)"
+                >{{ song.album.title }}</span
+              >
               <span>•</span>
               <span>{{ song.duration }}</span>
             </div>
@@ -144,28 +178,38 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 
           <!-- 操作按钮 -->
           <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" @click="emitter.emit(EVENTS.USER_LIKE_MUSIC,song)">
-               <HeartIcon class="w-4 h-4 text-white transition-all duration-300"
-                :class="[ userStore.isSongLiked(song) ? 'fill-red-500 text-red-500 scale-110' : '' ]" />
+            <Button variant="ghost" size="icon" @click="emitter.emit(EVENTS.USER_LIKE_MUSIC, song)">
+              <HeartIcon
+                class="w-4 h-4 transition-all duration-300"
+                :class="[userStore.isSongLiked(song) ? 'fill-red-500 text-red-500 scale-110' : '']"
+              />
             </Button>
             <Button @click="handleInsertSong(song)" variant="ghost" size="icon">
               <ListPlusIcon class="h-4 w-4" />
             </Button>
             <Button @click="handleAddSongToUserPlaylist(song)" variant="ghost" size="icon">
               <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
-               <BookmarkPlus  class="h-4 w-4" />
+              <BookmarkPlus class="h-4 w-4" />
             </Button>
 
-            <Button v-if="isUserCreatePlayList" variant="ghost" size="icon" @click.stop="deletePlaylistPageSong(song)">
+            <Button
+              v-if="isUserCreatePlayList"
+              variant="ghost"
+              size="icon"
+              @click.stop="deletePlaylistPageSong(song)"
+            >
               <!-- <MoreVerticalIcon class="h-4 w-4" /> -->
-               <Trash2Icon  class="h-4 w-4" />
+              <Trash2Icon class="h-4 w-4" />
             </Button>
           </div>
         </div>
       </div>
       <!-- 加载更多指示器 -->
-      <div v-if="displayedSongs.length < songs.length" ref="loadMoreTrigger"
-        class="flex items-center justify-center py-8">
+      <div
+        v-if="displayedSongs.length < songs.length"
+        ref="loadMoreTrigger"
+        class="flex items-center justify-center py-8"
+      >
         <Loader2Icon class="h-6 w-6 animate-spin text-gray-400" />
       </div>
     </div>
@@ -183,10 +227,12 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 /* 浅色模式 - 透明毛玻璃效果 */
 .song-item:hover .p-3 {
   background:
-    radial-gradient(ellipse at 50% 30%,
+    radial-gradient(
+      ellipse at 50% 30%,
       rgba(255, 255, 255, 0.45) 0%,
       rgba(255, 255, 255, 0.3) 50%,
-      transparent 100%),
+      transparent 100%
+    ),
     rgba(255, 255, 255, 0.35);
 
   backdrop-filter: blur(10px) saturate(200%) brightness(1.05);
