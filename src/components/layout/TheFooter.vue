@@ -85,7 +85,7 @@ const volume = ref(70)
 
       <!-- 右侧：音量 & 播放列表 -->
       <div class="volume-section">
-        <button class="icon-btn">
+        <button class="icon-btn volume-only">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -103,7 +103,7 @@ const volume = ref(70)
             />
           </svg>
         </button>
-        <div class="volume-bar">
+        <div class="volume-bar volume-only">
           <div class="volume-fill" :style="{ width: `${volume}%` }"></div>
           <input
             type="range"
@@ -114,7 +114,7 @@ const volume = ref(70)
             @input="handleVolume"
           />
         </div>
-        <button class="icon-btn">
+        <button class="icon-btn loop-mode">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -177,7 +177,7 @@ const volume = ref(70)
   margin: 0 auto;
   padding: 10px 20px;
   gap: 20px;
-  height: 80px;
+  height: var(--footer-h);
 }
 
 /* 左侧歌曲信息 */
@@ -340,11 +340,13 @@ const volume = ref(70)
   border: none;
   outline: none;
   cursor: pointer;
+  appearance: none;
   -webkit-appearance: none;
   opacity: 0;
 }
 
 .progress-input::-webkit-slider-thumb {
+  appearance: none;
   -webkit-appearance: none;
   width: 12px;
   height: 12px;
@@ -392,7 +394,7 @@ const volume = ref(70)
   border: none;
   outline: none;
   cursor: pointer;
-  -webkit-appearance: none;
+  appearance: none;
   opacity: 0;
 }
 
@@ -407,9 +409,8 @@ const volume = ref(70)
 /* 响应式 */
 @media (max-width: 768px) {
   .player-container {
-    padding: 8px 16px;
-    gap: 16px;
-    height: 72px;
+    padding: 6px 14px;
+    gap: 14px;
   }
 
   .song-section {
@@ -426,16 +427,58 @@ const volume = ref(70)
     font-size: 14px;
   }
 
-  .song-artist {
-    font-size: 12px;
-  }
-
   .play-btn {
     width: 38px;
     height: 38px;
   }
 
-  .volume-section {
+  .controls-row {
+    gap: 14px;
+  }
+
+  .volume-only {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-container {
+    padding: 4px 10px;
+    gap: 10px;
+  }
+
+  .song-section {
+    min-width: 100px;
+    max-width: 110px;
+  }
+
+  .album-cover {
+    width: 36px;
+    height: 36px;
+  }
+
+  .song-title {
+    font-size: 13px;
+  }
+
+  .play-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .controls-row {
+    gap: 10px;
+  }
+
+  .progress-row {
+    gap: 8px;
+  }
+
+  .time-text {
+    display: none;
+  }
+
+  .loop-mode {
     display: none;
   }
 }

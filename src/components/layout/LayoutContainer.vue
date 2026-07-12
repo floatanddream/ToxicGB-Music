@@ -90,7 +90,7 @@ onUnmounted(()=>{
   grid-template-rows: auto 1fr;
   grid-template-columns: auto 1fr;
   height: 100vh;
-  padding-bottom: 80px;
+  padding-bottom: var(--footer-h);
   /* 为固定底部播放器留出空间 */
   overflow: hidden;
   position: relative;
@@ -132,8 +132,8 @@ onUnmounted(()=>{
 .main {
   grid-area: main;
   overflow-y: auto;
-  height: calc(100vh - 100px);
-  /* 底部增加80px padding避免被footer挡住 */
+  height: calc(100vh - 60px - var(--footer-h));
+  /* header 60px + footer 高度，避免被 footer 挡住 */
   position: relative;
   z-index: 1;
   /* Lower z-index to stay behind sidebar */

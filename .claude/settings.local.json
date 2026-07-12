@@ -8,7 +8,8 @@
       "Bash(pnpm list:*)",
       "Bash(pnpm info:*)",
       "Bash(npm list:*)",
-      "Bash(pnpm dlx:*)"
+      "Bash(pnpm dlx:*)",
+      "Bash(pnpm type-check *)"
     ]
   }
 }
