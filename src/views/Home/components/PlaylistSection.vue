@@ -297,6 +297,15 @@ const scrollRight = () => {
   }
 }
 
+const handlePress = (btn: 'left' | 'right') => {
+  isButtonPressed.value = true
+  pressedButton.value = btn
+  setTimeout(() => {
+    isButtonPressed.value = false
+    pressedButton.value = null
+  }, 200)
+}
+
 const toggleLike = (playlist: Playlist) => {
   playlist.isLiked = !playlist.isLiked
 }
