@@ -5,8 +5,8 @@
         backgroundColor: 'var(--bg-card, rgba(255, 255, 255, 0.6))',
         backdropFilter: 'blur(12px)',
         border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.1))',
-      }" @mouseenter="$event.currentTarget.style.transform = 'translateY(-8px)'"
-        @mouseleave="$event.currentTarget.style.transform = 'translateY(0)'">
+      }" @mouseenter="cardEnter"
+        @mouseleave="cardLeave">
         <!-- 榜单标题 -->
         <div style="margin-bottom: 1.5rem;">
           <h3
@@ -30,8 +30,8 @@
               <div style="width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center;">
                 <PlayIcon v-if="!song.isPlaying"
                   style="width: 1rem; height: 1rem; color: var(--primary, #3b82f6); cursor: pointer; transition: transform 0.2s ease;"
-                  @mouseenter="$event.target.style.transform = 'scale(1.1)'"
-                  @mouseleave="$event.target.style.transform = 'scale(1)'" @click="togglePlay(song)" />
+                  @mouseenter="playIconEnter"
+                  @mouseleave="playIconLeave" @click="togglePlay(song)" />
                 <div v-else style="display: flex; align-items: center; gap: 0.125rem;">
                   <span
                     style="width: 0.25rem; height: 0.5rem; background-color: var(--primary, #3b82f6); border-radius: 9999px; animation: pulse 1.5s infinite;"></span>
@@ -64,8 +64,8 @@
                     style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text-secondary, #64748b);">
                     <span
                       style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s ease; cursor: pointer;"
-                      @mouseenter="$event.target.style.color = 'var(--text-primary, #1e293b)'"
-                      @mouseleave="$event.target.style.color = 'var(--text-secondary, #64748b)'">{{ song.artist
+                      @mouseenter="artistEnter"
+                      @mouseleave="artistLeave">{{ song.artist
                       }}</span>
                     <span
                       style="width: 0.25rem; height: 0.25rem; background-color: var(--text-secondary, #64748b); border-radius: 50%;"></span>
@@ -82,8 +82,8 @@
                   :style="{
                     color: song.isLiked ? 'var(--primary, #3b82f6)' : 'var(--text-secondary, #64748b)',
                   }" @click="toggleLike(song)"
-                  @mouseenter="$event.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--primary, #3b82f6) 10%, transparent)'"
-                  @mouseleave="$event.currentTarget.style.backgroundColor = 'transparent'">
+                  @mouseenter="likeEnter"
+                  @mouseleave="likeLeave">
                   <HeartIcon style="width: 1rem; height: 1rem; transition: all 0.3s ease;" :style="{
                     color: song.isLiked ? 'var(--primary, #3b82f6)' : 'var(--text-secondary, #64748b)',
                     transform: song.isLiked ? 'scale(1.2)' : 'scale(1)',
@@ -341,6 +341,37 @@ const formatDate = (dateString: string) => {
   if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
   return dateString;
 };
+
+// Hover 处理：安全获取 target 后修改样式
+const safeTarget = (e: MouseEvent): HTMLElement | null => {
+  const t = e.currentTarget ?? e.target
+  return t instanceof HTMLElement ? t : null
+}
+
+const cardEnter = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.transform = 'translateY(-8px)'
+}
+const cardLeave = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.transform = 'translateY(0)'
+}
+const playIconEnter = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.transform = 'scale(1.1)'
+}
+const playIconLeave = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.transform = 'scale(1)'
+}
+const artistEnter = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.color = 'var(--text-primary, #1e293b)'
+}
+const artistLeave = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.color = 'var(--text-secondary, #64748b)'
+}
+const likeEnter = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.backgroundColor = 'color-mix(in srgb, var(--primary, #3b82f6) 10%, transparent)'
+}
+const likeLeave = (e: MouseEvent) => {
+  const t = safeTarget(e); if (t) t.style.backgroundColor = 'transparent'
+}
 </script>
 
 <style lang="css" scoped>
