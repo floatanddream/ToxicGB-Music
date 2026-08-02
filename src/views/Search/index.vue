@@ -343,31 +343,32 @@ const handleSearch = (query: string) => {
 
 const handlePlaySong = (song: MusicTypes.Song) => {
   isPlaying.value = !isPlaying.value
-  console.log('Playing song:', song.title)
+  emitter.emit(EVENTS.INSERT_AND_PLAY, song)
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `开始播放歌曲 "${song.title}"`)
 }
 
 const handleArtistClick = (artist: MusicTypes.Artist) => {
-  console.log('Artist clicked:', artist.name)
+  emitter.emit(EVENTS.ARTIST_CLICK, artist)
 }
 
 const handleAlbumClick = (album: MusicTypes.Album) => {
-  console.log('Album clicked:', album.title)
+  emitter.emit(EVENTS.ALBUM_CLICK, album)
 }
 
 const handleUserClick = (user: MusicTypes.User) => {
-  console.log('User clicked:', user.name)
+  emitter.emit(EVENTS.USER_CLICK, user)
 }
 
 const handleFollowUser = (user: MusicTypes.User) => {
-  console.log('Follow user:', user.name)
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `关注用户 "${user.name}"（未实现）`)
 }
 
 const handlePlaylistClick = (playlist: MusicTypes.Playlist) => {
-  console.log('Playlist clicked:', playlist.title)
+  emitter.emit(EVENTS.PLAYLIST_CLICK, playlist)
 }
 
 const handleLikePlaylist = (playlist: MusicTypes.Playlist) => {
-  console.log('Like playlist:', playlist.title)
+  emitter.emit(MESSAGE_TYPE.TOAST_INFO, `收藏歌单 "${playlist.title}"（未实现）`)
 }
 
 onMounted(() => {
