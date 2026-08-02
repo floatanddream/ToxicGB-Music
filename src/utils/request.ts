@@ -140,34 +140,37 @@ class HttpClient {
 
   /**
    * 请求方法封装
+   * signal 可放在 params / data 内部透传给 ky，用于 AbortController 取消请求
    */
   async get<T = any>(url: string, params?: any): Promise<T> {
-    const { sendCookie, ...restParams } = params || {};
+    const { sendCookie, signal, ...restParams } = params || {};
     const searchParams = sendCookie
       ? { ...restParams, cookie: encodeURIComponent(this.getCookie()) }
       : restParams;
-    return this.instance.get(url, { searchParams }).json();
+    return this.instance.get(url, { searchParams, signal }).json();
   }
 
   async post<T = any>(url: string, data?: any): Promise<T> {
-    const { sendCookie, ...restData } = data || {};
+    const { sendCookie, signal, ...restData } = data || {};
     const jsonData = sendCookie
       ? { ...restData, cookie: this.getCookie() }
       : restData;
-    return this.instance.post(url, { json: jsonData }).json();
+    return this.instance.post(url, { json: jsonData, signal }).json();
   }
 
   async put<T = any>(url: string, data?: any): Promise<T> {
-    return this.instance.put(url, { json: data }).json()
+    const { signal, ...restData } = data || {};
+    return this.instance.put(url, { json: restData, signal }).json()
   }
 
   async delete<T = any>(url: string, data?: any): Promise<T> {
-    return this.instance.delete(url, { json: data }).json()
+    const { signal, ...restData } = data || {};
+    return this.instance.delete(url, { json: restData, signal }).json()
   }
 
-  async head(url: string, params?: any): Promise<Response> {
+  async head(url: string, params?: any, signal?: AbortSignal): Promise<Response> {
     const searchParams = params || {};
-    return ky.head(url, { searchParams });
+    return ky.head(url, { searchParams, signal });
   }
 
   /**
