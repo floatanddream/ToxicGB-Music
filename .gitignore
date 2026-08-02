@@ -39,3 +39,4 @@ __screenshots__/
 *.timestamp-*-*.mjs
 ToxicGB-Music.rar
 rename.py
+.claude/settings.local.json
