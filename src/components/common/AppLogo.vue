@@ -15,7 +15,7 @@ const sizeClasses = {
 </script>
 
 <template>
-  <div class="app-logo" :class="sizeClasses[size || 'medium']" @click="emit.click">
+  <div class="app-logo" :class="sizeClasses[size || 'medium']" @click="emit('click')">
     <span class="logo-text">专心音乐！</span>
   </div>
 </template>
