@@ -13,7 +13,8 @@ export interface Album {
     size?: number;             // 歌曲数量
     artists?: Artist[];        // 艺人列表（使用已定义的Artist类型）
     briefDesc?: string;        // 简介
-    commentCount?: number;    
-    shareCount?: number;      
-    songs?: Song[];            
+    commentCount?: number;
+    shareCount?: number;
+    songs?: Song[];
+    isLiked?: boolean;         // 是否已收藏
 }

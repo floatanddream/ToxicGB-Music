@@ -105,9 +105,12 @@ const playAllSongs = () => {
   }
 };
 
-// 收藏专辑
+// 收藏专辑（本地状态切换；后端 API 待接入）
 const toggleLike = () => {
-  
+  if (!albumDetail.value) return
+  const next = !albumDetail.value.isLiked
+  albumDetail.value = { ...albumDetail.value, isLiked: next }
+  emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS, next ? '已收藏专辑' : '已取消收藏')
 };
 
 watch(() => route.query.id, () => {
