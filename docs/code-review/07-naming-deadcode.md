@@ -8,7 +8,7 @@
 
 ## 🔴 P0 — 功能未完成
 
-### NAME-1. `Album/index.vue` toggleLike 是空函数
+### NAME-1. `Album/index.vue` toggleLike 是空函数 ✅ 已修复
 
 **位置**：`src/views/Album/index.vue:109-111`
 
@@ -24,9 +24,11 @@ AlbumHeader 的 `收藏专辑` 按钮（`@toggle-like`）触发后**什么都不
 
 **CLAUDE.md 未列出**。
 
+**已修复**：实现本地 `isLiked` 状态切换 + toast 反馈。后端"收藏专辑" API 待接入（`src/api/album.ts` 暂无此端点）。
+
 ---
 
-### NAME-2. `Search/index.vue` 7 个处理器都是 console.log
+### NAME-2. `Search/index.vue` 7 个处理器都是 console.log ✅ 已修复
 
 **位置**：`src/views/Search/index.vue:344-371`
 
@@ -44,6 +46,14 @@ const handleArtistClick = (artist) => {
 全部 7 个都是 console.log 占位。注意 `clickEventHandler.ts` 已经把 `EVENTS.ARTIST_CLICK` / `PLAYLIST_CLICK` / `ALBUM_CLICK` / `USER_CLICK` 都接好了路由跳转，但 Search 页面**完全绕过事件总线直接 console.log**。
 
 **用户感知**：从搜索结果点击歌手卡片 → console 有日志但 UI 不响应。
+
+**已修复**：7 个 handler 接入事件总线：
+- `handlePlaySong` → `EVENTS.INSERT_AND_PLAY` + toast
+- `handleArtistClick` → `EVENTS.ARTIST_CLICK`
+- `handleAlbumClick` → `EVENTS.ALBUM_CLICK`
+- `handleUserClick` → `EVENTS.USER_CLICK`
+- `handlePlaylistClick` → `EVENTS.PLAYLIST_CLICK`
+- `handleFollowUser` / `handleLikePlaylist` → toast 提示未实现（功能本身尚未实现，留作后续）
 
 ---
 
