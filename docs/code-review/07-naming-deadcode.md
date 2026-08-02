@@ -62,13 +62,15 @@ const handleSubscribe = () => {
 
 ---
 
-### NAME-4. `views/Player.vue` 是旧版占位文件
+### NAME-4. `views/Player.vue` 是旧版占位文件 ✅ 已修复
 
-**位置**：`src/views/Player.vue:1-70`
+**位置**：`src/views/Player.vue:1-70`（**已删除**）
 
 CLAUDE.md 已标记 — 纯 emoji 按钮 + 静态进度条，未接入路由（`router/index.ts` 无 `/player` 路由）。真实全屏播放器是 `views/FullscreenPlayer/FullScreenPlayer.vue`。
 
 **修法**：删除。
+
+**验证**：`grep -r "Player\.vue\|from .*/Player['\"]" src/` 无引用后已删除。
 
 ---
 
@@ -84,9 +86,9 @@ CLAUDE.md 已标记 — 纯 emoji 按钮 + 静态进度条，未接入路由（`
 
 ---
 
-### NAME-6. `core/player/player.ts` 是死代码
+### NAME-6. `core/player/player.ts` 是死代码 ✅ 已修复
 
-**位置**：`src/core/player/player.ts:1-3`
+**位置**：`src/core/player/player.ts:1-3`（**已删除**）
 
 ```ts
 import { MusicController } from "./musicController";
@@ -100,6 +102,8 @@ export default player;
 - CLAUDE.md 错误描述："单例模式由 player.ts 实例化"——实际是 playerStore.ts。
 
 **修法**：直接删除该文件。
+
+**验证**：`grep -r "core/player/player" src/` 无引用后已删除；vue-tsc 中 `TS1149` 大小写不一致错误一并消除。
 
 ---
 
@@ -126,9 +130,9 @@ const handleForgotPassword = async () => { /* 同上，console.log 邮箱 */ }
 
 ## 🟡 P1 — 死代码 / 残留
 
-### NAME-8. `stores/counter.ts` 是脚手架残留
+### NAME-8. `stores/counter.ts` 是脚手架残留 ✅ 已修复
 
-**位置**：`src/stores/counter.ts:1-12`
+**位置**：`src/stores/counter.ts:1-12`（**已删除**）
 
 ```ts
 import { defineStore } from 'pinia'
@@ -139,6 +143,8 @@ export const useCounterStore = defineStore('counter', () => {
 ```
 
 没有任何 import。CLAUDE.md 标记"可删除"。
+
+**验证**：`grep -r "useCounterStore\|counterStore" src/` 无消费者后已删除。
 
 ---
 

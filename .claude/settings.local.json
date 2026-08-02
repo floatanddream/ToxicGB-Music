@@ -9,7 +9,11 @@
       "Bash(pnpm info:*)",
       "Bash(npm list:*)",
       "Bash(pnpm dlx:*)",
-      "Bash(pnpm type-check *)"
+      "Bash(pnpm type-check *)",
+      "Bash(./node_modules/.bin/vue-tsc --build)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(awk -F: '{print $1}')"
     ]
   }
 }
