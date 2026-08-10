@@ -46,7 +46,7 @@ const volume = ref(70)
           :alt="currentSong?.title || '专辑封面'"
           class="album-cover"
         />
-        <div class="song-info">
+        <div class="song-info gap-1">
           <span class="song-title">{{ currentSong?.title || '未播放' }}</span>
           <ArtistDivider v-if="currentSong" :artists="currentSong?.artist" />
         </div>

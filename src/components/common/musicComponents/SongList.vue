@@ -15,13 +15,7 @@ import { EVENTS } from '@/constants/events'
 import { MESSAGE_TYPE } from '@/constants/messages'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useUserStore } from '@/stores/user'
-import {
-  computed,
-  onBeforeUnmount,
-  ref,
-  type ComponentPublicInstance,
-  inject,
-} from 'vue'
+import { computed, onBeforeUnmount, ref, type ComponentPublicInstance, inject } from 'vue'
 import { storeToRefs } from 'pinia'
 
 const playerStore = usePlayerStore()
@@ -103,9 +97,9 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 
           <!-- 歌曲信息 -->
           <div class="flex-1 min-w-0">
-            <h3 class="font-medium text-gray-900 dark:text-white truncate">
+            <span class="text-gray-900 dark:text-white truncate">
               {{ song.title }}
-            </h3>
+            </span>
             <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
               <span class="truncate">
                 <ArtistDivider v-if="song.artist" :artists="song.artist" />
@@ -152,6 +146,10 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 </template>
 
 <style scoped>
+:deep(.artist-divider .artist-name),
+:deep(.artist-divider .artist-separator) {
+  font-size: 14px;
+}
 /* 歌曲列表 */
 .song-item {
   transition: all 0.2s ease-in-out;

@@ -17,7 +17,9 @@
       "Bash(git add *)",
       "Bash(git check-ignore *)",
       "Bash(git reset *)",
-      "Bash(git commit -m 'fix\\(AppLogo\\): emit.click 改为 emit\\('\\\\''click'\\\\''\\)，Logo 点击事件生效 *)"
+      "Bash(git commit -m 'fix\\(AppLogo\\): emit.click 改为 emit\\('\\\\''click'\\\\''\\)，Logo 点击事件生效 *)",
+      "Bash(mkdir -p src/components/infiniteScroll)",
+      "Bash(git mv *)"
     ]
   }
 }
