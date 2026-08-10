@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { PlayIcon, PauseIcon, HeartIcon, ShareIcon,User2Icon,Music } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import type  { Playlist } from '@/types/playlist';
-import { formatNumber } from '@/utils/format';
-import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue';
+import { PlayIcon, PauseIcon, HeartIcon, ShareIcon, User2Icon, Music } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import type { Playlist } from '@/types/playlist'
+import { formatNumber } from '@/utils/format'
+import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue'
 
 defineProps<{
-  playlist: Playlist;
-  isUserCreatePlayList: boolean;
-}>();
+  playlist: Playlist
+  isUserCreatePlayList: boolean
+}>()
 
 defineEmits<{
-  'play-all': [];
-  'toggle-like': [];
-}>();
+  'play-all': []
+  'toggle-like': []
+}>()
 </script>
 
 <template>
@@ -57,8 +57,16 @@ defineEmits<{
             <PlayIcon class="h-5 w-5 mr-2 font-text-primary" />
             <span class="font-text-primary">{{ `播放全部` }}</span>
           </Button>
-          <Button v-if="!isUserCreatePlayList" variant="outline" size="lg" @click="$emit('toggle-like')">
-            <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': playlist?.subscribed }" />
+          <Button
+            v-if="!isUserCreatePlayList"
+            variant="outline"
+            size="lg"
+            @click="$emit('toggle-like')"
+          >
+            <HeartIcon
+              class="h-5 w-5 mr-2"
+              :class="{ 'fill-red-500 text-red-500': playlist?.subscribed }"
+            />
             {{ playlist?.subscribed ? '已收藏' : '收藏' }}
           </Button>
           <Button variant="outline" size="lg">
@@ -112,7 +120,6 @@ defineEmits<{
   height: 60px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
-  color: #0ea5e9;
 }
 @media (max-width: 768px) {
   .cover-container {
