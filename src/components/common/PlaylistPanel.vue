@@ -2,15 +2,15 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { X, ListMusic } from 'lucide-vue-next'
 import { usePlayerStore } from '@/stores/playerStore'
-import ArtistDivider from './musicComponents/artistDivider.vue';
-import emitter from '@/utils/eventBus';
-import { EVENTS } from '@/constants/events';
+import ArtistDivider from './musicComponents/artistDivider.vue'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
 
 const props = defineProps<{
   visible: boolean
 }>()
 
-const playerStore = usePlayerStore();
+const playerStore = usePlayerStore()
 
 // 直接使用 store 的响应式数据
 const songs = computed(() => playerStore.playlist)
@@ -48,7 +48,7 @@ const scrollToCurrentSong = () => {
   if (!scrollRef.value) return
   if (!currentSong.value) return
 
-  const index = songs.value.findIndex(s => s.id === currentSong.value?.id)
+  const index = songs.value.findIndex((s) => s.id === currentSong.value?.id)
   if (index === -1) return
 
   const marginTop = 20
@@ -74,15 +74,18 @@ onMounted(() => {
 })
 
 // 监听 visible 变化，自动滚动到当前歌曲
-watch(() => props.visible, (newVal) => {
-  if (newVal) {
-    setTimeout(() => {
-      nextTick(() => {
-        scrollToCurrentSong()
-      })
-    }, 100)
-  }
-})
+watch(
+  () => props.visible,
+  (newVal) => {
+    if (newVal) {
+      setTimeout(() => {
+        nextTick(() => {
+          scrollToCurrentSong()
+        })
+      }, 100)
+    }
+  },
+)
 </script>
 
 <template>
@@ -107,9 +110,13 @@ watch(() => props.visible, (newVal) => {
     <div ref="scrollRef" class="playlist-viewport custom-scrollbar" @scroll="onScroll">
       <div class="playlist-spacer" :style="{ height: `${totalHeight}px` }">
         <div class="playlist-visible" :style="{ transform: `translateY(${offsetY}px)` }">
-          <div v-for="song in visibleItems" :key="song.id" class="playlist-item"
-            :class="{ 'playlist-item-active': currentSong?.id === song.id }" 
-            @dblclick="emitter.emit(EVENTS.SWITCH_SONG,song)">
+          <div
+            v-for="song in visibleItems"
+            :key="song.id"
+            class="playlist-item"
+            :class="{ 'playlist-item-active': currentSong?.id === song.id }"
+            @dblclick="emitter.emit(EVENTS.SWITCH_SONG, song)"
+          >
             <img :src="song.cover" :alt="song.title" class="playlist-cover" />
             <div class="playlist-info">
               <span class="playlist-song-title">{{ song.title }}</span>
@@ -125,6 +132,10 @@ watch(() => props.visible, (newVal) => {
 </template>
 
 <style scoped>
+:deep(.artist-divider .artist-name),
+:deep(.artist-divider .artist-separator) {
+  font-weight: 400;
+}
 .playlist-panel {
   z-index: 10000;
   position: fixed;
@@ -188,7 +199,6 @@ watch(() => props.visible, (newVal) => {
 
 .playlist-count-bar {
   padding: 12px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
 
@@ -267,7 +277,7 @@ watch(() => props.visible, (newVal) => {
 
 .playlist-song-title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
