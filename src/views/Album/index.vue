@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import AlbumHeader from './components/AlbumHeader.vue';
 import AlbumContent from './components/AlbumContent.vue';
@@ -28,11 +28,26 @@ const commentsLoading = ref(false);
 const commentsLoadingMore = ref(false);
 const commentsOffset = ref(0);
 
+// 请求竞态保护：currentAlbumId 记录当前专辑；activeController 取消旧请求
+const currentAlbumId = ref('');
+let activeController: AbortController | null = null;
+
 const fetchAlbumDetail = async () => {
+  const id = albumId.value;
+  if (!id) return;
+  currentAlbumId.value = id;
+
+  // 取消旧请求
+  activeController?.abort();
+  const controller = new AbortController();
+  activeController = controller;
+
   emitter.emit(EVENTS.SCROOL_TOP);
   loading.value = true;
   try {
-    const albumRes = await getAlbumDetail(albumId.value);
+    const albumRes = await getAlbumDetail(id, controller.signal);
+    // await 后校验：当前响应是否还属于 currentAlbumId
+    if (currentAlbumId.value !== id || controller.signal.aborted) return;
     albumDetail.value = transformAlbumDetail(albumRes);
     //处理网易云专辑的歌曲没有url问题
     albumDetail.value.songs?.map((item) => {
@@ -42,37 +57,66 @@ const fetchAlbumDetail = async () => {
     });
     songs.value = albumDetail.value.songs || [];
   } catch (error) {
+    if (controller.signal.aborted) return;
     console.error('获取专辑数据失败:', error);
   } finally {
-    loading.value = false;
+    if (currentAlbumId.value === id) loading.value = false;
   }
 };
 
 const fetchAlbumComments = async () => {
+  const id = albumId.value;
+  if (!id) return;
+
+  // 取消旧请求
+  activeController?.abort();
+  const controller = new AbortController();
+  activeController = controller;
+
   commentsLoading.value = true;
   commentsOffset.value = 0;
   try {
-    const data = await getAlbumComments({ id: albumId.value, limit: 50, offset: 0 });
+    const data = await getAlbumComments({
+      id,
+      limit: 50,
+      offset: 0,
+      signal: controller.signal,
+    });
+    // 校验：评论是否还属于当前专辑
+    if (currentAlbumId.value !== id || controller.signal.aborted) return;
     albumComments.value = transformCommentListResponse(data);
   } catch (error) {
+    if (controller.signal.aborted) return;
     console.error('获取专辑评论数据失败:', error);
   } finally {
-    commentsLoading.value = false;
+    if (currentAlbumId.value === id) commentsLoading.value = false;
   }
 };
 
 const loadMoreComments = async () => {
   if (!albumComments.value?.more || commentsLoadingMore.value) return;
 
+  const id = albumId.value;
+  if (!id) return;
+
+  // 取消旧请求
+  activeController?.abort();
+  const controller = new AbortController();
+  activeController = controller;
+
   commentsLoadingMore.value = true;
   commentsOffset.value += 20;
 
   try {
     const data = await getAlbumComments({
-      id: albumId.value,
+      id,
       limit: 20,
-      offset: commentsOffset.value
+      offset: commentsOffset.value,
+      signal: controller.signal,
     });
+
+    // 校验：评论是否还属于当前专辑
+    if (currentAlbumId.value !== id || controller.signal.aborted) return;
 
     const newComments = transformCommentListResponse(data);
 
@@ -85,9 +129,12 @@ const loadMoreComments = async () => {
       albumComments.value.total = newComments.total;
     }
   } catch (error) {
+    if (controller.signal.aborted) return;
+    // 失败时回滚 offset，避免下次跳过这页评论
+    commentsOffset.value -= 20;
     console.error('加载更多评论失败:', error);
   } finally {
-    commentsLoadingMore.value = false;
+    if (currentAlbumId.value === id) commentsLoadingMore.value = false;
   }
 };
 
@@ -119,6 +166,10 @@ watch(() => route.query.id, () => {
 
 onMounted(() => {
   fetchAlbumDetail();
+});
+
+onUnmounted(() => {
+  activeController?.abort();
 });
 </script>
 

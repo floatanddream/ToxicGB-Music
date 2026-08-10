@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import ArtistHeader from './components/ArtistHeader.vue';
 import ArtistContent from './components/ArtistContent.vue';
@@ -20,20 +20,38 @@ const Songs = ref<Song[]>([]);
 const Albums = ref<Album[]>([]);
 const loading = ref(false);
 
-const fetchArtistData = async () => { 
+// 请求竞态保护：currentId 记录当前请求的 id + AbortController 取消旧请求
+const currentId = ref('');
+let activeController: AbortController | null = null;
+
+const fetchArtistData = async () => {
+  const id = artistId.value;
+  if (!id) return;
+  currentId.value = id;
+
+  // 取消旧请求
+  activeController?.abort();
+  const controller = new AbortController();
+  activeController = controller;
+
   emitter.emit(EVENTS.SCROOL_TOP);
   loading.value = true;
   try {
-    const artistRes = await getArtistDetail(artistId.value);
-    const songRes = await getArtistTop50(artistId.value);
-    const albumRes =await getArtistAlbum(artistId.value);
+    const [artistRes, songRes, albumRes] = await Promise.all([
+      getArtistDetail(id, controller.signal),
+      getArtistTop50(id, controller.signal),
+      getArtistAlbum(id, controller.signal),
+    ]);
+    // await 后再次校验：当前响应是否还属于 currentId
+    if (currentId.value !== id || controller.signal.aborted) return;
     artistData.value = artistRes.data as ArtistData;
     Songs.value = songRes.songs.map(transformToSong);
     Albums.value = albumRes?.hotAlbums?.map(transformAlbums);
   } catch (error) {
+    if (controller.signal.aborted) return;
     console.error('获取歌手数据失败:', error);
   } finally {
-    loading.value = false;
+    if (currentId.value === id) loading.value = false;
   }
 }
 
@@ -58,6 +76,10 @@ watch(()=> route.query.id,()=>{
 
 onMounted(() => {
   fetchArtistData();
+});
+
+onUnmounted(() => {
+  activeController?.abort();
 });
 </script>
 
