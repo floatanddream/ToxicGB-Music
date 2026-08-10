@@ -6,7 +6,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## 项目概述
 
-ToxicGB-Music 是一个基于 **Vue 3 + TypeScript** 的现代音乐播放器 Web 应用，采用苹果音乐风格的 UI 设计，支持深色模式、苹果风格歌词（含 TTML）、毛玻璃效果、全屏播放、MediaSession 锁屏控制等。
+ToxicGB-Music 是一个基于 **Vue 3 + TypeScript** 的仿网易云音乐现代音乐播放器 Web 应用，采用苹果音乐风格的 UI 设计，支持深色模式、苹果风格歌词（含 TTML）、毛玻璃效果、全屏播放、MediaSession 锁屏控制。
 
 **后端 API**: NeteaseCloudMusicApi 风格接口。开发环境下通过 Vite 代理 `/api` → `http://192.168.31.157:3000`（参见 `vite.config.ts`）。
 
@@ -15,23 +15,69 @@ ToxicGB-Music 是一个基于 **Vue 3 + TypeScript** 的现代音乐播放器 We
 
 ---
 
+## Agent参与项目须知
+
+#### 行为规范
+
+1. 不得以任何方式任何理由擅自启动服务实例,无论前端、后端、小程序,只能由人类完成重启或启动
+2. 不得以任何Hack方式试图操作数据库,Agent和LLM无法为数据安全负责
+3. 文件删除操作先过问用户,得到批准后进行删除
+
+#### 项目理解
+
+1. 理解`.harness`,`docs`下索引以及规则,大致了解项目已有功能和现状,其他文件无需立即阅读
+2. 根据代码库,发现并指出实现计划可行性以及潜在风险点,告知用户并由用户选择
+3. 制定计划后,需要用户表示同意或同等意思才可执行代码修改
+
+#### 代码执行
+
+1. 简单即是最好,遵守代码规范的前提下使用最简单的方式实现,直至用户要求采用更复杂的实现方式
+2. 最小影响面,只修改本次需求有关代码,不要操作无关代码
+3. 最小接触面,不要扩大需求范围,不要做与实现需求不相关的事情(比如无法通过测试则修改其他测试)
+
+#### 编码哲学
+
+1. 复杂度即成本,复杂度守恒与成本守恒一体两面,而成本不会消失只会转移,所以复杂度也是如此
+2. 显式优于隐式,不省略能够辅助人类和LLM识别和判断逻辑的代码、变量、注释和类型
+3. 保持无知,遇到模棱两可的问题及时询问用户,而不是替用户做出判断
+
+## 工作流
+
+#### 提出新需求或更改需求
+
+1. 先查看可能与需求有关文档和记录,初步理解需求,快速定位代码位置
+2. 查看代码库有关代码,根据相关代码进一步加深和验证理解
+3. 与用户交互式的确认需求,生成计划,用户批准后开始执行代码编写
+4. 编写完成后停止,不要扩大范围,等待用户下一步要求
+5. 完成后在`docs`下编写文档或更新有关文档
+
+#### 修复代码问题
+
+1. 先查看可能与需求有关文档和记录,初步理解需求,快速定位代码位置
+2. 查看代码库有关代码,根据相关代码进一步加深和验证理解
+3. 判断用户所提出问题是否与代码潜在问题相符,若有疑问交互式的与用户逐一确认问题特征/症状
+4. 无歧义后开始修改,完成后停止,根据用户要求进行测试
+5. 用户表示完成后更新`docs`下有关文档
+
+---
+
 ## 技术栈
 
-| 类别 | 技术 | 版本 | 说明 |
-|------|------|------|------|
-| 前端框架 | Vue 3 + TypeScript | `^3.5.30` | Composition API (`<script setup lang="ts">`) |
-| 构建工具 | Vite | `^7.3.1` | 快速开发与热更新 |
-| 状态管理 | Pinia | `^3.0.4` | `storeToRefs` 解构响应式数据 |
-| 路由 | Vue Router | `^5.0.3` | 动态导入组件 (`() => import()`) |
-| 样式 | Tailwind CSS | `^4.2.2` | 通过 `@tailwindcss/vite` 插件接入 |
-| UI 基础 | Reka UI + shadcn-vue 风格栈 | `reka-ui ^2.9.2` | 配套 `class-variance-authority`、`tailwind-merge`、`clsx`、`tw-animate-css`（**非直接依赖 `shadcn-vue` 包**） |
-| HTTP 客户端 | ky | `^2.0.0` | 现代 Fetch 封装，比 axios 更轻量 |
-| 图标 | Lucide Vue Next | `^1.0.0` | |
-| 事件总线 | mitt | `^3.0.1` | 全局事件通信 |
-| Toast 通知 | vue-sonner | `^2.0.9` | |
-| 歌词特效 | @applemusic-like-lyrics | core `^0.2.0` / lyric `^0.3.0` / vue `^0.2.0` | 苹果风格歌词 + 动态 mesh 渐变背景 + TTML |
-| 工具库 | @vueuse/core | `^14.2.1` | |
-| 动画 | motion-v | `^2.2.1` | |
+| 类别        | 技术                        | 版本                                          | 说明                                                                                                          |
+| ----------- | --------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 前端框架    | Vue 3 + TypeScript          | `^3.5.30`                                     | Composition API (`<script setup lang="ts">`)                                                                  |
+| 构建工具    | Vite                        | `^7.3.1`                                      | 快速开发与热更新                                                                                              |
+| 状态管理    | Pinia                       | `^3.0.4`                                      | `storeToRefs` 解构响应式数据                                                                                  |
+| 路由        | Vue Router                  | `^5.0.3`                                      | 动态导入组件 (`() => import()`)                                                                               |
+| 样式        | Tailwind CSS                | `^4.2.2`                                      | 通过 `@tailwindcss/vite` 插件接入                                                                             |
+| UI 基础     | Reka UI + shadcn-vue 风格栈 | `reka-ui ^2.9.2`                              | 配套 `class-variance-authority`、`tailwind-merge`、`clsx`、`tw-animate-css`（**非直接依赖 `shadcn-vue` 包**） |
+| HTTP 客户端 | ky                          | `^2.0.0`                                      | 现代 Fetch 封装，比 axios 更轻量                                                                              |
+| 图标        | Lucide Vue Next             | `^1.0.0`                                      |                                                                                                               |
+| 事件总线    | mitt                        | `^3.0.1`                                      | 全局事件通信                                                                                                  |
+| Toast 通知  | vue-sonner                  | `^2.0.9`                                      |                                                                                                               |
+| 歌词特效    | @applemusic-like-lyrics     | core `^0.2.0` / lyric `^0.3.0` / vue `^0.2.0` | 苹果风格歌词 + 动态 mesh 渐变背景 + TTML                                                                      |
+| 工具库      | @vueuse/core                | `^14.2.1`                                     |                                                                                                               |
+| 动画        | motion-v                    | `^2.2.1`                                      |                                                                                                               |
 
 > ⚠️ **不要假设** `oklch` 是项目唯一颜色系统 —— `oklch()` 仅在 `src/style.css` 的 shadcn 调色板中；`src/styles/dark-mode.css` 全部使用 hex / `rgba()`。
 
@@ -154,31 +200,31 @@ src/
 
 ```typescript
 interface Song {
-  id: string;
-  title: string;
-  aliasTitle: string;     // 歌曲别名
-  artist: Artist[];
-  album: Album;
-  duration: string;       // "04:32"
-  cover: string | undefined;
+  id: string
+  title: string
+  aliasTitle: string // 歌曲别名
+  artist: Artist[]
+  album: Album
+  duration: string // "04:32"
+  cover: string | undefined
 }
 
 interface Artist {
-  id: string;
-  name: string;
-  avatar: string;
-  fanCount: string;        // 已格式化
-  songCount: string;
-  verified: boolean;
+  id: string
+  name: string
+  avatar: string
+  fanCount: string // 已格式化
+  songCount: string
+  verified: boolean
 }
 
 interface Album {
-  id: string;
-  title: string;
-  artist: Artist[];
-  cover: string;
-  releaseDate: string;
-  songCount: string;
+  id: string
+  title: string
+  artist: Artist[]
+  cover: string
+  releaseDate: string
+  songCount: string
 }
 
 // 另外还有 RawAlbum / RawUserProfile / Playlist（精简版）
@@ -187,13 +233,13 @@ interface Album {
 ### 播放器类型 (`types/player.ts`)
 
 ```typescript
-type PlayMode = 'loop' | 'single' | 'random';
+type PlayMode = 'loop' | 'single' | 'random'
 
 interface Song extends MusicType.Song {
-  url?: string;           // 由 MusicService 注入
+  url?: string // 由 MusicService 注入
 }
 
-type SongLoader = (id: number | string) => Promise<Song>;
+type SongLoader = (id: number | string) => Promise<Song>
 ```
 
 ### 其他类型要点
@@ -224,16 +270,16 @@ type SongLoader = (id: number | string) => Promise<Song>;
 
 ### API 列表
 
-| 模块 | 关键方法 | 功能 |
-|------|----------|------|
-| `song.ts` | `getSongUrl(id)`、`checkUrl(url)` | `/song/url/v1`（level: `'exhigh'`，`sendCookie:true`）+ HEAD 校验 |
-| `album.ts` | `getAlbumDetail(id)`、`getAlbumComments({id,limit,offset,before})` | |
-| `artist.ts` | `getArtistTop50(id)`、`getArtistDetail(id)`、`getArtistAlbum(id)`、`getHotArtists(limit,offset)` | |
-| `playlist.ts` | `getPlaylistDetail` / `getPlaylistComments` / `getPlaylistSubscribers` / `getExquisitePlaylists` / `getPlaylistAllTracks` / `modifyPlaylistTracks` | |
-| `search.ts` | `searchByKeyword`（type 1018 综合）/ `Song` / `Album` / `Singer` / `Playlist` / `User` | 6 种 |
-| `user.ts` | `getUserFromCookie` / `getUser(uid)` / `fetchUserPlaylist(uid)` / `fetchUserFollows` / `fetchUserFolloweds` / `getUserSimpleIInfo` / `getLikeMusic(uid)` / `likeMusic(id,like)` / `getUserSongRecord(uid,type=1)` | 含「我创建」vs「我收藏」分离 |
-| `banner.ts` | `getBanner()` | 首页轮播 |
-| `lyric.ts` | `getSongLyric(id)`（`/lyric/new`，含 yrc/lrc）、`getTTMLLyric(id)`（外部 `amlldb.bikonoo.com`） | |
+| 模块          | 关键方法                                                                                                                                                                                                          | 功能                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `song.ts`     | `getSongUrl(id)`、`checkUrl(url)`                                                                                                                                                                                 | `/song/url/v1`（level: `'exhigh'`，`sendCookie:true`）+ HEAD 校验 |
+| `album.ts`    | `getAlbumDetail(id)`、`getAlbumComments({id,limit,offset,before})`                                                                                                                                                |                                                                   |
+| `artist.ts`   | `getArtistTop50(id)`、`getArtistDetail(id)`、`getArtistAlbum(id)`、`getHotArtists(limit,offset)`                                                                                                                  |                                                                   |
+| `playlist.ts` | `getPlaylistDetail` / `getPlaylistComments` / `getPlaylistSubscribers` / `getExquisitePlaylists` / `getPlaylistAllTracks` / `modifyPlaylistTracks`                                                                |                                                                   |
+| `search.ts`   | `searchByKeyword`（type 1018 综合）/ `Song` / `Album` / `Singer` / `Playlist` / `User`                                                                                                                            | 6 种                                                              |
+| `user.ts`     | `getUserFromCookie` / `getUser(uid)` / `fetchUserPlaylist(uid)` / `fetchUserFollows` / `fetchUserFolloweds` / `getUserSimpleIInfo` / `getLikeMusic(uid)` / `likeMusic(id,like)` / `getUserSongRecord(uid,type=1)` | 含「我创建」vs「我收藏」分离                                      |
+| `banner.ts`   | `getBanner()`                                                                                                                                                                                                     | 首页轮播                                                          |
+| `lyric.ts`    | `getSongLyric(id)`（`/lyric/new`，含 yrc/lrc）、`getTTMLLyric(id)`（外部 `amlldb.bikonoo.com`）                                                                                                                   |                                                                   |
 
 ---
 
@@ -242,21 +288,22 @@ type SongLoader = (id: number | string) => Promise<Song>;
 11 个转换函数：
 
 ```typescript
-transformToArtist()              // → Artist
-formatTimestampToDate()          // 时间戳 → 日期
-transformAlbums()                // → Album[]
-transformToPlaylist()            // → Playlist（精简）
-transformToUser()                // → User
-transformToSong()                // → Song
-transformPlaylistDetail()        // → Playlist（含 description 等完整字段）
-transformAlbumDetail()           // → Album（含 songs）
-transformComment()               // → Comment
-transformCommentListResponse()   // → CommentListResponse
+transformToArtist() // → Artist
+formatTimestampToDate() // 时间戳 → 日期
+transformAlbums() // → Album[]
+transformToPlaylist() // → Playlist（精简）
+transformToUser() // → User
+transformToSong() // → Song
+transformPlaylistDetail() // → Playlist（含 description 等完整字段）
+transformAlbumDetail() // → Album（含 songs）
+transformComment() // → Comment
+transformCommentListResponse() // → CommentListResponse
 ```
 
 > 约定：**所有 API 响应必须先转换再使用**，见开发指南。
 
 `utils/misc.ts` 另有：
+
 - `shouldTruncate(text)` / `getTruncatedDesc(text)` — 描述截断
 - `extractLeagcyLyrics(data)` — 优先 yrc，回退 lrc（**注意拼写错误 Leagcy**）
 - `extractTTMLLyrics(data)` — 提取 TTML
@@ -270,13 +317,16 @@ transformCommentListResponse()   // → CommentListResponse
 **单例模式**（由 `core/player/player.ts` 实例化并默认导出）。
 
 **HTML5 Audio 封装**（`new Audio()`）：
+
 - `playSong(song)` / `play()` / `pause()` / `toggle()` / `seek(time)` / `setVolume(0-1)` / `getCurrentTime()` / `getDuration()` / `isPlaying()` / `setMediaSessionHandlers(handlers)`
 
 **事件系统**（内部 `Map<string, EventCallback[]>`）：
+
 - `on(event, cb)` / `off(event, cb)` / `emit(event, payload)`
 - 事件名：`timeupdate`、`play`、`pause`、`ended`、`loaded`、`songchange`
 
 **MediaSession API 集成**（锁屏 / 硬件按键控制）：
+
 - 设置 metadata：`title`、`artist`（由 `song.artist[].name` 拼接）、`album`（`song.album.title`）、`artwork`（`{src: cover, sizes: '512x512', type: 'image/jpeg'}`，若有封面）
 - 注册 action handlers：`play`、`pause`、`nexttrack`、`previoustrack`、`seekbackward`（默认 10s）、`seekforward`、`seekto`
 - 在 `play` / `pause` 时同步 `playbackState`
@@ -294,6 +344,7 @@ transformCommentListResponse()   // → CommentListResponse
 **Composition API**。模块级直接 `new MusicController()`（**只在这里实例化一次**）。
 
 **状态**：
+
 ```typescript
 playlist: Song[]
 currentSong: Song | null
@@ -311,24 +362,24 @@ randomIndex: number
 
 **方法**：
 
-| 方法 | 功能 |
-|------|------|
-| `init()` | 注册 MediaSession handlers + 监听 player 事件 |
-| `replaceList(list, startIndex=0)` | 替换播放列表 |
-| `playSong(song)` | 播放单曲（先 reset 队列） |
-| `insertNext(song)` | 插入下一首 |
-| `insertNextAndPlay(song)` | 插入并立即播放 |
-| `switchSong(song)` | 切换到指定歌曲 |
-| `playByIndex(index)` | 按索引播放 |
-| `next()` / `prev()` | 切歌（处理 shuffle） |
-| `setMode(mode)` | 切换播放模式 |
-| `handleEnded()` | single 模式重播，否则 `next()` |
-| `play()` / `pause()` / `toggle()` | 播放控制 |
-| `seek(time)` | 跳转 |
-| `setVolume(v)` | 设置音量（v 是 0-100，内部 /100） |
-| `setFullPlayer(e)` | 切换全屏 |
-| `preloadNextSong()` | **预加载接下来 3 首**（跳过已有 url 的） |
-| `resetRandomQueue()` / `generateRandomQueue()` / `syncRandomIndex()` | 随机队列管理 |
+| 方法                                                                 | 功能                                          |
+| -------------------------------------------------------------------- | --------------------------------------------- |
+| `init()`                                                             | 注册 MediaSession handlers + 监听 player 事件 |
+| `replaceList(list, startIndex=0)`                                    | 替换播放列表                                  |
+| `playSong(song)`                                                     | 播放单曲（先 reset 队列）                     |
+| `insertNext(song)`                                                   | 插入下一首                                    |
+| `insertNextAndPlay(song)`                                            | 插入并立即播放                                |
+| `switchSong(song)`                                                   | 切换到指定歌曲                                |
+| `playByIndex(index)`                                                 | 按索引播放                                    |
+| `next()` / `prev()`                                                  | 切歌（处理 shuffle）                          |
+| `setMode(mode)`                                                      | 切换播放模式                                  |
+| `handleEnded()`                                                      | single 模式重播，否则 `next()`                |
+| `play()` / `pause()` / `toggle()`                                    | 播放控制                                      |
+| `seek(time)`                                                         | 跳转                                          |
+| `setVolume(v)`                                                       | 设置音量（v 是 0-100，内部 /100）             |
+| `setFullPlayer(e)`                                                   | 切换全屏                                      |
+| `preloadNextSong()`                                                  | **预加载接下来 3 首**（跳过已有 url 的）      |
+| `resetRandomQueue()` / `generateRandomQueue()` / `syncRandomIndex()` | 随机队列管理                                  |
 
 **预加载**：`watch(currentIndex, () => preloadNextSong())` 在 store 内注册。
 
@@ -345,26 +396,26 @@ randomIndex: number
 ARTIST_CLICK: 'artist-click'
 PLAYLIST_CLICK: 'playlist-click'
 ALBUM_CLICK: 'album-click'
-USER_CLICK: 'user-click'                 // ⚠️ 原文档遗漏
+USER_CLICK: 'user-click' // ⚠️ 原文档遗漏
 SONG_CLICK: 'song-click'
-SCROOL_TOP: 'scroll-top'                 // ⚠️ 拼写错误，缺 L
+SCROOL_TOP: 'scroll-top' // ⚠️ 拼写错误，缺 L
 // 播放控制
 PLAY_ALL: 'play-all'
 INSERT_NEXT: 'insert-next'
 INSERT_AND_PLAY: 'insert-and-play'
-SWITCH_SONG: 'switch-song'               // ⚠️ 原文档遗漏
-TOGGLE_FULLSCREEN: 'toggle-fullscreen'   // ⚠️ 原文档遗漏
+SWITCH_SONG: 'switch-song' // ⚠️ 原文档遗漏
+TOGGLE_FULLSCREEN: 'toggle-fullscreen' // ⚠️ 原文档遗漏
 // 用户事件
-USER_LOGIN: 'user-login'                 // ⚠️ 原文档遗漏
-USER_LIKE_MUSIC: 'user-like-music'       // ⚠️ 原文档遗漏
-USER_COLLECT_SONG: 'user-collect-song'   // ⚠️ 原文档遗漏
-USER_DELETE_SONG: 'user-delete-song'     // ⚠️ 原文档遗漏
+USER_LOGIN: 'user-login' // ⚠️ 原文档遗漏
+USER_LIKE_MUSIC: 'user-like-music' // ⚠️ 原文档遗漏
+USER_COLLECT_SONG: 'user-collect-song' // ⚠️ 原文档遗漏
+USER_DELETE_SONG: 'user-delete-song' // ⚠️ 原文档遗漏
 ```
 
 ### Toast 消息 (`constants/messages.ts`)
 
 ```typescript
-TOAST_SUSSESS    // ⚠️ 拼写错误（双 S），常量化已沿用
+TOAST_SUSSESS // ⚠️ 拼写错误（双 S），常量化已沿用
 TOAST_ERROR
 TOAST_WARNING
 TOAST_INFO
@@ -372,12 +423,12 @@ TOAST_INFO
 
 ### 事件总线处理器 (`utils/eventBusHandler/`)
 
-| Handler | 订阅事件 | 行为 |
-|---|---|---|
-| `clickEventHandler` | ARTIST/PLAYLIST/ALBUM/USER/SONG_CLICK | 路由跳转或日志 |
-| `playEventHandler` | PLAY_ALL / INSERT_NEXT / INSERT_AND_PLAY / SWITCH_SONG | 调用 playerStore |
-| `toastEventHandler` | TOAST_* | 调用 vue-sonner |
-| `userEventHandler` | USER_LOGIN / USER_LIKE_MUSIC | 调用 userStore |
+| Handler             | 订阅事件                                               | 行为             |
+| ------------------- | ------------------------------------------------------ | ---------------- |
+| `clickEventHandler` | ARTIST/PLAYLIST/ALBUM/USER/SONG_CLICK                  | 路由跳转或日志   |
+| `playEventHandler`  | PLAY_ALL / INSERT_NEXT / INSERT_AND_PLAY / SWITCH_SONG | 调用 playerStore |
+| `toastEventHandler` | TOAST\_\*                                              | 调用 vue-sonner  |
+| `userEventHandler`  | USER_LOGIN / USER_LIKE_MUSIC                           | 调用 userStore   |
 
 `main.ts` 在启动时依次注册上述 4 个 handler。
 
@@ -389,7 +440,7 @@ import { EVENTS } from '@/constants/events'
 
 emitter.emit(EVENTS.PLAY_ALL, songs)
 emitter.emit(EVENTS.INSERT_NEXT, song)
-emitter.emit('TOAST_SUSSESS', '操作成功')   // 注意是 SUSSESS
+emitter.emit('TOAST_SUSSESS', '操作成功') // 注意是 SUSSESS
 ```
 
 ---
@@ -403,12 +454,14 @@ emitter.emit('TOAST_SUSSESS', '操作成功')   // 注意是 SUSSESS
 - **初始化**: `router.beforeEach` 钩子触发 `userStore.fetchUser()`，手动也可调 `userStore.ensureUser()`
 
 **State**：
+
 - `user: User | null`、`account: Account | null`
 - `_userCreatePlaylist` / `_userSubPlaylist`（通过 getter 暴露为 `userCreatePlaylist` / `userSubPlaylist`，依据 `subscribed` 标志分离）
 - `userLikeListSet: Set<number|string>`（用 Set 加速 `isSongLiked` 查询）
 - `userSubCount: userSimpleInfo | null`（关注/粉丝数）
 
 **Actions**：
+
 - `init()` / `fetchUser(force=false)` / `ensureUser()` / `setUser(user, account)` / `resetUser()` / `persist()`
 - `toggleLikeMusic(song)` —— 调 `likeMusic(id, !isAlreadyLike)`，通过**新建一个 Set**触发响应式，emit toast
 
@@ -442,7 +495,7 @@ const theme = 'light' as 'light' | 'dark'
 ### 4. `core/player/player.ts` import 大小写
 
 ```typescript
-import MusicController from './musicController'  // ⚠️ 实际文件是 MusicController.ts
+import MusicController from './musicController' // ⚠️ 实际文件是 MusicController.ts
 ```
 
 Windows 不区分大小写所以能跑；部署到 Linux / CI 时会报模块未找到。
@@ -462,38 +515,30 @@ Windows 不区分大小写所以能跑；部署到 Linux / CI 时会报模块未
 ### CSS 变量 (`styles/dark-mode.css`)
 
 **亮色模式（`:root`，lines 3-28）：**
+
 ```css
---bg-primary: #ffffff
---bg-secondary: #f8f9fa
---bg-tertiary: #f3f4f6
---bg-card: rgba(255,255,255,0.7)
---bg-hover: rgba(243,244,246,0.7)
---text-primary: #1f2937
---text-secondary: #6b7280
---text-tertiary: #9ca3af
---text-inverse: #ffffff
---border-primary: #e5e7eb
---border-secondary: rgba(229,231,235,0.5)
---border-tertiary: rgba(229,231,235,0.3)
---shadow-sm / md / lg / xl
---glass-bg: rgba(255,255,255,0.7)
---glass-border: rgba(255,255,255,0.2)
---glass-shadow: 0 8px 32px rgba(0,0,0,0.1)
+--bg-primary: #ffffff --bg-secondary: #f8f9fa --bg-tertiary: #f3f4f6
+  --bg-card: rgba(255, 255, 255, 0.7) --bg-hover: rgba(243, 244, 246, 0.7) --text-primary: #1f2937
+  --text-secondary: #6b7280 --text-tertiary: #9ca3af --text-inverse: #ffffff
+  --border-primary: #e5e7eb --border-secondary: rgba(229, 231, 235, 0.5)
+  --border-tertiary: rgba(229, 231, 235, 0.3) --shadow-sm / md / lg / xl
+  --glass-bg: rgba(255, 255, 255, 0.7) --glass-border: rgba(255, 255, 255, 0.2) --glass-shadow: 0
+  8px 32px rgba(0, 0, 0, 0.1);
 ```
 
 **暗黑模式（`:root.dark`，lines 30-55）：** 镜像 dark 配色（`#0d0d0d`、`#1a1a1a`、白文、`#374151` 边框、`rgba(26,26,26,0.7)` glass 背景）。
 
 ### 毛玻璃类（分两个文件）
 
-| 类名 | 定义于 | 特性 |
-|---|---|---|
-| `.glass` | `dark-mode.css` (line 131) | `backdrop-filter: blur(20px) saturate(180%)`，使用 CSS 变量 |
-| `.glass-light` | `dark-mode.css` | 纯 `rgba(255,255,255,0.85)`，无 backdrop-filter |
-| `.glass-dark` | `dark-mode.css` | 纯 `rgba(26,26,26,0.85)`，无 backdrop-filter |
-| `.glass-container` | `style.css` | `blur(18px) saturate(200%) brightness(1.2) contrast(1.05)` + padding |
-| `.glass-card` | `style.css` | 同上，卡片样式 |
-| `.glass-effect` | `style.css` | 同上 + 强调发光 |
-| `.glass-component` | `style.css` (line 385) | 侧边栏变体 |
+| 类名               | 定义于                     | 特性                                                                 |
+| ------------------ | -------------------------- | -------------------------------------------------------------------- |
+| `.glass`           | `dark-mode.css` (line 131) | `backdrop-filter: blur(20px) saturate(180%)`，使用 CSS 变量          |
+| `.glass-light`     | `dark-mode.css`            | 纯 `rgba(255,255,255,0.85)`，无 backdrop-filter                      |
+| `.glass-dark`      | `dark-mode.css`            | 纯 `rgba(26,26,26,0.85)`，无 backdrop-filter                         |
+| `.glass-container` | `style.css`                | `blur(18px) saturate(200%) brightness(1.2) contrast(1.05)` + padding |
+| `.glass-card`      | `style.css`                | 同上，卡片样式                                                       |
+| `.glass-effect`    | `style.css`                | 同上 + 强调发光                                                      |
+| `.glass-component` | `style.css` (line 385)     | 侧边栏变体                                                           |
 
 **移动端降级**（`dark-mode.css` line 230-235）：`@media (max-width: 768px) { .glass { backdrop-filter: blur(10px) saturate(180%) } }`。
 
@@ -534,7 +579,9 @@ import { MeshGradientRenderer } from '@applemusic-like-lyrics/core'
 ```typescript
 const DISPLAY_BATCH_SIZE = 20
 const displayCount = ref(DISPLAY_BATCH_SIZE)
-const loadMore = () => { displayCount.value += DISPLAY_BATCH_SIZE }
+const loadMore = () => {
+  displayCount.value += DISPLAY_BATCH_SIZE
+}
 ```
 
 使用 `IntersectionObserver` 监听底部哨兵元素。
@@ -558,14 +605,14 @@ const generateRandomQueue = () => {
 
 ## 路由配置 (`router/index.ts`)
 
-| 路径 | 名称 | 组件 |
-|------|------|------|
-| `/` | `Home` | `views/Home/index.vue` |
-| `/search` | `Search` | `views/Search/index.vue` |
-| `/playlist` | `playlist` | `views/Playlist/index.vue` |
-| `/artist` | `artist` | `views/Artist/index.vue` |
-| `/album` | `album` | `views/Album/index.vue` |
-| `/user` | `user` | `views/User/index.vue` ⚠️ 原文档遗漏 |
+| 路径        | 名称       | 组件                                 |
+| ----------- | ---------- | ------------------------------------ |
+| `/`         | `Home`     | `views/Home/index.vue`               |
+| `/search`   | `Search`   | `views/Search/index.vue`             |
+| `/playlist` | `playlist` | `views/Playlist/index.vue`           |
+| `/artist`   | `artist`   | `views/Artist/index.vue`             |
+| `/album`    | `album`    | `views/Album/index.vue`              |
+| `/user`     | `user`     | `views/User/index.vue` ⚠️ 原文档遗漏 |
 
 全部 `() => import(...)` 懒加载。`createWebHistory(import.meta.env.BASE_URL)`。全局 `beforeEach` 调用 `userStore.fetchUser()`（未加载时）。
 
