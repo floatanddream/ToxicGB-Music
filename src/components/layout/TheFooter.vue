@@ -152,6 +152,10 @@ const volume = ref(70)
 </template>
 
 <style scoped>
+:deep(.artist-divider .artist-name),
+:deep(.artist-divider .artist-separator) {
+  font-weight: 400;
+}
 .player-footer {
   background: rgba(255, 255, 255, 0.95);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -210,7 +214,7 @@ const volume = ref(70)
 
 .song-title {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
