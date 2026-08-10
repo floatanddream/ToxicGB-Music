@@ -7,7 +7,7 @@ import ArtistGrid from '@/components/common/pageComponents/ArtistGrid.vue'
 import AlbumGrid from '@/components/common/pageComponents/AlbumGrid.vue'
 import UserGrid from '@/components/common/pageComponents/UserGrid.vue'
 import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue'
-import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import InfiniteScroll from '@/components/infiniteScroll/InfiniteScroll.vue'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SearchIcon, Loader2 } from 'lucide-vue-next'
 import {
