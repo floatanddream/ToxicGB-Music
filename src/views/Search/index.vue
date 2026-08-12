@@ -385,7 +385,7 @@ onMounted(() => {
       <div class="section-header flex flex-col mb-8">
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
           <span
-            class="bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400 bg-clip-text text-transparent"
+            class="bg-gradient-to-r from-red-600 to-orange-600 dark:from-red-600 dark:to-orange-600 bg-clip-text text-transparent"
           >
             <span v-if="searchQuery">{{ searchQuery }} 的搜索结果</span>
             <span v-else>搜索音乐</span>
