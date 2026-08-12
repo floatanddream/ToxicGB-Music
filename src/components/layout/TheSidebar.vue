@@ -3,7 +3,7 @@ import NavigationMenu from '../common/NavigationMenu.vue'
 import type { MenuItem } from '@/types/menu'
 import { ref, onMounted, computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { MoonIcon, SunIcon, Music, ListMusic, ChevronDown, ChevronRight } from 'lucide-vue-next'
+import { Music, ListMusic, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 
@@ -49,29 +49,7 @@ const toggleSubPlaylists = () => {
   subPlaylistsCollapsed.value = !subPlaylistsCollapsed.value
 }
 
-const isDarkMode = ref(false)
-
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.documentElement.classList.toggle('dark', isDarkMode.value)
-  localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
-}
-
-const initTheme = () => {
-  const savedTheme = localStorage.getItem('theme')
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-
-  if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-    isDarkMode.value = true
-    document.documentElement.classList.add('dark')
-  } else {
-    isDarkMode.value = false
-    document.documentElement.classList.remove('dark')
-  }
-}
-
 onMounted(() => {
-  initTheme()
   // userStore.ensureUser()
 })
 
@@ -85,12 +63,6 @@ defineEmits<{
 
 // 基础菜单项（不包括歌单）
 const baseMenuItems: MenuItem[] = [
-  {
-    id: 'theme-toggle',
-    label: '主题',
-    icon: '🎨',
-    action: toggleTheme
-  },
   {
     id: 'home',
     label: '首页',
@@ -151,14 +123,6 @@ const baseMenuItems: MenuItem[] = [
         </div>
       </div>
     </div>
-
-    <div class="theme-toggle-container">
-      <Button variant="outline" size="sm" @click="toggleTheme" class="theme-toggle-btn">
-        <SunIcon v-if="isDarkMode" class="h-4 w-4 text-yellow-500" />
-        <MoonIcon v-else class="h-4 w-4 text-gray-700" />
-        {{ isDarkMode ? '浅色模式' : '深色模式' }}
-      </Button>
-    </div>
   </aside>
 </template>
 
@@ -185,24 +149,6 @@ const baseMenuItems: MenuItem[] = [
 
 .sidebar.collapsed {
   width: 60px;
-}
-
-.theme-toggle-container {
-  padding: 16px;
-  margin-top: auto;
-  border-top: 1px solid rgba(224, 224, 224, 0.3);
-}
-
-.dark .theme-toggle-container {
-  border-top-color: rgba(51, 51, 51, 0.3);
-}
-
-.theme-toggle-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 }
 
 @media (max-width: 768px) {
