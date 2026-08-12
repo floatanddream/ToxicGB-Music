@@ -1,6 +1,5 @@
-
 <template>
-  <div class="search-bar group" :class="{ 'focused': isFocused }">
+  <div class="search-bar group" :class="{ focused: isFocused }">
     <input
       v-model="query"
       type="text"
@@ -17,40 +16,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { SearchIcon } from 'lucide-vue-next';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { SearchIcon } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const isFocused = ref(false);
+const router = useRouter()
+const isFocused = ref(false)
 
 defineProps<{
   placeholder?: string
-}>();
+}>()
 
 const emit = defineEmits<{
   search: [query: string]
-}>();
+}>()
 
-const query = defineModel<string>();
+const query = defineModel<string>()
 
 const handleSearch = () => {
   if (query.value?.trim()) {
     router.push({
       path: '/search',
       query: {
-        keywords: query.value
-      }
-    });
-    emit('search', query.value);
+        keywords: query.value,
+      },
+    })
+    emit('search', query.value)
   }
-};
+}
 
 const handleKeyPress = (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
-    handleSearch();
+    handleSearch()
   }
-};
+}
 </script>
 
 <style scoped>
@@ -74,13 +73,13 @@ const handleKeyPress = (e: KeyboardEvent) => {
 
 .search-bar.focused {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(14, 165, 233, 0.3);
+  border-color: rgba(233, 14, 14, 0.3);
   box-shadow: 0 4px 16px rgba(14, 165, 233, 0.1);
 }
 
 .dark .search-bar.focused {
   background: rgba(17, 25, 40, 0.25);
-  border-color: rgba(14, 165, 233, 0.2);
+  border-color: rgba(233, 14, 14, 0.2);
 }
 
 .search-input {
@@ -124,13 +123,13 @@ const handleKeyPress = (e: KeyboardEvent) => {
 }
 
 .search-button:hover {
-  background: rgba(14, 165, 233, 0.1);
-  color: #0ea5e9;
+  background: rgba(233, 14, 14, 0.1);
+  color: #ff453a;
 }
 
 .dark .search-button:hover {
-  background: rgba(14, 165, 233, 0.2);
-  color: #38bdf8;
+  background: rgba(233, 14, 14, 0.2);
+  color: #ff453a;
 }
 
 .search-bar.group {
@@ -145,7 +144,7 @@ const handleKeyPress = (e: KeyboardEvent) => {
   right: 0;
   bottom: 0;
   border-radius: 25px;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0) 100%);
+  background: linear-gradient(135deg, rgba(233, 14, 14, 0.1) 0%, rgba(233, 14, 98, 0) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: -1;

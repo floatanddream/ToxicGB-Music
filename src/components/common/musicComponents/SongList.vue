@@ -152,43 +152,25 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 }
 /* 歌曲列表 */
 .song-item {
-  transition: all 0.2s ease-in-out;
+  user-select: none;
+  transition: all 1s ease-in-out;
   cursor: pointer;
   border-radius: 10px;
 }
 
 /* 浅色模式 - 透明毛玻璃效果 */
 .song-item:hover .p-3 {
-  background:
-    radial-gradient(
-      ellipse at 50% 30%,
-      rgba(255, 255, 255, 0.45) 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      transparent 100%
-    ),
-    rgba(255, 255, 255, 0.35);
+  background: rgba(201, 201, 201, 0.5);
 
-  backdrop-filter: blur(10px) saturate(200%) brightness(1.05);
-  -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.05);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.12);
+  /* backdrop-filter: blur(10px) saturate(200%) brightness(1.05);
+  -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.05); */
 }
 
 /* 暗色模式 - 透明毛玻璃效果 */
 .dark .song-item:hover .p-3 {
-  background: rgba(37, 37, 37, 0.1);
+  background: rgba(255, 255, 255, 0.06);
 
-  backdrop-filter: blur(10px) saturate(180%) brightness(1.5);
-  -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.5);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 8px 32px rgba(0, 0, 0, 0.3);
+  /* backdrop-filter: blur(10px) saturate(180%) brightness(1.5);
+  -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.5); */
 }
 </style>
