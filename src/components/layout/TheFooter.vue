@@ -8,6 +8,7 @@ import { formatTime } from '@/utils/format'
 import PlaylistPanel from '../common/PlaylistPanel.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
+import BouncingIconButton from '@/components/misc/BouncingIconButton.vue'
 
 const playerStore = usePlayerStore()
 
@@ -33,6 +34,11 @@ const handleVolume = (e: Event) => {
   playerStore.setVolume(Number(target.value))
 }
 
+const handleOpenPlaylist = () => {
+  isPlaylistOpen.value = !isPlaylistOpen.value
+  console.log('Playlist open state:', isPlaylistOpen.value)
+}
+
 const volume = ref(70)
 </script>
 
@@ -55,16 +61,33 @@ const volume = ref(70)
       <!-- 中间：播放控制 -->
       <div class="center-section">
         <div class="controls-row">
-          <button class="icon-btn" @click="playerStore.prev">
+          <BouncingIconButton
+            size="h-9 w-9"
+            hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+            :pressed-scale="0.8"
+            custom-class="icon-btn"
+            @click="playerStore.prev"
+          >
             <Rewind />
-          </button>
-          <button class="play-btn" @click="handleClickPlayAndPause">
+          </BouncingIconButton>
+          <BouncingIconButton
+            size="h-[42px] w-[42px]"
+            :pressed-scale="0.8"
+            custom-class="play-btn"
+            @click="handleClickPlayAndPause"
+          >
             <Play v-if="!playing" />
             <Pause v-else />
-          </button>
-          <button class="icon-btn" @click="playerStore.next">
+          </BouncingIconButton>
+          <BouncingIconButton
+            size="h-9 w-9"
+            hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+            :pressed-scale="0.8"
+            custom-class="icon-btn"
+            @click="playerStore.next"
+          >
             <FastForward />
-          </button>
+          </BouncingIconButton>
         </div>
         <div class="progress-row">
           <span class="time-text">{{ formatTime(currentTime) }}</span>
@@ -85,7 +108,12 @@ const volume = ref(70)
 
       <!-- 右侧：音量 & 播放列表 -->
       <div class="volume-section">
-        <button class="icon-btn volume-only">
+        <BouncingIconButton
+          size="h-9 w-9"
+          hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+          :pressed-scale="0.8"
+          custom-class="icon-btn volume-only"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -102,7 +130,7 @@ const volume = ref(70)
               d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
             />
           </svg>
-        </button>
+        </BouncingIconButton>
         <div class="volume-bar volume-only">
           <div class="volume-fill" :style="{ width: `${volume}%` }"></div>
           <input
@@ -114,7 +142,12 @@ const volume = ref(70)
             @input="handleVolume"
           />
         </div>
-        <button class="icon-btn loop-mode">
+        <BouncingIconButton
+          size="h-9 w-9"
+          hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+          :pressed-scale="0.8"
+          custom-class="icon-btn loop-mode"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -129,13 +162,25 @@ const volume = ref(70)
             <circle cx="12" cy="12" r="10" />
             <polygon points="10 8 16 12 10 16 10 8" />
           </svg>
-        </button>
-        <button class="icon-btn" @click="isPlaylistOpen = !isPlaylistOpen">
+        </BouncingIconButton>
+        <BouncingIconButton
+          size="h-9 w-9"
+          hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+          :pressed-scale="0.8"
+          custom-class="icon-btn"
+          @click.stop="handleOpenPlaylist"
+        >
           <ListMusic :size="20" />
-        </button>
-        <button class="icon-btn" @click="emitter.emit(EVENTS.TOGGLE_FULLSCREEN, true)">
+        </BouncingIconButton>
+        <BouncingIconButton
+          size="h-9 w-9"
+          hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+          :pressed-scale="0.8"
+          custom-class="icon-btn"
+          @click="emitter.emit(EVENTS.TOGGLE_FULLSCREEN, true)"
+        >
           <Maximize2 :size="18" />
-        </button>
+        </BouncingIconButton>
       </div>
     </div>
 
