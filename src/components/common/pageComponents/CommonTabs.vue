@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export interface TabItem {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
-const modelValue = defineModel<string>();
+const modelValue = defineModel<string>()
 
 const props = defineProps<{
-  tabs: TabItem[];
-}>();
+  tabs: TabItem[]
+}>()
 </script>
 
 <template>
   <div class="sticky top-0 z-20 py-2">
-    <div class="inline-flex px-2">
+    <div class="inline-flex">
       <Tabs
         v-model="modelValue"
         class="glass-tab-container w-full rounded-xl px-1 py-1 shadow-lg border border-white/10 backdrop-blur-lg"
@@ -27,7 +27,7 @@ const props = defineProps<{
             :value="tab.value"
             class="tab-button relative flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 data-[state=inactive]:text-gray-300 data-[state=active]:text-white"
           >
-            <span class="relative z-10 font-text-primary">{{ tab.label }}</span>
+            <span class="relative z-10">{{ tab.label }}</span>
             <span
               v-if="modelValue === tab.value"
               class="absolute inset-0 bg-gradient-to-r rounded-lg shadow bg-gradient-red-custom"
@@ -40,7 +40,6 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-
 .tab-button {
   overflow: hidden;
 }
@@ -61,7 +60,8 @@ const props = defineProps<{
 
 /* 动态玻璃流动效果 */
 @keyframes liquidFlow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(-100%) skewX(-15deg);
   }
   50% {
