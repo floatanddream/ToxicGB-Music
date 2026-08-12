@@ -1,0 +1,193 @@
+/* ===========================================================
+   🔧 Utilities — 工具类
+   - bg / text / border / shadow 颜色类
+   - hover-lift / hover-scale / hover-bright
+   - transition-* 过渡
+   - 全局滚动条
+   - 卡片 / 按钮 / 输入框 基础
+   - 布局组件特定覆盖（footer / sidebar / header）
+   =========================================================== */
+
+/* ---------- 背景颜色类 ---------- */
+.bg-primary {
+  background-color: var(--bg-primary) !important;
+}
+.bg-secondary {
+  background-color: var(--bg-secondary) !important;
+}
+.bg-tertiary {
+  background-color: var(--bg-tertiary) !important;
+}
+.bg-card {
+  background-color: var(--bg-card) !important;
+}
+.bg-hover:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* ---------- 文字颜色类 ---------- */
+.text-primary {
+  color: var(--text-primary) !important;
+}
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+.text-tertiary {
+  color: var(--text-tertiary) !important;
+}
+.text-inverse {
+  color: var(--text-inverse) !important;
+}
+
+/* ---------- 边框颜色类 ---------- */
+.border-primary {
+  border-color: var(--border-primary) !important;
+}
+.border-secondary {
+  border-color: var(--border-secondary) !important;
+}
+.border-tertiary {
+  border-color: var(--border-tertiary) !important;
+}
+
+/* ---------- 阴影类 ---------- */
+.shadow-sm {
+  box-shadow: var(--shadow-sm) !important;
+}
+.shadow-md {
+  box-shadow: var(--shadow-md) !important;
+}
+.shadow-lg {
+  box-shadow: var(--shadow-lg) !important;
+}
+.shadow-xl {
+  box-shadow: var(--shadow-xl) !important;
+}
+
+/* ---------- Hover 效果 ---------- */
+.hover-lift:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+.hover-scale:hover {
+  transform: scale(1.05) !important;
+}
+.hover-bright:hover {
+  filter: brightness(1.1) !important;
+}
+
+/* ---------- 过渡类 ---------- */
+.transition-all {
+  transition: all 0.3s ease !important;
+}
+.transition-fast {
+  transition: all 0.15s ease !important;
+}
+.transition-slow {
+  transition: all 0.5s ease !important;
+}
+
+/* ---------- 通用过渡 *（dark-mode.css）---------- */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.1s ease;
+}
+
+/* ---------- 基础组件类 ---------- */
+.card-base {
+  background-color: var(--bg-card) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--border-secondary) !important;
+  transition: all 0.3s ease !important;
+}
+
+.button-base {
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+
+.input-base {
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: 0.5rem !important;
+  color: var(--text-primary) !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s ease !important;
+}
+.input-base:focus {
+  outline: none !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+}
+
+/* ---------- 布局组件特定覆盖 ---------- */
+.player-footer {
+  background-color: var(--glass-bg) !important;
+  border-top: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+.sidebar {
+  background-color: var(--glass-bg) !important;
+  border-right: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+.header {
+  background-color: var(--glass-bg) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+/* ---------- 全局滚动条 ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ---------- 可复用滚动条类（类似 shadcn ScrollArea）---------- */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

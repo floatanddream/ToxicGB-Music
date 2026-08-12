@@ -1,0 +1,13 @@
+/* ===========================================================
+   ✨ Animations — 路由切换 + 其他全局动画
+   =========================================================== */
+
+/* Vue Router 路由切换（App.vue 使用） */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

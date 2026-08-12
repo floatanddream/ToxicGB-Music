@@ -1,0 +1,62 @@
+/* ===========================================================
+   🔘 Buttons — 按钮样式
+   - .bg-gradient-red-custom（红色播放按钮）
+   - .btn-gradient-primary（蓝色渐变按钮）
+   - .font-text-primary（跟随主题色）
+   =========================================================== */
+
+/* 红色渐变按钮（播放全部等） */
+.bg-gradient-red-custom {
+  background: linear-gradient(135deg, #ff3b30 50%, #da3535 100%);
+  color: #fff; /* 强制白字：红色背景上跟随主题色会看不清 */
+  transition: all 0.3s ease;
+}
+.bg-gradient-red-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+}
+
+/* 跟随主题文字色（用于普通文本） */
+.font-text-primary {
+  color: var(--text-primary);
+}
+.dark .font-text-primary {
+  color: var(--text-primary);
+}
+
+/* 蓝色渐变按钮 */
+.btn-gradient-primary {
+  background-image: linear-gradient(
+    to right,
+    var(--primary-color, #3b82f6),
+    var(--primary-color, #3b82f6) / 0.8
+  );
+  color: rgb(0, 0, 0);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+.dark .btn-gradient-primary {
+  color: #ffffff;
+}
+.btn-gradient-primary:hover {
+  background-image: linear-gradient(
+    to right,
+    var(--primary-color, #3b82f6) / 0.9,
+    var(--primary-color, #3b82f6)
+  );
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  transform: scale(1.05);
+}
+.btn-gradient-primary:active {
+  transform: scale(0.98);
+}
+.btn-gradient-primary:focus {
+  outline: none;
+  ring: 2px solid var(--primary-color, #3b82f6);
+  ring-offset: 2px;
+}

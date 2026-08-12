@@ -1,0 +1,40 @@
+/* ===========================================================
+   🧱 Base — 字体 / body / 鼠标光标 / Tailwind base
+   =========================================================== */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root,
+body,
+html {
+  font-family: 'PingFang SC', '苹方', 'Microsoft YaHei', sans-serif !important;
+  font-weight: 700;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+  cursor: pointer;
+  }
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    'Helvetica Neue', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
