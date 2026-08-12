@@ -25,9 +25,9 @@ const props = defineProps<{
             v-for="tab in tabs"
             :key="tab.value"
             :value="tab.value"
-            class="tab-button relative flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 data-[state=inactive]:text-gray-300 data-[state=active]:text-white"
+            class="tab-button relative flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 data-[state=inactive]:text-gray-800 data-[state=active]:text-white"
           >
-            <span class="relative z-10">{{ tab.label }}</span>
+            <span class="relative z-10 font-bold">{{ tab.label }}</span>
             <span
               v-if="modelValue === tab.value"
               class="absolute inset-0 bg-gradient-to-r rounded-lg shadow bg-gradient-red-custom"
