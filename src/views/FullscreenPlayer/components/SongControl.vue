@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import BouncingSlider from '@/components/misc/BouncingSlider.vue'
-import { animate, motion, useSpring } from "motion-v"
+import BouncingIconButton from '@/components/misc/BouncingIconButton.vue'
 import { formatTime } from '@/utils/format'
 import { usePlayerStore } from '@/stores/playerStore'
 import ArtistDivider from '@/components/common/musicComponents/artistDivider.vue'
 import { FastForward, PauseIcon, PlayIcon, Rewind } from 'lucide-vue-next'
 
 const playerStore = usePlayerStore()
-
-const prevSpring = useSpring(1, { damping: 10, stiffness: 300 })
-const playSpring = useSpring(1, { damping: 10, stiffness: 300 })
-const nextSpring = useSpring(1, { damping: 10, stiffness: 300 })
 
 const props = defineProps<{
   duration: number
@@ -24,6 +20,14 @@ const emit = defineEmits<{
 
 const handleSeek = (time: number) => {
   emit('seek', time)
+}
+
+const togglePlay = () => {
+  if (playerStore.playing) {
+    playerStore.pause()
+  } else {
+    playerStore.play()
+  }
 }
 </script>
 
@@ -42,36 +46,18 @@ const handleSeek = (time: number) => {
       </div>
     </div>
     <div class="control flex justify-center gap-10 mt-5">
-      <motion.div class="flex justify-center items-center h-15 w-15 cursor-pointer prevSong
-           rounded-full hover:bg-[rgba(0,0,0,0.08)] transition-colors duration-200"
-        :style="{ scale: prevSpring }"
-        @click="playerStore.prev()"
-        @mousedown="animate(prevSpring, 0.85, { type: 'spring', damping: 12, stiffness: 300 })"
-        @mouseup="animate(prevSpring, 1, { type: 'spring', damping: 12, stiffness: 300 })"
-        @mouseleave="animate(prevSpring, 1, { type: 'spring', damping: 12, stiffness: 300 })">
+      <BouncingIconButton custom-class="prevSong" @click="playerStore.prev()">
         <Rewind class="h-8 w-8" />
-      </motion.div>
+      </BouncingIconButton>
 
-      <motion.div class="flex justify-center items-center h-15 w-15 cursor-pointer playPause
-           rounded-full hover:bg-[rgba(0,0,0,0.08)] transition-colors duration-200"
-        :style="{ scale: playSpring }"
-        @click="playerStore.playing ? playerStore.pause() : playerStore.play()"
-        @mousedown="animate(playSpring, 0.85, { type: 'spring', damping: 12, stiffness: 300 })"
-        @mouseup="animate(playSpring, 1, { type: 'spring', damping: 12, stiffness: 300 })"
-        @mouseleave="animate(playSpring, 1, { type: 'spring', damping: 12, stiffness: 300 })">
-        <PauseIcon class="h-8 w-8" v-if="playerStore.playing" />
-        <PlayIcon class="h-8 w-8" v-else />
-      </motion.div>
+      <BouncingIconButton custom-class="playPause" @click="togglePlay">
+        <PauseIcon v-if="playerStore.playing" class="h-8 w-8" />
+        <PlayIcon v-else class="h-8 w-8" />
+      </BouncingIconButton>
 
-      <motion.div class="flex justify-center items-center h-15 w-15 cursor-pointer nextSong
-           rounded-full hover:bg-[rgba(0,0,0,0.08)] transition-colors duration-200"
-        :style="{ scale: nextSpring }"
-        @click="playerStore.next()"
-        @mousedown="animate(nextSpring, 0.85, { type: 'spring', damping: 12, stiffness: 300 })"
-        @mouseup="animate(nextSpring, 1, { type: 'spring', damping: 12, stiffness: 300 })"
-        @mouseleave="animate(nextSpring, 1, { type: 'spring', damping: 12, stiffness: 300 })">
+      <BouncingIconButton custom-class="nextSong" @click="playerStore.next()">
         <FastForward class="h-8 w-8" />
-      </motion.div>
+      </BouncingIconButton>
     </div>
   </div>
 </template>
