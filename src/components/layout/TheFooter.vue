@@ -271,6 +271,7 @@ const volume = ref(70)
 
 .play-btn {
   background: #fa233b;
+  color: #fff; /* 强制白字：红底上跟随 buttontext 系统色（接近黑）对比度差 */
   border: none;
   border-radius: 50%;
   width: 42px;
