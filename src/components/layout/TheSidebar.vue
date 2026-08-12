@@ -7,24 +7,23 @@ import { Music, ListMusic, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 
-const userStore = useUserStore();
-const route = useRoute();
+const userStore = useUserStore()
+const route = useRoute()
 
 //用户创建歌单与用户收藏歌单的容器ref
-const userCreatePlaylistRef = ref<HTMLDivElement>();
-const userSubPlaylistRef = ref<HTMLDivElement>();
+const userCreatePlaylistRef = ref<HTMLDivElement>()
+const userSubPlaylistRef = ref<HTMLDivElement>()
 const createPlaylistHeight = computed(() => {
-  return userCreatePlaylistRef.value?.scrollHeight;
-});
+  return userCreatePlaylistRef.value?.scrollHeight
+})
 const subPlaylistHeight = computed(() => {
-  return userSubPlaylistRef.value?.scrollHeight;
-  
-});
+  return userSubPlaylistRef.value?.scrollHeight
+})
 
 // 是否有歌单数据
-const hasPlaylists = computed(() =>
-  (userStore.userCreatePlaylist?.length || 0) > 0 ||
-  (userStore.userSubPlaylist?.length || 0) > 0
+const hasPlaylists = computed(
+  () =>
+    (userStore.userCreatePlaylist?.length || 0) > 0 || (userStore.userSubPlaylist?.length || 0) > 0,
 )
 
 // 当前歌单 ID
@@ -33,7 +32,7 @@ const currentPlaylistId = computed(() => {
 })
 
 // 判断歌单是否激活
-const isPlaylistActive = (playlistId: string) => {
+const isPlaylistActive = (playlistId: string | number) => {
   return currentPlaylistId.value === playlistId
 }
 
@@ -67,13 +66,13 @@ const baseMenuItems: MenuItem[] = [
     id: 'home',
     label: '首页',
     icon: '🏠',
-    route: '/'
+    route: '/',
   },
   {
     id: 'search',
     label: '搜索',
     icon: '🔍',
-    route: '/search'
+    route: '/search',
   },
 ]
 </script>
@@ -92,12 +91,18 @@ const baseMenuItems: MenuItem[] = [
           <ChevronRight v-if="myPlaylistsCollapsed" class="h-4 w-4 ml-auto" />
           <ChevronDown v-else class="h-4 w-4 ml-auto" />
         </div>
-        <div ref="userCreatePlaylistRef"
+        <div
+          ref="userCreatePlaylistRef"
           :style="{ maxHeight: !myPlaylistsCollapsed ? `${createPlaylistHeight}px` : '0' }"
-          :class="['playlist-list', { expanded: !myPlaylistsCollapsed }]">
-          <RouterLink v-for="playlist in userStore.userCreatePlaylist" :key="playlist.id"
-            :to="`/playlist?id=${playlist.id}`" class="playlist-item"
-            :class="{ active: isPlaylistActive(playlist.id) }">
+          :class="['playlist-list', { expanded: !myPlaylistsCollapsed }]"
+        >
+          <RouterLink
+            v-for="playlist in userStore.userCreatePlaylist"
+            :key="playlist.id"
+            :to="`/playlist?id=${playlist.id}`"
+            class="playlist-item"
+            :class="{ active: isPlaylistActive(playlist.id) }"
+          >
             <img :src="playlist.cover" :alt="playlist.title" class="playlist-cover" />
             <span class="playlist-name">{{ playlist.title }}</span>
           </RouterLink>
@@ -112,11 +117,18 @@ const baseMenuItems: MenuItem[] = [
           <ChevronRight v-if="subPlaylistsCollapsed" class="h-4 w-4 ml-auto" />
           <ChevronDown v-else class="h-4 w-4 ml-auto" />
         </div>
-        <div ref="userSubPlaylistRef" :class="['playlist-list', { expanded: !subPlaylistsCollapsed }]"
-          :style="{ maxHeight: !subPlaylistsCollapsed ? `${subPlaylistHeight}px` : `0` }">
-          <RouterLink v-for="playlist in userStore.userSubPlaylist" :key="playlist.id"
-            :to="`/playlist?id=${playlist.id}`" class="playlist-item"
-            :class="{ active: isPlaylistActive(playlist.id) }">
+        <div
+          ref="userSubPlaylistRef"
+          :class="['playlist-list', { expanded: !subPlaylistsCollapsed }]"
+          :style="{ maxHeight: !subPlaylistsCollapsed ? `${subPlaylistHeight}px` : `0` }"
+        >
+          <RouterLink
+            v-for="playlist in userStore.userSubPlaylist"
+            :key="playlist.id"
+            :to="`/playlist?id=${playlist.id}`"
+            class="playlist-item"
+            :class="{ active: isPlaylistActive(playlist.id) }"
+          >
             <img :src="playlist.cover" :alt="playlist.title" class="playlist-cover" />
             <span class="playlist-name">{{ playlist.title }}</span>
           </RouterLink>
@@ -221,7 +233,9 @@ const baseMenuItems: MenuItem[] = [
   padding: 0;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.5s ease;
+  transition:
+    max-height 0.5s ease,
+    opacity 0.5s ease;
 }
 
 .playlist-list.expanded {
