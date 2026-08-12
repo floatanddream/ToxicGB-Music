@@ -2,7 +2,7 @@
 import { motion, useSpring } from "motion-v"
 
 interface Props {
-	/** 点击回调 */
+	/** 点击回调（通过 :on-click prop 传递） */
 	onClick?: (e: MouseEvent) => void
 	/** 自定义 class，追加到基础类（默认：flex 居中 + 圆形） */
 	customClass?: string
@@ -27,9 +27,8 @@ const props = withDefaults(defineProps<Props>(), {
 	pressedScale: 0.85,
 })
 
-const emit = defineEmits<{
-	click: [evt: MouseEvent]
-}>()
+// 注意：不声明 emits。父级 @click 自动 fallthrough 到根 motion.div 的 DOM listener，
+// 避免声明 emit 后同时触发自定义事件 + fallthrough DOM 事件导致的"双触发"。
 
 const spring = useSpring(1, {
 	damping: props.springDamping,
@@ -43,7 +42,6 @@ const onRelease = () => {
 	spring.set(1)
 }
 const handleClick = (e: MouseEvent) => {
-	emit('click', e)
 	props.onClick?.(e)
 }
 </script>
