@@ -54,8 +54,8 @@ defineEmits<{
 
         <div class="flex gap-3 justify-center md:justify-start">
           <Button size="lg" class="bg-gradient-red-custom" @click="$emit('play-all')">
-            <PlayIcon class="h-5 w-5 mr-2 font-text-primary" />
-            <span class="font-text-primary">{{ `播放全部` }}</span>
+            <PlayIcon class="h-5 w-5 mr-2" />
+            <span>{{ `播放全部` }}</span>
           </Button>
           <Button
             v-if="!isUserCreatePlayList"

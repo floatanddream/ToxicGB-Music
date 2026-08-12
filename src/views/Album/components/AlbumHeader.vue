@@ -1,20 +1,28 @@
 <script setup lang="ts">
-import { PlayIcon,  HeartIcon, ShareIcon, Calendar, Disc, MessageCircleHeart, UserStarIcon } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import { formatNumber } from '@/utils/format';
-import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue';
-import type { Album } from '@/types/album';
-import ArtistDivider from '@/components/common/musicComponents/artistDivider.vue';
-import { formatTimestampToDate } from '@/utils/dataTransformer';
+import {
+  PlayIcon,
+  HeartIcon,
+  ShareIcon,
+  Calendar,
+  Disc,
+  MessageCircleHeart,
+  UserStarIcon,
+} from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { formatNumber } from '@/utils/format'
+import DescriptionWithDialog from '@/components/common/musicComponents/DescriptionWithDialog.vue'
+import type { Album } from '@/types/album'
+import ArtistDivider from '@/components/common/musicComponents/artistDivider.vue'
+import { formatTimestampToDate } from '@/utils/dataTransformer'
 
 defineProps<{
-  album: Album;
-}>();
+  album: Album
+}>()
 
 defineEmits<{
-  'play-all': [];
-  'toggle-like': [];
-}>();
+  'play-all': []
+  'toggle-like': []
+}>()
 </script>
 
 <template>
@@ -23,20 +31,24 @@ defineEmits<{
       <!-- 封面 -->
       <div class="cover-container">
         <img :src="album?.picUrl" :alt="album?.name" class="cover-image" />
-        <div class="cover-overlay">
-
-        </div>
+        <div class="cover-overlay"></div>
       </div>
 
       <!-- 信息 -->
       <div class="flex-1 text-center md:text-left">
         <h1 class="text-3xl md:text-4xl font-bold mb-3">{{ album?.name }}</h1>
         <div
-          class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3 justify-center md:justify-start">
+          class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3 justify-center md:justify-start"
+        >
           <UserStarIcon class="h-4 w-4" />
           <ArtistDivider v-if="album.artists" :artists="album?.artists" />
         </div>
-        <DescriptionWithDialog v-if="album?.description" title="专辑简介" trigger-text="详细" :text="album?.description" />
+        <DescriptionWithDialog
+          v-if="album?.description"
+          title="专辑简介"
+          trigger-text="详细"
+          :text="album?.description"
+        />
         <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-4">
           <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Disc class="h-4 w-4" />
@@ -58,11 +70,14 @@ defineEmits<{
 
         <div class="flex gap-3 justify-center md:justify-start">
           <Button size="lg" class="bg-gradient-red-custom" @click="$emit('play-all')">
-            <PlayIcon class="h-5 w-5 mr-2 font-text-primary" />
-            <span class="font-text-primary">{{  '播放全部' }}</span>
+            <PlayIcon class="h-5 w-5 mr-2" />
+            <span>{{ '播放全部' }}</span>
           </Button>
           <Button variant="outline" size="lg" @click="$emit('toggle-like')">
-            <HeartIcon class="h-5 w-5 mr-2" :class="{ 'fill-red-500 text-red-500': album?.isLiked }" />
+            <HeartIcon
+              class="h-5 w-5 mr-2"
+              :class="{ 'fill-red-500 text-red-500': album?.isLiked }"
+            />
             {{ album?.isLiked ? '已收藏' : '收藏' }}
           </Button>
           <Button variant="outline" size="lg">
