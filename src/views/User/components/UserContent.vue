@@ -4,7 +4,7 @@ import UserTabs from './UserTabs.vue';
 import type { Playlist, User } from '@/types/musicTypes';
 import { type UserSongRecord } from '@/types/user.ts';
 import UserGrid from '@/components/common/pageComponents/UserGrid.vue';
-import PlaylistGrid from '@/components/common/pageComponents/PlaylistGrid.vue';
+import PlaylistGridInfinite from '@/components/infiniteScroll/PlaylistGridInfinite.vue';
 import SongRecordList from '@/components/common/musicComponents/SongRecordList.vue';
 
 const activeTab = ref<'playlists' | 'follows' | 'followeds' | 'songHistory'>('playlists');
@@ -26,7 +26,7 @@ defineProps<{
     <Transition name="fade-slide" mode="out-in">
       <!-- 歌单 -->
       <div v-if="activeTab === 'playlists'" key="playlists" class="user-content">
-        <PlaylistGrid :playlists="playlists" />
+        <PlaylistGridInfinite :playlists="playlists" />
       </div>
 
       <!-- 关注 -->
