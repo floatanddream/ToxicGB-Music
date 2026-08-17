@@ -87,12 +87,12 @@
                       variant="ghost"
                       size="icon"
                       class="like-button"
-                      :class="{ 'scale-110': playlist.isLiked }"
+                      :class="{ 'scale-110': userStore.isPlaylistSubscribed(playlist.id) }"
                       @click.stop="toggleLike(playlist)"
                     >
                       <HeartIcon
                         class="w-4 h-4 text-white transition-all duration-300"
-                        :class="{ 'fill-red-500 text-red-500 scale-110': playlist.isLiked }"
+                        :class="{ 'fill-red-500 text-red-500 scale-110': userStore.isPlaylistSubscribed(playlist.id) }"
                       />
                     </Button>
                   </div>
@@ -217,8 +217,9 @@ import DescriptionWithDialog from '@/components/common/musicComponents/Descripti
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import { MESSAGE_TYPE } from '@/constants/messages'
+import { useUserStore } from '@/stores/user'
 
-const hoveredPlaylist = ref<number | null>(null)
+const hoveredPlaylist = ref<string | number | null>(null)
 const scrollContainer = ref<HTMLElement | null>(null)
 const viewportContainer = ref<HTMLElement | null>(null)
 const offset = ref(0)
@@ -306,8 +307,13 @@ const handlePress = (btn: 'left' | 'right') => {
   }, 200)
 }
 
-const toggleLike = (playlist: Playlist) => {
-  playlist.isLiked = !playlist.isLiked
+const userStore = useUserStore()
+const subscribingId = ref<string | number | null>(null)
+const toggleLike = async (playlist: Playlist) => {
+  if (subscribingId.value !== null) return
+  subscribingId.value = playlist.id
+  await userStore.toggleSubscribePlaylist(playlist)
+  subscribingId.value = null
 }
 
 const playPlaylist = (playlist: Playlist) => {

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Music2, User, Play, Heart } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { Music2, User, Play, Heart, Loader2 } from 'lucide-vue-next';
+import { useUserStore } from '@/stores/user';
 import { Button } from '@/components/ui/button';
 import {
   TooltipProvider,
@@ -17,9 +19,18 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  'like-playlist': [playlist: Playlist];
   'artist-click': [artist: any];
 }>();
+
+const userStore = useUserStore();
+const isUserCreated = computed(() => userStore.isUserCreatedPlaylist(props.playlist));
+const isLiked = computed(() => userStore.isPlaylistSubscribed(props.playlist.id));
+const subscribeLoading = ref(false);
+const handleSubscribe = async () => {
+  subscribeLoading.value = true;
+  await userStore.toggleSubscribePlaylist(props.playlist);
+  subscribeLoading.value = false;
+};
 
 const handlePlaylistClick = () => {
   emitter.emit(EVENTS.PLAYLIST_CLICK,props.playlist);
@@ -34,10 +45,17 @@ const handlePlaylistClick = () => {
       </div>
 
       <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button size="icon" variant="secondary"
-          class="w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 text-white"
-          @click.stop="$emit('like-playlist', playlist)">
-          <Heart class="w-3 h-3" :class="{ 'fill-red-500 text-red-500': playlist.isLiked }" />
+        <Button
+          v-if="!isUserCreated"
+          size="icon"
+          variant="secondary"
+          class="w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 text-white subscribe-btn"
+          :disabled="subscribeLoading"
+          @click.stop="handleSubscribe"
+        >
+          <Loader2 v-if="subscribeLoading" class="w-3 h-3 animate-spin" />
+          <Heart v-else class="w-3 h-3 transition-all duration-300"
+            :class="{ 'fill-red-500 text-red-500': isLiked }" />
         </Button>
         <Button size="icon" variant="secondary"
           class="w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 text-white">
@@ -119,5 +137,17 @@ const handlePlaylistClick = () => {
 
 .playlist-card:hover .playlist-image {
   transform: scale(1.1);
+}
+
+/* 收藏按钮微动效 */
+.subscribe-btn {
+  transition: transform 0.15s ease;
+}
+.subscribe-btn:active {
+  transform: scale(0.92);
+}
+.subscribe-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }
 </style>

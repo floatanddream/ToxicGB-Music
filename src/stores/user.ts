@@ -7,6 +7,7 @@ import {
   getUserSimpleIInfo,
   likeMusic,
 } from '@/api/user'
+import { subscribePlaylist } from '@/api/playlist'
 import type { Playlist, Song } from '@/types/musicTypes'
 import type { Playlist as FullPlaylist } from '@/types/playlist'
 import { transformToPlaylist } from '@/utils/dataTransformer'
@@ -21,6 +22,7 @@ interface UserState {
   _userCreatePlaylist: Playlist[] | null // 改名前缀加 _
   _userSubPlaylist: Playlist[] | null // 改名前缀加 _
   userLikeListSet: Set<number | string>
+  subscribedPlaylistSet: Set<string> // 已收藏歌单 id 集合（统一存字符串）
   userSubCount: userSimpleInfo | null
 }
 
@@ -50,6 +52,7 @@ export const useUserStore = defineStore('user', {
     _userCreatePlaylist: null,
     _userSubPlaylist: null,
     userLikeListSet: new Set(),
+    subscribedPlaylistSet: new Set(),
     userSubCount: null,
   }),
 
@@ -72,9 +75,12 @@ export const useUserStore = defineStore('user', {
       (song: Song): boolean =>
         state.userLikeListSet.has(song.id),
     
+    isPlaylistSubscribed: (state) => (id: string | number): boolean =>
+      state.subscribedPlaylistSet.has(String(id)),
+
     isUserCreatedPlaylist: (state) =>
       (playlist: Playlist | FullPlaylist): boolean =>
-        state._userCreatePlaylist!.some((item) => item.id === playlist.id),
+        state._userCreatePlaylist?.some((item) => item.id === playlist.id) ?? false,
   },
 
   actions: {
@@ -90,6 +96,7 @@ export const useUserStore = defineStore('user', {
         this._userCreatePlaylist = data.userCreatePlaylist
         this._userSubPlaylist = data.userSubPlaylist
         this.userLikeListSet = new Set(data.userLikeListSet || [])
+        this.subscribedPlaylistSet = new Set(data.subscribedPlaylistSet || [])
       } catch {
         this.resetUser()
       }
@@ -124,6 +131,43 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    /**
+     * 收藏 / 取消收藏歌单
+     * 成功更新 subscribedPlaylistSet 与 _userSubPlaylist（侧边栏同步）
+     * @param playlist 简化 Playlist（id 恒为字符串）
+     */
+    async toggleSubscribePlaylist(playlist: Playlist): Promise<boolean> {
+      // 登录守卫：未登录直接拦截，不发请求
+      if (!this.isLogin) {
+        emitter.emit(MESSAGE_TYPE.TOAST_WARNING, '请先登录')
+        return false
+      }
+      const id = String(playlist.id)
+      const isSubscribed = this.subscribedPlaylistSet.has(id)
+      const res = await subscribePlaylist(isSubscribed ? 2 : 1, playlist.id)
+      if (res?.code === 200 || res?.code === '200') {
+        // 更新 Set（新建实例触发响应式）
+        const newSet = new Set(this.subscribedPlaylistSet)
+        isSubscribed ? newSet.delete(id) : newSet.add(id)
+        this.subscribedPlaylistSet = newSet
+
+        // 同步侧边栏「收藏的歌单」（重新赋值新数组显式触发）
+        if (isSubscribed) {
+          this._userSubPlaylist = (this._userSubPlaylist || []).filter((p) => String(p.id) !== id)
+        } else {
+          const list = this._userSubPlaylist || []
+          if (!list.some((p) => String(p.id) === id)) {
+            this._userSubPlaylist = [...list, playlist]
+          }
+        }
+
+        emitter.emit(MESSAGE_TYPE.TOAST_SUSSESS, isSubscribed ? '已取消收藏' : '已收藏')
+        return true
+      }
+      emitter.emit(MESSAGE_TYPE.TOAST_ERROR, isSubscribed ? '取消收藏失败' : '收藏失败')
+      return false
+    },
+
     async fetchUser(force = false) {
       const token = localStorage.getItem('cookie')
       if (!token) {
@@ -148,6 +192,7 @@ export const useUserStore = defineStore('user', {
         this.lastFetchTime = Date.now()
         this._userCreatePlaylist = userCreate
         this._userSubPlaylist = userSub
+        this.subscribedPlaylistSet = new Set(userSub.map((p) => String(p.id)))
         const { code, ...userSimpleInfo } = userSimpleInfoRes
         this.userSubCount = userSimpleInfo
         this.persist()
@@ -188,6 +233,7 @@ export const useUserStore = defineStore('user', {
           account: this.account,
           lastFetchTime: this.lastFetchTime,
           userLikeListSet: [...this.userLikeListSet],
+          subscribedPlaylistSet: [...this.subscribedPlaylistSet],
         }),
       )
     },

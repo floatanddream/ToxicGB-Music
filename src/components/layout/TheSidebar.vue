@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import NavigationMenu from '../common/NavigationMenu.vue'
 import type { MenuItem } from '@/types/menu'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Music, ListMusic, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user'
@@ -13,12 +13,8 @@ const route = useRoute()
 //用户创建歌单与用户收藏歌单的容器ref
 const userCreatePlaylistRef = ref<HTMLDivElement>()
 const userSubPlaylistRef = ref<HTMLDivElement>()
-const createPlaylistHeight = computed(() => {
-  return userCreatePlaylistRef.value?.scrollHeight
-})
-const subPlaylistHeight = computed(() => {
-  return userSubPlaylistRef.value?.scrollHeight
-})
+const createPlaylistHeight = ref(0)
+const subPlaylistHeight = ref(0)
 
 // 是否有歌单数据
 const hasPlaylists = computed(
@@ -47,6 +43,20 @@ const toggleMyPlaylists = () => {
 const toggleSubPlaylists = () => {
   subPlaylistsCollapsed.value = !subPlaylistsCollapsed.value
 }
+
+// 歌单列表内容变化时重新测量高度（scrollHeight 非响应式，需在 DOM 更新后手动重测）
+const measureSubHeight = async () => {
+  await nextTick()
+  subPlaylistHeight.value = userSubPlaylistRef.value?.scrollHeight || 0
+}
+const measureCreateHeight = async () => {
+  await nextTick()
+  createPlaylistHeight.value = userCreatePlaylistRef.value?.scrollHeight || 0
+}
+watch(() => userStore.userSubPlaylist, measureSubHeight)
+watch(() => userStore.userCreatePlaylist, measureCreateHeight)
+watch(subPlaylistsCollapsed, measureSubHeight)
+watch(myPlaylistsCollapsed, measureCreateHeight)
 
 onMounted(() => {
   // userStore.ensureUser()

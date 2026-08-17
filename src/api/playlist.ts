@@ -56,3 +56,12 @@ export async function modifyPlaylistTracks(playlistId :string | number,
   , op: 'add' | 'del') {
   return await request.post(`/playlist/tracks?op=${op}&pid=${playlistId}&tracks=${songId}`,{ sendCookie: true})
 }
+
+/**
+ * 收藏 / 取消收藏歌单
+ * t = 1: 收藏，t = 2: 取消收藏
+ * 接口地址: /playlist/subscribe
+ */
+export async function subscribePlaylist(t: 1 | 2, id: string | number) {
+  return await request.get(`/playlist/subscribe?t=${t}&id=${id}`, { sendCookie: true })
+}
