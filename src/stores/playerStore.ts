@@ -80,15 +80,18 @@ export const usePlayerStore = defineStore('player', () => {
       if (typeof s.volume === 'number' && s.volume >= 0 && s.volume <= 1) {
         volume.value = s.volume;
       }
-      if (
+      // eqGains 与 eqPresetId 必须「一起生效、一起放弃」。
+      // 频段数变更（5 → 10）后，旧存储里的 eqGains 长度不匹配会被下面的校验拒绝；
+      // 此时若仍然恢复 eqPresetId，UI 会显示某个预设、而实际增益是平的。
+      const eqGainsAccepted =
         Array.isArray(s.eqGains) &&
         s.eqGains.length === EQ_BANDS.length &&
-        s.eqGains.every((g: unknown) => typeof g === 'number' && Number.isFinite(g))
-      ) {
+        s.eqGains.every((g: unknown) => typeof g === 'number' && Number.isFinite(g));
+      if (eqGainsAccepted) {
         eqGains.value = s.eqGains;
-      }
-      if (typeof s.eqPresetId === 'string') {
-        eqPresetId.value = s.eqPresetId;
+        if (typeof s.eqPresetId === 'string') {
+          eqPresetId.value = s.eqPresetId;
+        }
       }
       if (
         typeof s.playbackRate === 'number' &&

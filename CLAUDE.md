@@ -624,7 +624,13 @@ const generateRandomQueue = () => {
 
 ### 音效调整 (`components/common/AudioEffectDialog.vue`)
 
-- **EQ 预设**：5 段（60 / 230 / 910 / 3.6k / 14k Hz），曲线定义在 `constants/audioEffects.ts`
+- **EQ 预设**：10 段（31 / 63 / 125 / 250 / 500 / 1k / 2k / 4k / 8k / 16k Hz），
+  首尾为 shelf、中间 8 段 peaking（Q=1.4，恒定 Q）；12 组预设曲线定义在
+  `constants/audioEffects.ts`。⚠️ 每个 preset 的 `gains` 长度**必须**等于
+  `EQ_BANDS.length`，两者是唯一的耦合点，改频段数时两处必须同步。
+  ⚠️ 频段数变更会让旧 `localStorage` 里的 `eqGains` 因长度不匹配被整体拒绝
+  （这是设计好的兜底）；`loadSettings` 里 `eqGains` 与 `eqPresetId` 是
+  「一起生效、一起放弃」，避免出现「UI 显示某预设、增益却是平的」。
 - **变速**：0.5x–2.0x + 「保持音高」开关（原生 `preservesPitch`）
 - **音调（不改变速度）**：±12 半音，基于 `@soundtouchjs/audio-worklet`（WSOLA 算法）
 - **持久化**：`localStorage['player_settings']`（volume / eqPresetId / eqGains / playbackRate / preservesPitch / pitchSemitones）

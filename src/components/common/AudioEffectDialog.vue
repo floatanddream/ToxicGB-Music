@@ -61,7 +61,7 @@ const handlePresetChange = (value: unknown) => {
       ⚠️ 本面板内它们被「借用」作强调色，与 --bg-primary 原本的「页面底色」语义不同。
     -->
     <DialogContent
-      class="absolute! glass-container z-500 max-w-md rounded-2xl overflow-hidden"
+      class="absolute! glass-container z-500 max-w-lg rounded-2xl overflow-hidden"
       style="
         --primary: var(--primary-color);
         --bg-primary: var(--primary-color);
@@ -91,8 +91,10 @@ const handlePresetChange = (value: unknown) => {
           </SelectContent>
         </Select>
 
-        <!-- 频段：每列自带 0 dB 参考线，避免跨列对齐的魔法偏移 -->
-        <div class="mt-5 flex justify-around gap-3">
+        <!-- 频段：每列自带 0 dB 参考线，避免跨列对齐的魔法偏移。
+             gap-2（而非 gap-3）是给 10 条滑块让出宽度 —— max-w-lg 内
+             每列约 40px，刚好容纳 6px 轨道 + "+12.0" 这样的数值标签。 -->
+        <div class="mt-5 flex justify-around gap-2">
           <div
             v-for="(band, i) in EQ_BANDS"
             :key="band.key"
