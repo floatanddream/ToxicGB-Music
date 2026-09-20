@@ -1,7 +1,19 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
-import { FastForward, Pause, Play, Rewind, ListMusic, Maximize2, SlidersHorizontal } from 'lucide-vue-next'
+import {
+  FastForward,
+  Pause,
+  Play,
+  Rewind,
+  ListMusic,
+  Maximize2,
+  SlidersHorizontal,
+  Repeat,
+  Repeat1,
+  Shuffle,
+} from 'lucide-vue-next'
+import type { PlayMode } from '@/types/player'
 import ArtistDivider from '../common/musicComponents/artistDivider.vue'
 import { storeToRefs } from 'pinia'
 import { formatTime } from '@/utils/format'
@@ -13,9 +25,24 @@ import AudioEffectDialog from '@/components/common/AudioEffectDialog.vue'
 
 const playerStore = usePlayerStore()
 
-const { currentSong, currentTime, duration, playing, volume } = storeToRefs(playerStore)
+const { currentSong, currentTime, duration, playing, volume, mode } = storeToRefs(playerStore)
 const isPlaylistOpen = ref(false)
 const isEffectOpen = ref(false)
+
+// 播放模式：点一次前进一档。顺序与图标一一对应，勿随意调整。
+const MODE_CYCLE: readonly PlayMode[] = ['loop', 'single', 'random']
+
+const MODE_LABELS: Record<PlayMode, string> = {
+  loop: '列表循环',
+  single: '单曲循环',
+  random: '随机播放',
+}
+
+const cycleMode = () => {
+  const index = MODE_CYCLE.indexOf(mode.value)
+  const next = MODE_CYCLE[(index + 1) % MODE_CYCLE.length]
+  if (next) playerStore.setMode(next)
+}
 
 // store 存 0-1，滑块要 0-100，双向桥接
 const volumePercent = computed({
@@ -157,21 +184,13 @@ const handleOpenPlaylist = () => {
           hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
           :pressed-scale="0.8"
           custom-class="icon-btn loop-mode"
+          :title="MODE_LABELS[mode]"
+          :aria-label="MODE_LABELS[mode]"
+          @click="cycleMode"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polygon points="10 8 16 12 10 16 10 8" />
-          </svg>
+          <Repeat v-if="mode === 'loop'" :size="18" />
+          <Repeat1 v-else-if="mode === 'single'" :size="18" />
+          <Shuffle v-else :size="18" />
         </BouncingIconButton>
         <BouncingIconButton
           size="h-9 w-9"
