@@ -19,7 +19,12 @@
       "Bash(git reset *)",
       "Bash(git commit -m 'fix\\(AppLogo\\): emit.click 改为 emit\\('\\\\''click'\\\\''\\)，Logo 点击事件生效 *)",
       "Bash(mkdir -p src/components/infiniteScroll)",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(mkdir -p .superpowers/sdd)",
+      "Bash(cat)",
+      "Bash(bash __TRACKED_VAR__/task-brief docs/superpowers/plans/2026-09-19-audio-effects.md 1)",
+      "Bash(cp src/components/layout/TheFooter.vue /tmp/TheFooter.fixed.vue)",
+      "Bash(git stash *)"
     ]
   }
 }

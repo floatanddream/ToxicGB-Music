@@ -62,7 +62,11 @@ const handlePresetChange = (value: unknown) => {
     -->
     <DialogContent
       class="absolute! glass-container z-500 max-w-md rounded-2xl overflow-hidden"
-      style="--primary: var(--primary-color); --bg-primary: var(--primary-color); --border-primary: var(--primary-color)"
+      style="
+        --primary: var(--primary-color);
+        --bg-primary: var(--primary-color);
+        --border-primary: var(--primary-color);
+      "
     >
       <DialogHeader>
         <DialogTitle>音效设置</DialogTitle>
@@ -132,7 +136,7 @@ const handlePresetChange = (value: unknown) => {
           />
           <span class="w-14 text-right text-sm tabular-nums"> {{ playbackRate.toFixed(2) }}x </span>
         </div>
-        <div class="mt-4 flex items-center justify-between">
+        <div class="mt-6 flex items-center justify-between">
           <span class="text-sm">保持音高</span>
           <Switch
             :model-value="preservesPitch"
