@@ -39,11 +39,11 @@ const handleArtistClick = (artist: Artist) => {
 }
 
 .artist-name:hover {
-  color: #fa233b;
+  color: var(--primary-color);
 }
 
 .dark .artist-name:hover {
-  color: #fa233b;
+  color: var(--primary-color);
 }
 
 .artist-separator {

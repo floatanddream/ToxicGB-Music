@@ -41,7 +41,7 @@ const handleUserClick = (user: User) => {
 }
 
 .artist-card:hover h3 {
-  color: #e90e0e;
+  color: var(--primary-color);
 }
 
 .user-image {

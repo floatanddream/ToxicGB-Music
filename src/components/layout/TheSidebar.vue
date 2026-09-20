@@ -270,28 +270,28 @@ const baseMenuItems: MenuItem[] = [
 }
 
 .playlist-item:hover {
-  background: #ff3b30;
+  background: var(--primary-color);
   border-radius: 8px;
-  border: 1px solid #ff3b30;
+  border: 1px solid var(--primary-color);
   color: #fff;
 }
 
 .dark .playlist-item:hover {
-  background: #ff453a;
-  border: 1px solid #ff453a;
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
   color: #fff;
 }
 
 .playlist-item.active {
-  background: #ff3b30;
+  background: var(--primary-color);
   border-radius: 8px;
-  border: 1px solid #ff3b30;
+  border: 1px solid var(--primary-color);
   color: #fff;
 }
 
 .dark .playlist-item.active {
-  background: #ff453a;
-  border: 1px solid #ff453a;
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
   color: #fff;
 }
 

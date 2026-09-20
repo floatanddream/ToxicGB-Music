@@ -247,15 +247,15 @@ watch(
 }
 
 .playlist-item-active {
-  background: rgba(250, 35, 59, 0.08);
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
 }
 
 .dark .playlist-item-active {
-  background: rgba(250, 35, 59, 0.15);
+  background: color-mix(in srgb, var(--primary-color) 15%, transparent);
 }
 
 .playlist-item-active .playlist-song-title {
-  color: #fa233b;
+  color: var(--primary-color);
 }
 
 .playlist-cover {

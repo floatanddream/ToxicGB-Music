@@ -94,10 +94,10 @@ defineProps<{
 
 .menu-link:hover,
 .sub-menu-link:hover {
-  background: #ff3b30;
+  background: var(--primary-color);
   /* 亮红色 */
   border-radius: 8px;
-  border: 1px solid #ff3b30;
+  border: 1px solid var(--primary-color);
   margin: 0 8px;
   padding: 12px 12px;
 
@@ -109,9 +109,9 @@ defineProps<{
 
 .dark .menu-link:hover,
 .dark .sub-menu-link:hover {
-  background: #ff453a;
+  background: var(--primary-color);
   /* 暗色稍微提亮 */
-  border: 1px solid #ff453a;
+  border: 1px solid var(--primary-color);
 
 
   color: #fff;
@@ -119,9 +119,9 @@ defineProps<{
 
 .menu-link.active,
 .sub-menu-link.active {
-  background: #ff3b30;
+  background: var(--primary-color);
   border-radius: 8px;
-  border: 1px solid #ff3b30;
+  border: 1px solid var(--primary-color);
   color: #fff;
   margin: 0 8px;
   padding: 12px 12px;
@@ -130,8 +130,8 @@ defineProps<{
 
 .dark .menu-link.active,
 .dark .sub-menu-link.active {
-  background: #ff453a;
-  border: 1px solid #ff453a;
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
   color: #fff;
 
 

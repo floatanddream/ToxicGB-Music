@@ -23,13 +23,13 @@ const sizeClasses = {
 <style scoped>
 .app-logo {
   font-weight: bold;
-  color: #e74c3c;
+  color: var(--primary-color);
   cursor: pointer;
   user-select: none;
 }
 
 .logo-text {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

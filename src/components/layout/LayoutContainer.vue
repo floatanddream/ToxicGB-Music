@@ -107,7 +107,7 @@ onUnmounted(()=>{
 }
 
 .dark .full-page-background {
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, color-mix(in srgb, var(--primary-dark) 10%, transparent) 100%);
 }
 
 

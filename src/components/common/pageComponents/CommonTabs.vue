@@ -55,7 +55,7 @@ const props = defineProps<{
 
 :deep(.tabs-trigger[data-state='active']) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 /* 动态玻璃流动效果 */

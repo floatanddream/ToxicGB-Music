@@ -7,13 +7,13 @@
 
 /* 红色渐变按钮（播放全部等） */
 .bg-gradient-red-custom {
-  background: linear-gradient(135deg, #ff3b30 50%, #da3535 100%);
+  background: linear-gradient(135deg, var(--primary-color) 50%, var(--primary-dark) 100%);
   color: #fff; /* 强制白字：红色背景上跟随主题色会看不清 */
   transition: all 0.3s ease;
 }
 .bg-gradient-red-custom:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 10px 25px color-mix(in srgb, var(--primary-color) 30%, transparent);
 }
 
 /* 跟随主题文字色（用于普通文本） */

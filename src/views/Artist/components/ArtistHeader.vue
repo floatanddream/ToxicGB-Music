@@ -133,12 +133,12 @@ defineEmits<{
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary-color) 70%, transparent);
   }
 
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 10px transparent;
   }
 }
 

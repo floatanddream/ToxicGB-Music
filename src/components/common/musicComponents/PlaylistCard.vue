@@ -128,7 +128,7 @@ const handlePlaylistClick = () => {
 }
 
 .playlist-card:hover h3 {
-  color: #fb2c36;
+  color: var(--primary-color);
 }
 
 .playlist-image {

@@ -28,7 +28,7 @@ const props = defineProps<{
 }
 
 .album-card:hover h3 {
-  color: #fb2c36;
+  color: var(--primary-color);
 }
 
 .album-image {
