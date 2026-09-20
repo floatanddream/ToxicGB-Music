@@ -41,7 +41,8 @@ export const usePlayerStore = defineStore('player', () => {
   const pitchSemitones = ref<number>(PITCH_DEFAULT);
 
   // 随机播放队列
-  const randomQueue = ref<number[]>([]);
+  // 随机顺序（存 song **id**，不是 playlist 下标 —— 理由见下方「随机队列管理」）
+  const randomQueue = ref<string[]>([]);
   const randomIndex = ref<number>(0);
 
   /* ---------------- 设置持久化 ---------------- */
@@ -153,34 +154,59 @@ export const usePlayerStore = defineStore('player', () => {
     });
   };
 
-  /* ---------------- 🎲 随机队列管理 ---------------- */
-  const resetRandomQueue = () => {
-    randomQueue.value = [];
-    randomIndex.value = 0;
+  /* ---------------- 🎲 随机队列管理 ----------------
+   *
+   * randomQueue 存的是 **song id**，不是 playlist 的下标。
+   *
+   * 为什么用 id：下标队列有一个强不变量「randomQueue[i] 必须始终是 playlist 的
+   * 有效下标」，而 playlist 每次增删都会破坏它 —— 于是 replaceList / playSong /
+   * insertNext 三处都得 resetRandomQueue() 补救（该函数已随本次重构删除），
+   * 漏一处就静默播错歌。
+   * 换成 id 之后这个不变量不再需要维护：队列里残留一个已删除的 id 也无害，
+   * 播放时跳过即可。
+   *
+   * 「随机顺序」不做保留 —— 每次切到随机模式都重新洗牌。保留会引入
+   * 「队列可能过时」这个新状态（顺序模式下插/删的歌不在队列里），
+   * 需要额外的补齐逻辑，得不偿失。
+   */
+
+  /** 按 id 取 playlist 下标；歌已被删时返回 -1 */
+  const indexOfSongId = (id: string) => playlist.value.findIndex((s) => s.id === id);
+
+  /** 把 randomIndex 对齐到「当前正在播的那首歌」在队列中的位置 */
+  const syncRandomIndex = () => {
+    const id = currentSong.value?.id;
+    if (id === undefined) return;
+    const pos = randomQueue.value.indexOf(id);
+    if (pos !== -1) randomIndex.value = pos;
   };
 
+  /**
+   * 重新洗牌。队列就是 playlist 的纯随机排列。
+   *
+   * ⚠️ 故意**不**把当前曲换到第 0 位 —— 那是「随机模式下回绕会重播上一首」的根源：
+   * 旧实现把当前曲放在第 0 位，而所有调用方都把 index 0 当成「下一首」。
+   * 现在当前曲在第几位就在第几位，由 syncRandomIndex() 对齐。
+   */
   const generateRandomQueue = () => {
-    const len = playlist.value.length;
-    randomQueue.value = Array.from({ length: len }, (_, i) => i);
+    const ids = playlist.value.map((s) => s.id);
 
     // Fisher-Yates 洗牌
-    for (let i = len - 1; i > 0; i--) {
+    for (let i = ids.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [randomQueue.value[i]!, randomQueue.value[j]!] = [randomQueue.value[j]!, randomQueue.value[i]!];
+      [ids[i], ids[j]] = [ids[j]!, ids[i]!];
     }
 
-    // 当前歌曲放到第一位
-    if (currentIndex.value !== -1) {
-      const pos = randomQueue.value.indexOf(currentIndex.value);
-      [randomQueue.value[0]!, randomQueue.value[pos]!] = [randomQueue.value[pos]!, randomQueue.value[0]!];
-    }
-
-    randomIndex.value = 0;
+    randomQueue.value = ids;
+    syncRandomIndex();
   };
 
-  const syncRandomIndex = () => {
-    const pos = randomQueue.value.indexOf(currentIndex.value);
-    if (pos !== -1) randomIndex.value = pos;
+  /** 按 id 播放。id 已失效（歌被删）时静默跳过，不会播错歌。 */
+  const playBySongId = (id: string | undefined) => {
+    if (id === undefined) return;
+    const index = indexOfSongId(id);
+    if (index === -1) return;
+    playByIndex(index);
   };
 
   /* ---------------- 🎵 播放控制 ---------------- */
@@ -204,13 +230,19 @@ export const usePlayerStore = defineStore('player', () => {
     if (playlist.value.length === 0) return;
 
     if (mode.value === 'random') {
+      if (randomQueue.value.length === 0) generateRandomQueue();
+
       randomIndex.value++;
 
+      // 走到队列末尾 → 重新洗牌，并前进到「当前曲之后」的那一首。
+      // generateRandomQueue 会把 randomIndex 对齐到当前曲，这里再 +1，
+      // 否则回绕时会重播刚刚放完的那首。
       if (randomIndex.value >= randomQueue.value.length) {
         generateRandomQueue();
+        randomIndex.value = (randomIndex.value + 1) % randomQueue.value.length;
       }
 
-      playByIndex(randomQueue.value[randomIndex.value]!);
+      playBySongId(randomQueue.value[randomIndex.value]);
     } else {
       let nextIndex = currentIndex.value + 1;
       if (nextIndex >= playlist.value.length) nextIndex = 0;
@@ -222,14 +254,18 @@ export const usePlayerStore = defineStore('player', () => {
     if (playlist.value.length === 0) return;
 
     if (mode.value === 'random') {
+      if (randomQueue.value.length === 0) generateRandomQueue();
+
       randomIndex.value--;
 
+      // 走到队列开头 → 重新洗牌，并退到「当前曲之前」的那一首
       if (randomIndex.value < 0) {
         generateRandomQueue();
-        randomIndex.value = randomQueue.value.length - 1;
+        randomIndex.value =
+          (randomIndex.value - 1 + randomQueue.value.length) % randomQueue.value.length;
       }
 
-      playByIndex(randomQueue.value[randomIndex.value]!);
+      playBySongId(randomQueue.value[randomIndex.value]);
     } else {
       let prevIndex = currentIndex.value - 1;
       if (prevIndex < 0) prevIndex = playlist.value.length - 1;
@@ -261,7 +297,9 @@ export const usePlayerStore = defineStore('player', () => {
     try {
       playlist.value = [...list];
       currentIndex.value = index;
-      resetRandomQueue();
+      // 整个列表被换掉了，旧的随机顺序不再有意义 —— 清空，让 next() 惰性重建
+      randomQueue.value = [];
+      randomIndex.value = 0;
       await preloadNextSong();
       playByIndex(index);
     } finally {
@@ -274,7 +312,9 @@ export const usePlayerStore = defineStore('player', () => {
     playlist.value = [fullSong];
     currentIndex.value = 0;
     currentSong.value = fullSong;
-    resetRandomQueue();
+    // 播放列表缩成一首，旧的随机顺序作废
+    randomQueue.value = [];
+    randomIndex.value = 0;
     player.playSong(fullSong);
   };
 
@@ -295,7 +335,20 @@ export const usePlayerStore = defineStore('player', () => {
     const insertIndex = currentIndex.value + 1;
     const fullSong = await getSong(song);
     playlist.value.splice(insertIndex, 0, fullSong);
-    resetRandomQueue();
+
+    // 随机模式下要让「刚插入的这首」成为下一首。
+    // 队列存的是 id，所以上面 playlist 的增删本身不影响队列 —— 只需把新歌 id
+    // 补插到当前项之后。若它已在队列里（上面的去重分支删掉了），先 filter 掉避免重复。
+    // currentPos === -1（当前曲不在队列里）时新歌落到队首、randomIndex 置 -1，
+    // 下一次 next() 的 ++ 正好落在它上面。
+    if (mode.value === 'random' && randomQueue.value.length > 0) {
+      const currentId = currentSong.value?.id;
+      const rest = randomQueue.value.filter((id) => id !== fullSong.id);
+      const currentPos = currentId === undefined ? -1 : rest.indexOf(currentId);
+      rest.splice(currentPos + 1, 0, fullSong.id);
+      randomQueue.value = rest;
+      randomIndex.value = currentPos;
+    }
   };
 
   const insertNextAndPlay = async (song: Song) => {
