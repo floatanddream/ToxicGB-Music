@@ -17,6 +17,7 @@
     "@applemusic-like-lyrics/lyric": "^0.3.0",
     "@applemusic-like-lyrics/vue": "^0.2.0",
     "@lucide/vue": "^1.47.0",
+    "@soundtouchjs/audio-worklet": "^2.1.1",
     "@tailwindcss/vite": "^4.2.2",
     "@vueuse/core": "^14.2.1",
     "class-variance-authority": "^0.7.1",

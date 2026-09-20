@@ -3,6 +3,18 @@ import type { Song, PlayMode } from '@/types/player';
 import { MusicController } from '@/core/player/MusicController';
 import { getSong } from '@/core/player/MusicService';
 import { ref, watch } from 'vue';
+import { watchDebounced } from '@vueuse/core';
+import {
+  EQ_BANDS,
+  EQ_PRESETS,
+  EQ_GAIN_MIN,
+  EQ_GAIN_MAX,
+  PLAYBACK_RATE_MIN,
+  PLAYBACK_RATE_MAX,
+  PITCH_MIN,
+  PITCH_MAX,
+  PITCH_DEFAULT,
+} from '@/constants/audioEffects';
 
 const player = new MusicController();
 
@@ -21,13 +33,94 @@ export const usePlayerStore = defineStore('player', () => {
   const loading = ref<boolean>(false);
   const volume = ref<number>(0.5);
 
+  // 音效
+  const eqPresetId = ref<string>('flat');
+  const eqGains = ref<number[]>(EQ_BANDS.map(() => 0));
+  const playbackRate = ref<number>(1);
+  const preservesPitch = ref<boolean>(true);
+  const pitchSemitones = ref<number>(PITCH_DEFAULT);
+
   // 随机播放队列
   const randomQueue = ref<number[]>([]);
   const randomIndex = ref<number>(0);
 
+  /* ---------------- 设置持久化 ---------------- */
+  const SETTINGS_KEY = 'player_settings';
+
+  const persistSettings = () => {
+    try {
+      localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({
+          volume: volume.value,
+          eqPresetId: eqPresetId.value,
+          eqGains: eqGains.value,
+          playbackRate: playbackRate.value,
+          preservesPitch: preservesPitch.value,
+          pitchSemitones: pitchSemitones.value,
+        }),
+      );
+    } catch {
+      // localStorage 不可用（隐私模式 / 配额）时静默忽略，不影响播放
+    }
+  };
+
+  /**
+   * 逐字段校验后再落值。
+   * localStorage 中可能存在损坏 JSON 或旧版本结构（例如频段数变更后
+   * eqGains 长度不匹配），一个坏数据不允许把播放器搞挂。
+   */
+  const loadSettings = () => {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return;
+
+      const s = JSON.parse(raw);
+
+      if (typeof s.volume === 'number' && s.volume >= 0 && s.volume <= 1) {
+        volume.value = s.volume;
+      }
+      if (
+        Array.isArray(s.eqGains) &&
+        s.eqGains.length === EQ_BANDS.length &&
+        s.eqGains.every((g: unknown) => typeof g === 'number' && Number.isFinite(g))
+      ) {
+        eqGains.value = s.eqGains;
+      }
+      if (typeof s.eqPresetId === 'string') {
+        eqPresetId.value = s.eqPresetId;
+      }
+      if (
+        typeof s.playbackRate === 'number' &&
+        s.playbackRate >= PLAYBACK_RATE_MIN &&
+        s.playbackRate <= PLAYBACK_RATE_MAX
+      ) {
+        playbackRate.value = s.playbackRate;
+      }
+      if (typeof s.preservesPitch === 'boolean') {
+        preservesPitch.value = s.preservesPitch;
+      }
+      if (
+        typeof s.pitchSemitones === 'number' &&
+        s.pitchSemitones >= PITCH_MIN &&
+        s.pitchSemitones <= PITCH_MAX
+      ) {
+        pitchSemitones.value = s.pitchSemitones;
+      }
+    } catch {
+      // 坏数据 / 旧版本结构 → 整体忽略，走默认值
+    }
+  };
+
   /* ---------------- 初始化 ---------------- */
   const init = () => {
+    loadSettings();
+
     player.setVolume(volume.value);
+    player.setEqGains(eqGains.value);
+    player.setPlaybackRate(playbackRate.value);
+    player.setPreservesPitch(preservesPitch.value);
+    player.setPitchSemitones(pitchSemitones.value);
 
     // 设置 MediaSession 控制
     player.setMediaSessionHandlers({
@@ -242,6 +335,44 @@ export const usePlayerStore = defineStore('player', () => {
     volume.value = v;
   };
 
+  /* ---------------- 音效 ---------------- */
+  const setEqPreset = (id: string) => {
+    const preset = EQ_PRESETS.find((p) => p.id === id);
+    if (!preset) return;
+    eqPresetId.value = id;
+    eqGains.value = [...preset.gains];
+    player.setEqGains(eqGains.value);
+  };
+
+  const setBandGain = (index: number, gain: number) => {
+    // 越界 index 会让数组膨胀，持久化后又被 loadSettings 的长度校验整体拒绝，
+    // 症状是「下次进入页面整个 EQ 静默回退默认值」—— 直接拦掉。
+    if (index < 0 || index >= EQ_BANDS.length) return;
+    const clamped = Math.max(EQ_GAIN_MIN, Math.min(EQ_GAIN_MAX, gain));
+    const next = [...eqGains.value];
+    next[index] = clamped;
+    eqGains.value = next;
+    eqPresetId.value = ''; // 手动改动后脱离预设，所有预设按钮取消高亮
+    player.setEqGains(next);
+  };
+
+  const setPlaybackRate = (rate: number) => {
+    const clamped = Math.max(PLAYBACK_RATE_MIN, Math.min(PLAYBACK_RATE_MAX, rate));
+    playbackRate.value = clamped;
+    player.setPlaybackRate(clamped);
+  };
+
+  const setPreservesPitch = (enabled: boolean) => {
+    preservesPitch.value = enabled;
+    player.setPreservesPitch(enabled);
+  };
+
+  const setPitchSemitones = (semitones: number) => {
+    const clamped = Math.max(PITCH_MIN, Math.min(PITCH_MAX, semitones));
+    pitchSemitones.value = clamped;
+    player.setPitchSemitones(clamped);
+  };
+
   /* ---------------- 预加载 ---------------- */
   const preloadNextSong = async () => {
     for(let i = currentIndex.value; i < currentIndex.value + 3; i++){
@@ -263,9 +394,27 @@ export const usePlayerStore = defineStore('player', () => {
     preloadNextSong();
   });
 
+  watchDebounced(
+    () => ({
+      volume: volume.value,
+      eqPresetId: eqPresetId.value,
+      eqGains: [...eqGains.value],
+      playbackRate: playbackRate.value,
+      preservesPitch: preservesPitch.value,
+      pitchSemitones: pitchSemitones.value,
+    }),
+    persistSettings,
+    { debounce: 300 },
+  );
+
   return {
     isFullScreen,
     volume,
+    eqPresetId,
+    eqGains,
+    playbackRate,
+    preservesPitch,
+    pitchSemitones,
     playlist,
     currentSong,
     currentIndex,
@@ -288,6 +437,11 @@ export const usePlayerStore = defineStore('player', () => {
     seek,
     setMode,
     setVolume,
+    setEqPreset,
+    setBandGain,
+    setPlaybackRate,
+    setPreservesPitch,
+    setPitchSemitones,
     switchSong,
     setFullPlayer,
   };

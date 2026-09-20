@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
-import { FastForward, Pause, Play, Rewind, ListMusic, Maximize2 } from 'lucide-vue-next'
+import { FastForward, Pause, Play, Rewind, ListMusic, Maximize2, SlidersHorizontal } from 'lucide-vue-next'
 import ArtistDivider from '../common/musicComponents/artistDivider.vue'
 import { storeToRefs } from 'pinia'
 import { formatTime } from '@/utils/format'
@@ -9,11 +9,20 @@ import PlaylistPanel from '../common/PlaylistPanel.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 import BouncingIconButton from '@/components/misc/BouncingIconButton.vue'
+import AudioEffectDialog from '@/components/common/AudioEffectDialog.vue'
 
 const playerStore = usePlayerStore()
 
-const { currentSong, currentTime, duration, playing } = storeToRefs(playerStore)
+const { currentSong, currentTime, duration, playing, volume } = storeToRefs(playerStore)
 const isPlaylistOpen = ref(false)
+const isEffectOpen = ref(false)
+
+// store 存 0-1，滑块要 0-100，双向桥接
+const volumePercent = computed({
+  get: () => Math.round(volume.value * 100),
+  // 原生 range 的 v-model 传字符串（Vue 的 castToNumber 只对 type="number" / .number 生效），此处显式转换
+  set: (v: number | string) => playerStore.setVolume(Number(v)),
+})
 
 const progress = computed(() => {
   if (!duration || duration.value === 0 || !currentTime) return 0
@@ -29,17 +38,10 @@ const handleProgress = (e: Event) => {
   playerStore.seek(Number(target.value))
 }
 
-const handleVolume = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  playerStore.setVolume(Number(target.value))
-}
-
 const handleOpenPlaylist = () => {
   isPlaylistOpen.value = !isPlaylistOpen.value
   console.log('Playlist open state:', isPlaylistOpen.value)
 }
-
-const volume = ref(70)
 </script>
 
 <template>
@@ -112,6 +114,15 @@ const volume = ref(70)
           size="h-9 w-9"
           hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
           :pressed-scale="0.8"
+          custom-class="icon-btn"
+          @click="isEffectOpen = true"
+        >
+          <SlidersHorizontal :size="18" />
+        </BouncingIconButton>
+        <BouncingIconButton
+          size="h-9 w-9"
+          hover-bg="hover:bg-black/5 dark:hover:bg-white/10"
+          :pressed-scale="0.8"
           custom-class="icon-btn volume-only"
         >
           <svg
@@ -132,14 +143,13 @@ const volume = ref(70)
           </svg>
         </BouncingIconButton>
         <div class="volume-bar volume-only">
-          <div class="volume-fill" :style="{ width: `${volume}%` }"></div>
+          <div class="volume-fill" :style="{ width: `${volumePercent}%` }"></div>
           <input
             type="range"
             class="volume-input"
             min="0"
             max="100"
-            v-model="volume"
-            @input="handleVolume"
+            v-model="volumePercent"
           />
         </div>
         <BouncingIconButton
@@ -192,6 +202,8 @@ const volume = ref(70)
           @close="isPlaylistOpen = false"
         />
       </Transition>
+
+      <AudioEffectDialog v-model:open="isEffectOpen" />
     </Teleport>
   </footer>
 </template>
@@ -315,7 +327,7 @@ const volume = ref(70)
 }
 
 .play-btn {
-  background: #fa233b;
+  background: var(--primary-color);
   color: #fff; /* 强制白字：红底上跟随 buttontext 系统色（接近黑）对比度差 */
   border: none;
   border-radius: 50%;
@@ -332,7 +344,7 @@ const volume = ref(70)
 
 .play-btn:hover {
   transform: scale(1.05);
-  background: #d91a2e;
+  background: var(--primary-dark);
 }
 
 .play-btn:active {
@@ -375,7 +387,7 @@ const volume = ref(70)
   left: 0;
   top: 0;
   height: 100%;
-  background: #fa233b;
+  background: var(--primary-color);
   border-radius: 2px;
   transition: width 0.05s linear;
 }
@@ -401,7 +413,7 @@ const volume = ref(70)
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #fa233b;
+  background: var(--primary-color);
 }
 
 /* 右侧音量 */
@@ -430,7 +442,7 @@ const volume = ref(70)
   left: 0;
   top: 0;
   height: 100%;
-  background: #fa233b;
+  background: var(--primary-color);
   border-radius: 2px;
 }
 
@@ -453,7 +465,7 @@ const volume = ref(70)
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #fa233b;
+  background: var(--primary-color);
 }
 
 /* 响应式 */

@@ -78,8 +78,9 @@ ToxicGB-Music 是一个基于 **Vue 3 + TypeScript** 的仿网易云音乐现代
 | 歌词特效    | @applemusic-like-lyrics     | core `^0.2.0` / lyric `^0.3.0` / vue `^0.2.0` | 苹果风格歌词 + 动态 mesh 渐变背景 + TTML                                                                      |
 | 工具库      | @vueuse/core                | `^14.2.1`                                     |                                                                                                               |
 | 动画        | motion-v                    | `^2.2.1`                                      |                                                                                                               |
+| 音频变调    | @soundtouchjs/audio-worklet | `^2.1.1`                                      | SoundTouch 的 AudioWorklet 移植（WSOLA），音调滑块用                                                          |
 
-> ⚠️ **不要假设** `oklch` 是项目唯一颜色系统 —— `oklch()` 仅在 `src/style.css` 的 shadcn 调色板中；`src/styles/dark-mode.css` 全部使用 hex / `rgba()`。
+> ⚠️ **不要假设** `oklch` 是项目唯一颜色系统 —— `oklch()` 仅在 `src/styles/tokens.css` 的 shadcn 调色板中；同一文件的自定义变量（`--primary-color: #e74c3c` 等）与其余样式文件全部使用 hex / `rgba()`。
 
 ---
 
@@ -113,6 +114,7 @@ src/
 │   │   │   ├── CommentList.vue / CommentItem.vue
 │   │   │   ├── songsContainer.vue
 │   │   │   └── AlbumGrid / ArtistGrid / PlaylistGrid / UserGrid.vue
+│   │   ├── AudioEffectDialog.vue    # 音效设置对话框（EQ / 变速 / 变调），毛玻璃
 │   │   ├── AppLogo.vue / SearchBar.vue / NavigationMenu.vue
 │   │   ├── UserAvatar.vue / AuthModal.vue / PlaylistPanel.vue
 │   │
@@ -126,19 +128,20 @@ src/
 │   │   ├── BouncingSlider.vue       # 动画滑块（音量/进度）
 │   │   └── Menu.vue                 # 右键 / 上下文菜单
 │   │
-│   └── ui/                          # shadcn-vue 风格基础组件（16 个）
+│   └── ui/                          # shadcn-vue 风格基础组件（18 个）
 │       ├── button, card, collapsible, context-menu, dialog,
 │       ├── input, label, progress, scroll-area, separator,
+│       ├── slider, switch,
 │       └── sheet, sidebar, skeleton, sonner, tabs, tooltip
 │
 ├── constants/
+│   ├── audioEffects.ts              # EQ 频段定义 + 预设曲线 + 变速/变调范围
 │   ├── events.ts                    # 14 个事件名常量（注意拼写错误：SCROOL_TOP 缺 L）
 │   └── messages.ts                  # 4 个 Toast 消息类型（注意拼写错误：TOAST_SUSSESS）
 │
 ├── core/player/                     # 播放器核心（单例）
-│   ├── MusicController.ts           # HTML5 Audio + MediaSession 封装
-│   ├── MusicService.ts              # 歌曲URL获取 + Map 缓存 + HEAD 校验
-│   └── player.ts                    # 单例导出（import 路径大小写需注意，见下文 ⚠️）
+│   ├── MusicController.ts           # HTML5 Audio + MediaSession + Web Audio 音频图（EQ / 变调）
+│   └── MusicService.ts              # 歌曲URL获取 + Map 缓存 + HEAD 校验
 │
 ├── lib/                             # 工具库（如 cn() = clsx + tailwind-merge）
 │
@@ -151,8 +154,14 @@ src/
 │   ├── app.ts                       # 应用状态 ⚠️ 当前为非响应式 const（BUG）
 │   └── counter.ts                   # ⚠️ 残留脚手架，建议删除
 │
-├── styles/
-│   └── dark-mode.css                # 主题 CSS 变量 + .glass* 基础类
+├── styles/                          # 全局样式（由 index.css 按依赖顺序 @import）
+│   ├── index.css                    # 样式入口，按序 @import 下列各分类文件
+│   ├── tokens.css                   # 设计令牌：hex/rgba 变量 + shadcn oklch 调色板 + 暗色覆盖
+│   ├── base.css                     # 基础重置与排版
+│   ├── utilities.css                # 自定义工具类
+│   ├── glass.css                    # 毛玻璃类（.glass / -container / -card / -effect / -component）
+│   ├── buttons.css                  # 按钮样式
+│   └── animations.css               # 动画与过渡（含路由过渡）
 │
 ├── types/                           # TypeScript 类型定义
 │   ├── album.ts, artist.ts, banner.ts, comment.ts, menu.ts, playlist.ts,
@@ -188,8 +197,7 @@ src/
 │   └── Player.vue                   # ⚠️ 旧版占位文件（emoji 按钮，未接入路由），可删除
 │
 ├── App.vue                          # 根组件（LayoutContainer + RouterView + scale 过渡）
-├── main.ts                          # 入口（Pinia / Router / 4 个 eventHandler / playerStore.init() / userStore.init()）
-└── style.css                        # 全局样式（Tailwind + 毛玻璃 + 路由过渡 + 自定义滚动条）
+└── main.ts                          # 入口（Pinia / Router / 4 个 eventHandler / playerStore.init() / userStore.init()）
 ```
 
 ---
@@ -314,7 +322,7 @@ transformCommentListResponse() // → CommentListResponse
 
 ### MusicController (`core/player/MusicController.ts`)
 
-**单例模式**（由 `core/player/player.ts` 实例化并默认导出）。
+**单例模式**（唯一的 `new MusicController()` 在 `stores/playerStore.ts` 模块级，该实例即 `usePlayerStore()` 内部使用的 player）。
 
 **HTML5 Audio 封装**（`new Audio()`）：
 
@@ -331,7 +339,10 @@ transformCommentListResponse() // → CommentListResponse
 - 注册 action handlers：`play`、`pause`、`nexttrack`、`previoustrack`、`seekbackward`（默认 10s）、`seekforward`、`seekto`
 - 在 `play` / `pause` 时同步 `playbackState`
 
-⚠️ **大小写陷阱**：`player.ts` 中 `import MusicController from './musicController'` 使用的是小写路径，但实际文件名是 `MusicController.ts`。Windows 不会报错，**部署到 Linux / 参与开源时必须修复**（改为 `./MusicController`）。
+**Web Audio 音频图**（EQ / 变调）：
+
+- `ensureGraph()` —— 懒建，首次 `play()` 时**同步**调用，见「特色功能 → 音效调整」
+- `setEqGains(gains: number[])` / `setPlaybackRate(rate)` / `setPreservesPitch(bool)` / `setPitchSemitones(semitones)`
 
 ### MusicService (`core/player/MusicService.ts`)
 
@@ -492,19 +503,11 @@ const theme = 'light' as 'light' | 'dark'
 
 未接入路由，仅 emoji 按钮 + 静态进度条。真实全屏播放器是 `views/FullscreenPlayer/FullScreenPlayer.vue`。
 
-### 4. `core/player/player.ts` import 大小写
-
-```typescript
-import MusicController from './musicController' // ⚠️ 实际文件是 MusicController.ts
-```
-
-Windows 不区分大小写所以能跑；部署到 Linux / CI 时会报模块未找到。
-
-### 5. `constants/events.ts` `SCROOL_TOP` 与 `constants/messages.ts` `TOAST_SUSSESS` 拼写错误
+### 4. `constants/events.ts` `SCROOL_TOP` 与 `constants/messages.ts` `TOAST_SUSSESS` 拼写错误
 
 已在整个 codebase 沿用，**不建议改动**（破坏面太大），写新代码时请按现有拼写。
 
-### 6. `utils/misc.ts` `extractLeagcyLyrics` 拼写错误
+### 5. `utils/misc.ts` `extractLeagcyLyrics` 拼写错误
 
 同上，已沿用。
 
@@ -512,9 +515,27 @@ Windows 不区分大小写所以能跑；部署到 Linux / CI 时会报模块未
 
 ## 主题系统
 
-### CSS 变量 (`styles/dark-mode.css`)
+### 样式文件结构 (`src/styles/`)
 
-**亮色模式（`:root`，lines 3-28）：**
+全局样式由 `src/styles/index.css` 作为唯一入口按依赖顺序 `@import`（`main.ts` 只导入 `./styles/index.css`）。**注意：旧版的 `src/style.css` 与 `src/styles/dark-mode.css` 已不存在**，相关内容按下表拆分：
+
+| 文件              | 职责                                                                    |
+| ----------------- | ----------------------------------------------------------------------- |
+| `index.css`       | 样式入口，按序 `@import` 其余文件（tokens 必须最先）                    |
+| `tokens.css`      | 设计令牌：hex/rgba 变量 + `--glass-*` + shadcn oklch 调色板 + 暗色覆盖  |
+| `base.css`        | 基础重置与排版                                                          |
+| `utilities.css`   | 自定义工具类                                                            |
+| `glass.css`       | 全部 `glass*` 毛玻璃类                                                  |
+| `buttons.css`     | 按钮样式                                                                |
+| `animations.css`  | 动画与过渡（含路由过渡）                                                |
+
+> ⚠️ **`glass.css` 是无 `@layer` 导入的**（`index.css` 里是裸 `@import './glass.css'`），因此其中声明的规则属于「未分层样式」，**优先级高于 Tailwind 的所有 `@layer` 工具类**，与选择器特异度无关。
+>
+> 具体坑：`.glass-container` / `.glass-card` / `.glass-effect` 在 `glass.css` line 33 声明了 **`position: relative`（无 `!important`）**。需要脱离文档流的毛玻璃容器必须显式写 `absolute!` / `fixed!`（Tailwind v4 的 important 后缀），否则定位会被静默改写为 `relative`。
+
+### CSS 变量 (`styles/tokens.css`)
+
+**亮色模式（`:root`，lines 10-79）：**
 
 ```css
 --bg-primary: #ffffff --bg-secondary: #f8f9fa --bg-tertiary: #f3f4f6
@@ -526,23 +547,23 @@ Windows 不区分大小写所以能跑；部署到 Linux / CI 时会报模块未
   8px 32px rgba(0, 0, 0, 0.1);
 ```
 
-**暗黑模式（`:root.dark`，lines 30-55）：** 镜像 dark 配色（`#0d0d0d`、`#1a1a1a`、白文、`#374151` 边框、`rgba(26,26,26,0.7)` glass 背景）。
+**暗黑模式（`:root.dark`，lines 82-140）：** 镜像 dark 配色（`#0d0d0d`、`#1a1a1a`、白文、`#374151` 边框、`rgba(26,26,26,0.7)` glass 背景），并重定义 shadcn oklch 变量。
 
-### 毛玻璃类（分两个文件）
+### 毛玻璃类（`styles/glass.css`）
 
-| 类名               | 定义于                     | 特性                                                                 |
-| ------------------ | -------------------------- | -------------------------------------------------------------------- |
-| `.glass`           | `dark-mode.css` (line 131) | `backdrop-filter: blur(20px) saturate(180%)`，使用 CSS 变量          |
-| `.glass-light`     | `dark-mode.css`            | 纯 `rgba(255,255,255,0.85)`，无 backdrop-filter                      |
-| `.glass-dark`      | `dark-mode.css`            | 纯 `rgba(26,26,26,0.85)`，无 backdrop-filter                         |
-| `.glass-container` | `style.css`                | `blur(18px) saturate(200%) brightness(1.2) contrast(1.05)` + padding |
-| `.glass-card`      | `style.css`                | 同上，卡片样式                                                       |
-| `.glass-effect`    | `style.css`                | 同上 + 强调发光                                                      |
-| `.glass-component` | `style.css` (line 385)     | 侧边栏变体                                                           |
+| 类名               | 特性                                                                 |
+| ------------------ | -------------------------------------------------------------------- |
+| `.glass`           | `backdrop-filter: blur(20px) saturate(180%)`，使用 CSS 变量          |
+| `.glass-light`     | 纯 `rgba(255,255,255,0.85)`，无 backdrop-filter                      |
+| `.glass-dark`      | 纯 `rgba(26,26,26,0.85)`，无 backdrop-filter                         |
+| `.glass-container` | `blur(18px) saturate(200%) brightness(1.2) contrast(1.05)` + padding |
+| `.glass-card`      | 同上，卡片样式                                                       |
+| `.glass-effect`    | 同上 + 强调发光                                                      |
+| `.glass-component` | 侧边栏变体                                                           |
 
-**移动端降级**（`dark-mode.css` line 230-235）：`@media (max-width: 768px) { .glass { backdrop-filter: blur(10px) saturate(180%) } }`。
+**移动端降级**（`glass.css` line 112）：`@media (max-width: 768px) { .glass { backdrop-filter: blur(10px) saturate(180%) } }`。
 
-**`style.css` 也含 `oklch()`**：shadcn 调色板（`--background`、`--foreground`、`--card`、`--primary`、`--destructive`、`--chart-1..5`、`--sidebar-*`），位于 `:root`（line 110-151）。自定义 `--primary-color: #e74c3c` 等。
+**`tokens.css` 也含 `oklch()`**：shadcn 调色板（`--background`、`--foreground`、`--card`、`--primary`、`--destructive`、`--chart-1..5`、`--sidebar-*`），位于 `:root`（line 47-79）。同一文件的自定义 `--primary-color: #e74c3c`（line 37）则是 hex。
 
 ### 主题切换
 
@@ -601,6 +622,38 @@ const generateRandomQueue = () => {
 
 实现位于 `stores/playerStore.ts:66-83`，且把当前歌曲放到队列首位。
 
+### 音效调整 (`components/common/AudioEffectDialog.vue`)
+
+- **EQ 预设**：5 段（60 / 230 / 910 / 3.6k / 14k Hz），曲线定义在 `constants/audioEffects.ts`
+- **变速**：0.5x–2.0x + 「保持音高」开关（原生 `preservesPitch`）
+- **音调（不改变速度）**：±12 半音，基于 `@soundtouchjs/audio-worklet`（WSOLA 算法）
+- **持久化**：`localStorage['player_settings']`（volume / eqPresetId / eqGains / playbackRate / preservesPitch / pitchSemitones）
+
+**音频图：** `MusicController.ensureGraph()` 懒建于首次 `play()`，链路为
+`MediaElementSource → BiquadFilter ×5 → [可变调节点] → destination`
+
+⚠️ **四条必须遵守的约束：**
+
+1. **`ensureGraph()` 只能在 `play()` 中「同步」调用，不可 `await`** —— 自动播放策略要求
+   `audio.play()` 落在用户手势的同步路径上，否则首次播放无声。
+2. **`setPlaybackRate()` 必须同时写 `audio.defaultPlaybackRate` 与 `audio.playbackRate`** ——
+   媒体加载算法会把后者重置为前者，只写一个会导致换歌后倍速丢失。
+3. **`this.audio.crossOrigin = 'anonymous'` 必须在首次设 `src` 之前指定**，且不能用
+   `'use-credentials'` —— Web Audio 的 `MediaElementAudioSourceNode` 对「跨域且未经 CORS 批准」
+   的资源会强制输出静音（不报错）；而 CDN 返回 `Access-Control-Allow-Origin: *`，
+   与带凭据模式互斥，后者会被浏览器拒绝。
+4. **变调节点是懒插入 / 懒移除的**：音调为 0 时**不在链路里**，非 0 时才插入。
+   SoundTouch 即使 0 半音也有 50–125ms 的 WSOLA 内部缓冲延迟，常驻会让音频与进度条 / 歌词错位。
+   **已知代价**：音调 ≠ 0 时歌词会比声音略快。
+
+**残留风险（最终审查提出，尚未实际触发）：**
+
+- **`crossOrigin='anonymous'` 使 CDN 请求不再携带 Cookie**，理论上影响需要 Cookie 鉴权的曲目。有效反证：`api/song.ts` 的 `checkUrl` 本就是浏览器侧跨域 HEAD（ky 直连、不经代理），抽样 5 首 × 2 个 CDN 节点均为**无 Cookie** 请求且全部 200 + `ACAO: *`。
+- **若某 CDN 节点不返回 ACAO 头，整曲会加载失败**，而 `<audio>` **未注册 `error` 监听**（`MusicController.initEvents`），症状为「无限加载、无任何提示」。该缺口是既存的，不在本次范围。
+- **首次播放若来自锁屏 / 媒体键**（MediaSession handler，或 `ended` 后自动续播），`AudioContext` 会在非用户手势路径上创建、以 `suspended` 起步；`ensureGraph()` 里的 `resume()` 不 await，症状是「UI 显示在播放但没声音且不报错」。**用户在页内再点一次播放即自愈**；页内点击播放不走这条路径。
+- **音调 ≠ 0 时换歌**：SoundTouch 的环形缓冲不会因 `load()` 清空，可能听到上一首的尾巴或一小段空隙（与 WSOLA 延迟同一根因）。
+- **iOS 后台 / 锁屏播放**：媒体元素接入 Web Audio 后，iOS Safari 在页面转后台时会挂起 AudioContext，历史上有「锁屏即无声」的报告。本仓库 UI 明显桌面优先，桌面 Chrome 无此问题。**若移动端在支持范围内，这是最该优先真机验证的一项。**
+
 ---
 
 ## 路由配置 (`router/index.ts`)
@@ -631,12 +684,17 @@ const generateRandomQueue = () => {
 
 ```bash
 pnpm dev          # 开发模式
-pnpm build        # 构建生产版本
-pnpm type-check   # 类型检查
+pnpm build        # 构建生产版本（run-p type-check + build-only 并行）
+pnpm build-only   # 只打包不类型检查（vite build）
+pnpm type-check   # 类型检查（vue-tsc）
 pnpm format       # 代码格式化
 pnpm preview      # 预览构建结果
 pnpm lint         # Lint 检查
 ```
+
+> ⚠️ **`pnpm build` 会并行触发 `type-check`**（定义为 `run-p type-check "build-only {@}" --`）。
+> 仓库当前有 **25 个既存 TypeScript 错误**（与本轮音频功能无关，见 `type-check` 输出），
+> 因此 `pnpm build` 必然失败。**只想验证打包是否通过，请用 `pnpm build-only`。**
 
 ---
 
@@ -674,10 +732,10 @@ const song = transformToSong(apiResponse)
 
 ## 注意事项
 
-- **播放器单例**: 只在 `core/player/player.ts` 中 `new MusicController()` 一次
+- **播放器单例**: 只在 `stores/playerStore.ts` 中 `new MusicController()` 一次（`core/player/` 下没有 `player.ts`）
 - **事件总线初始化**: 在 `main.ts` 中注册 4 个 handler
 - **使用 `storeToRefs`**: 从 store 解构响应式数据
 - **HTTP 库**: 使用 `ky` 而非 `axios`
-- **颜色系统**: `dark-mode.css` 用 hex/rgba，`style.css` 部分用 `oklch()` —— **不要假设统一**
+- **颜色系统**: `styles/tokens.css` 部分用 `oklch()`（shadcn 调色板），其余用 hex/rgba —— **不要假设统一**
 - **导入路径**: `@/` 指向 `src/`
 - **拼写错误**：`SCROOL_TOP` / `TOAST_SUSSESS` / `extractLeagcyLyrics` 沿用旧拼写，不要改
