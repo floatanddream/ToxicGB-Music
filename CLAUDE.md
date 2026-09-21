@@ -371,30 +371,30 @@ currentTime: number
 duration: number
 loading: boolean
 volume: number                    // 0-1（UI 显示时 ×100）
-randomQueue: number[]             // Fisher-Yates 洗牌结果
+randomQueue: string[]             // 随机播放顺序，存 song **id**（不是 playlist 下标）
 randomIndex: number
 ```
 
 **方法**：
 
-| 方法                                                                 | 功能                                          |
-| -------------------------------------------------------------------- | --------------------------------------------- |
-| `init()`                                                             | 注册 MediaSession handlers + 监听 player 事件 |
-| `replaceList(list, startIndex=0)`                                    | 替换播放列表                                  |
-| `playSong(song)`                                                     | 播放单曲（先 reset 队列）                     |
-| `insertNext(song)`                                                   | 插入下一首                                    |
-| `insertNextAndPlay(song)`                                            | 插入并立即播放                                |
-| `switchSong(song)`                                                   | 切换到指定歌曲                                |
-| `playByIndex(index)`                                                 | 按索引播放                                    |
-| `next()` / `prev()`                                                  | 切歌（处理 shuffle）                          |
-| `setMode(mode)`                                                      | 切换播放模式                                  |
-| `handleEnded()`                                                      | single 模式重播，否则 `next()`                |
-| `play()` / `pause()` / `toggle()`                                    | 播放控制                                      |
-| `seek(time)`                                                         | 跳转                                          |
-| `setVolume(v)`                                                       | 设置音量（v 是 0-100，内部 /100）             |
-| `setFullPlayer(e)`                                                   | 切换全屏                                      |
-| `preloadNextSong()`                                                  | **预加载接下来 3 首**（跳过已有 url 的）      |
-| `resetRandomQueue()` / `generateRandomQueue()` / `syncRandomIndex()` | 随机队列管理                                  |
+| 方法                                                               | 功能                                          |
+| ------------------------------------------------------------------ | --------------------------------------------- |
+| `init()`                                                           | 注册 MediaSession handlers + 监听 player 事件 |
+| `replaceList(list, startIndex=0)`                                  | 替换播放列表                                  |
+| `playSong(song)`                                                   | 播放单曲（清空随机队列）                      |
+| `insertNext(song)`                                                 | 插入下一首                                    |
+| `insertNextAndPlay(song)`                                          | 插入并立即播放                                |
+| `switchSong(song)`                                                 | 切换到指定歌曲                                |
+| `playByIndex(index)`                                               | 按索引播放                                    |
+| `next()` / `prev()`                                                | 切歌（处理 shuffle）                          |
+| `setMode(mode)`                                                    | 切换播放模式                                  |
+| `handleEnded()`                                                    | single 模式重播，否则 `next()`                |
+| `play()` / `pause()` / `toggle()`                                  | 播放控制                                      |
+| `seek(time)`                                                       | 跳转                                          |
+| `setVolume(v)`                                                     | 设置音量（v 是 0-100，内部 /100）             |
+| `setFullPlayer(e)`                                                 | 切换全屏                                      |
+| `preloadNextSong()`                                                | **预加载接下来 3 首**（跳过已有 url 的）      |
+| `generateRandomQueue()` / `syncRandomIndex()` / `playBySongId(id)` | 随机队列管理（队列存 song id）                |
 
 **预加载**：`watch(currentIndex, () => preloadNextSong())` 在 store 内注册。
 
@@ -410,7 +410,7 @@ randomIndex: number
   `ensureGraph()` 建出 `suspended` AudioContext 的已知陷阱
 - 校验不过**整体放弃**，不做部分过滤（否则 `currentIndex` 会静默错位到别的歌）
 
-**Fisher-Yates** 在 `generateRandomQueue()` 中（lines 71-74），把当前歌曲放到第 0 位以保证它先播。
+**Fisher-Yates** 在 `generateRandomQueue()` 中，洗的是 song **id** 数组；**故意不把当前曲换到第 0 位** —— 那正是「随机模式下回绕会重播上一首」的根因。
 
 ---
 
@@ -632,16 +632,19 @@ const loadMore = () => {
 
 ```typescript
 const generateRandomQueue = () => {
-  const len = playlist.value.length
-  randomQueue.value = Array.from({ length: len }, (_, i) => i)
-  for (let i = len - 1; i > 0; i--) {
+  const ids = playlist.value.map((s) => s.id)
+  for (let i = ids.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[randomQueue.value[i], randomQueue.value[j]] = [randomQueue.value[j], randomQueue.value[i]]
+    ;[ids[i], ids[j]] = [ids[j]!, ids[i]!]
   }
+  randomQueue.value = ids
+  syncRandomIndex() // 把 randomIndex 对齐到「当前正在播的那首」
 }
 ```
 
-实现位于 `stores/playerStore.ts:66-83`，且把当前歌曲放到队列首位。
+实现位于 `stores/playerStore.ts` 的 `generateRandomQueue()`。队列存的是 **song id 而非 playlist 下标** —— 下标队列携带「必须始终是有效下标」这条强不变量，而 playlist 每次增删都会破坏它；换成 id 后该不变量不再需要维护，残留一个已删除的 id 也无害（播放时跳过）。
+
+> ⚠️ **故意不把当前曲换到第 0 位** —— 那正是「随机模式下回绕会重播上一首」的根因：所有调用方都把 `randomIndex = 0` 当成「该播下一首了」。当前曲在第几位就在第几位，由 `syncRandomIndex()` 对齐。
 
 ### 音效调整 (`components/common/AudioEffectDialog.vue`)
 

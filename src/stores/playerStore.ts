@@ -223,9 +223,18 @@ export const usePlayerStore = defineStore('player', () => {
     // 失败兜底（VIP / 无版权 / 下架 / 网络抖动）：保留队列，但把 currentSong 置空。
     // 不能留着它 —— 界面显示着一首歌、audio.src 却是空的状态，用户点 ▶ 会静默无反应。
     // 不清快照：失败路径上 watcher 跟踪的几项都没变，不会触发重写，下次刷新会再试。
-    // 用户已经换歌（stale）时直接返回：那不是「我们的」恢复失败，留着这行日志纯噪声。
+    // 「什么都没发生」的三重判据。任何一条不成立都说明用户插了一脚 —— 此时置空
+    // currentSong 只会把用户刚点出来的状态抹掉（随后由用户那次操作填回，中间闪一下「未播放」）：
+    //   isStale()         —— 用户换了歌，currentSong 已被换成别的对象
+    //   currentIndex 变了 —— 用户点了另一首。playByIndex 是**先改索引**、await 之后才改
+    //                        currentSong，所以那段窗口里 isStale() 仍为假、槽位也还没动，
+    //                        只有索引能证明用户动了手
+    //   槽位易主           —— 整个队列被换掉（replaceList），此时索引可能恰好没变
+    const nothingHappened = () =>
+      !isStale() && currentIndex.value === restoredIndex && slotIsOurs()
+
     const handleRestoreFailure = (err: unknown) => {
-      if (isStale()) return
+      if (!nothingHappened()) return
       currentSong.value = null
       console.warn('[playerStore] 恢复上次的歌曲失败，队列已保留:', err)
     }
