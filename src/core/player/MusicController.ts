@@ -267,8 +267,19 @@ export class MusicController {
     this.emit('songchange', song)
   }
 
-  playSong(song: Song) {
+  /**
+   * 只装载、不播放。
+   *
+   * 用途：刷新后把上次的歌曲预先灌进 <audio>，这样用户点 ▶ 时
+   * MusicController.play() 不必变成 async —— 自动播放策略要求 audio.play()
+   * 落在用户手势的同步路径上，而解析 URL 是异步的，塞不进那条路径。
+   */
+  loadSong(song: Song) {
     this.load(song)
+  }
+
+  playSong(song: Song) {
+    this.loadSong(song)
     this.play()
   }
 
