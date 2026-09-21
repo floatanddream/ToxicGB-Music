@@ -25,8 +25,8 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
 <template>
   <AlertDialogPortal>
     <!-- 这里的 z-index 不是 shadcn 默认值（原本都是 z-50）：.player-footer 是
-         z-index: 100、音量浮层是 z-110，不抬高的话底栏会盖在暗色遮罩之上
-         （页面暗了、底栏还亮着）。内容层抬到 z-500 与 AudioEffectDialog 对齐。 -->
+         z-index: 100、音量浮层是 z-110，不抬高的话底栏会盖在蒙层之上，
+         蒙层底边被切掉一块。内容层抬到 z-500 与 AudioEffectDialog 对齐。 -->
     <AlertDialogOverlay
       data-slot="alert-dialog-overlay"
       class="liquid-glass-mask-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-120 bg-black/80"

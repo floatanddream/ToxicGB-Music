@@ -128,11 +128,11 @@ src/
 │   │   ├── BouncingSlider.vue       # 动画滑块（音量/进度）
 │   │   └── Menu.vue                 # 右键 / 上下文菜单
 │   │
-│   └── ui/                          # shadcn-vue 风格基础组件（18 个）
-│       ├── button, card, collapsible, context-menu, dialog,
-│       ├── input, label, progress, scroll-area, separator,
-│       ├── slider, switch,
-│       └── sheet, sidebar, skeleton, sonner, tabs, tooltip
+│   └── ui/                          # shadcn-vue 风格基础组件（21 个）
+│       ├── alert-dialog, button, card, collapsible, context-menu,
+│       ├── dialog, input, label, popover, progress, scroll-area,
+│       ├── select, separator, sheet, sidebar, skeleton, slider,
+│       └── sonner, switch, tabs, tooltip
 │
 ├── constants/
 │   ├── audioEffects.ts              # EQ 频段定义 + 预设曲线 + 变速/变调范围
@@ -159,7 +159,7 @@ src/
 │   ├── tokens.css                   # 设计令牌：hex/rgba 变量 + shadcn oklch 调色板 + 暗色覆盖
 │   ├── base.css                     # 基础重置与排版
 │   ├── utilities.css                # 自定义工具类
-│   ├── glass.css                    # 毛玻璃类（.glass / -container / -card / -effect / -component）
+│   ├── glass.css                    # 毛玻璃类（.glass / -container / -card / -effect / -component）+ 弹窗蒙层
 │   ├── buttons.css                  # 按钮样式
 │   └── animations.css               # 动画与过渡（含路由过渡）
 │
@@ -519,15 +519,15 @@ const theme = 'light' as 'light' | 'dark'
 
 全局样式由 `src/styles/index.css` 作为唯一入口按依赖顺序 `@import`（`main.ts` 只导入 `./styles/index.css`）。**注意：旧版的 `src/style.css` 与 `src/styles/dark-mode.css` 已不存在**，相关内容按下表拆分：
 
-| 文件              | 职责                                                                    |
-| ----------------- | ----------------------------------------------------------------------- |
-| `index.css`       | 样式入口，按序 `@import` 其余文件（tokens 必须最先）                    |
-| `tokens.css`      | 设计令牌：hex/rgba 变量 + `--glass-*` + shadcn oklch 调色板 + 暗色覆盖  |
-| `base.css`        | 基础重置与排版                                                          |
-| `utilities.css`   | 自定义工具类                                                            |
-| `glass.css`       | 全部 `glass*` 毛玻璃类                                                  |
-| `buttons.css`     | 按钮样式                                                                |
-| `animations.css`  | 动画与过渡（含路由过渡）                                                |
+| 文件             | 职责                                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
+| `index.css`      | 样式入口，按序 `@import` 其余文件（tokens 必须最先）                   |
+| `tokens.css`     | 设计令牌：hex/rgba 变量 + `--glass-*` + shadcn oklch 调色板 + 暗色覆盖 |
+| `base.css`       | 基础重置与排版                                                         |
+| `utilities.css`  | 自定义工具类                                                           |
+| `glass.css`      | 全部 `glass*` 毛玻璃类 + 弹窗蒙层 `.liquid-glass-mask-background`      |
+| `buttons.css`    | 按钮样式                                                               |
+| `animations.css` | 动画与过渡（含路由过渡）                                               |
 
 > ⚠️ **`glass.css` 是无 `@layer` 导入的**（`index.css` 里是裸 `@import './glass.css'`），因此其中声明的规则属于「未分层样式」，**优先级高于 Tailwind 的所有 `@layer` 工具类**，与选择器特异度无关。
 >
@@ -551,15 +551,20 @@ const theme = 'light' as 'light' | 'dark'
 
 ### 毛玻璃类（`styles/glass.css`）
 
-| 类名               | 特性                                                                 |
-| ------------------ | -------------------------------------------------------------------- |
-| `.glass`           | `backdrop-filter: blur(20px) saturate(180%)`，使用 CSS 变量          |
-| `.glass-light`     | 纯 `rgba(255,255,255,0.85)`，无 backdrop-filter                      |
-| `.glass-dark`      | 纯 `rgba(26,26,26,0.85)`，无 backdrop-filter                         |
-| `.glass-container` | `blur(18px) saturate(200%) brightness(1.2) contrast(1.05)` + padding |
-| `.glass-card`      | 同上，卡片样式                                                       |
-| `.glass-effect`    | 同上 + 强调发光                                                      |
-| `.glass-component` | 侧边栏变体                                                           |
+| 类名                            | 特性                                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------- |
+| `.glass`                        | `backdrop-filter: blur(20px) saturate(180%)`，使用 CSS 变量                             |
+| `.glass-light`                  | 纯 `rgba(255,255,255,0.85)`，无 backdrop-filter                                         |
+| `.glass-dark`                   | 纯 `rgba(26,26,26,0.85)`，无 backdrop-filter                                            |
+| `.glass-container`              | `blur(18px) saturate(200%) brightness(1.2) contrast(1.05)` + padding                    |
+| `.glass-card`                   | 同上，卡片样式                                                                          |
+| `.glass-effect`                 | 同上 + 强调发光                                                                         |
+| `.glass-component`              | 侧边栏变体                                                                              |
+| `.liquid-glass-mask-background` | 弹窗蒙层。径向渐变 + `blur(10px)`，亮/暗两套；带 `::before` 扫光（`liquid-shimmer` 8s） |
+
+**弹窗蒙层**：`ui/dialog/DialogOverlay.vue` 与 `ui/alert-dialog/AlertDialogContent.vue` 都引用 `.liquid-glass-mask-background`（原先是前者的 scoped `.liquid-glass-advanced`，后抽成全局类）。两处都显式抬高了 z-index —— DialogOverlay `z-100`、AlertDialog overlay `z-120` / content `z-500`。**不是可选**：`.player-footer` 是 `z-index: 100`、音量浮层 `z-110`，用 shadcn 默认的 `z-50` 会让底栏盖在蒙层之上。
+
+> 蒙层类本身**不设** `position`，但它有 `position: absolute; inset: 0` 的 `::before` 扫光层 —— 宿主必须自带定位（上述两个宿主都是 Tailwind 的 `fixed`），否则扫光会跑到别的定位祖先上。
 
 **移动端降级**（`glass.css` line 112）：`@media (max-width: 768px) { .glass { backdrop-filter: blur(10px) saturate(180%) } }`。
 
