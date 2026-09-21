@@ -326,7 +326,11 @@ transformCommentListResponse() // → CommentListResponse
 
 **HTML5 Audio 封装**（`new Audio()`）：
 
-- `playSong(song)` / `play()` / `pause()` / `toggle()` / `seek(time)` / `setVolume(0-1)` / `getCurrentTime()` / `getDuration()` / `isPlaying()` / `setMediaSessionHandlers(handlers)`
+- `loadSong(song)` / `playSong(song)` / `play()` / `pause()` / `toggle()` / `seek(time)` / `setVolume(0-1)` / `getCurrentTime()` / `getDuration()` / `isPlaying()` / `setMediaSessionHandlers(handlers)`
+
+> `loadSong(song)` 是「只装载不播放」的档位，`playSong(song)` = `loadSong + play`。
+> 它存在的理由是 `play()` 必须保持同步（见下方四条约束的第 1 条），
+> 而刷新后恢复队列时解析 URL 是异步的，只能提前装载。
 
 **事件系统**（内部 `Map<string, EventCallback[]>`）：
 
@@ -393,6 +397,18 @@ randomIndex: number
 | `resetRandomQueue()` / `generateRandomQueue()` / `syncRandomIndex()` | 随机队列管理                                  |
 
 **预加载**：`watch(currentIndex, () => preloadNextSong())` 在 store 内注册。
+
+**持久化**：两个互不相干的 `localStorage` key ——
+`player_settings`（音量 / EQ / 变速 / 变调）与 `player_queue`（队列快照）。
+分开存、分开校验，一份坏了不牵连另一份。
+
+`player_queue` 快照内容是 `{ v, playlist, currentIndex, mode, randomQueue, randomIndex }`：
+
+- **剔除 `url`** —— CDN 直链带时效，存了刷新后会失效
+- **不存 `currentTime`** —— 一律从 0:00 开始
+- **不自动播放** —— 恢复为「暂停在原位」，从而绕开无手势时
+  `ensureGraph()` 建出 `suspended` AudioContext 的已知陷阱
+- 校验不过**整体放弃**，不做部分过滤（否则 `currentIndex` 会静默错位到别的歌）
 
 **Fisher-Yates** 在 `generateRandomQueue()` 中（lines 71-74），把当前歌曲放到第 0 位以保证它先播。
 
@@ -664,6 +680,15 @@ const generateRandomQueue = () => {
 - **首次播放若来自锁屏 / 媒体键**（MediaSession handler，或 `ended` 后自动续播），`AudioContext` 会在非用户手势路径上创建、以 `suspended` 起步；`ensureGraph()` 里的 `resume()` 不 await，症状是「UI 显示在播放但没声音且不报错」。**用户在页内再点一次播放即自愈**；页内点击播放不走这条路径。
 - **音调 ≠ 0 时换歌**：SoundTouch 的环形缓冲不会因 `load()` 清空，可能听到上一首的尾巴或一小段空隙（与 WSOLA 延迟同一根因）。
 - **iOS 后台 / 锁屏播放**：媒体元素接入 Web Audio 后，iOS Safari 在页面转后台时会挂起 AudioContext，历史上有「锁屏即无声」的报告。本仓库 UI 明显桌面优先，桌面 Chrome 无此问题。**若移动端在支持范围内，这是最该优先真机验证的一项。**
+
+### 队列持久化的已知限制
+
+1. **多标签页不同步**：两个标签页同时开着，后写的覆盖先写的，先开的那个不会感知
+   （不监听 `storage` 事件）。
+2. **300ms 写入窗口**：`debounce: 300` 意味着「换队列后 300ms 内刷新」会丢掉这次
+   变更。消除它需要加 `pagehide` 监听器，权衡后不做。
+3. **刷新最多预取 3 首**：当前曲（异步恢复）+ `preloadNextSong()` 预取的接下来 2 首。
+   恢复的若是队列第 1 首则 `currentIndex` 未变、`watch` 不触发，只取 1 首。
 
 ---
 
