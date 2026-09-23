@@ -40,3 +40,6 @@ __screenshots__/
 ToxicGB-Music.rar
 rename.py
 .claude/settings.local.json
+
+# 本地提示词 / 需求草稿，不进版本库
+docs/prompt/
