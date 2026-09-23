@@ -2,6 +2,9 @@ import { defineStore } from 'pinia';
 import type { Song, PlayMode } from '@/types/player';
 import { MusicController } from '@/core/player/MusicController';
 import { getSong } from '@/core/player/MusicService';
+import { getSongMvId } from '@/api/song';
+import { getMvUrl } from '@/api/mv';
+import { useSettingsStore } from './settings';
 import { ref, watch } from 'vue';
 import { watchDebounced } from '@vueuse/core';
 import {
@@ -19,6 +22,9 @@ import {
 const player = new MusicController();
 
 export const usePlayerStore = defineStore('player', () => {
+  // MV 背景是应用级设置，存在 settings store 里；播放器只读它，不写。
+  const settings = useSettingsStore();
+
   const playlist = ref<Song[]>([]);
   const currentSong = ref<Song | null>(null);
   const currentIndex = ref<number>(0);
@@ -125,9 +131,12 @@ export const usePlayerStore = defineStore('player', () => {
    *
    * 与 player_settings 分开存、分开校验：一份队列数据损坏不应把音量 / EQ 一起带走。
    *
-   * url 必须剔除 —— Song.url 是带时效的 CDN 直链，存下来刷新后会指向过期地址
-   * （症状：点音频没反应）。恢复时由 MusicService.getSong() 重新解析。
-   * `url: undefined` 这个写法依赖 JSON.stringify 会直接丢掉值为 undefined 的键。
+   * url 与 mvUrl 都必须剔除 —— 两者都是带时效的 CDN 直链，存下来刷新后会指向过期
+   * 地址（症状分别是「点音频没反应」和「MV 背景黑屏」）。前者恢复时由
+   * MusicService.getSong() 重新解析，后者由 resolveMv() 按 mvid 重新解析。
+   * `xxx: undefined` 这个写法依赖 JSON.stringify 会直接丢掉值为 undefined 的键。
+   *
+   * mvid 则保留 —— 它是稳定的 id，恢复后靠它重新拿地址，能省掉一次 /song/detail。
    */
   const persistQueue = () => {
     try {
@@ -135,7 +144,11 @@ export const usePlayerStore = defineStore('player', () => {
         QUEUE_KEY,
         JSON.stringify({
           v: QUEUE_SCHEMA_VERSION,
-          playlist: playlist.value.map((song) => ({ ...song, url: undefined })),
+          playlist: playlist.value.map((song) => ({
+            ...song,
+            url: undefined,
+            mvUrl: undefined,
+          })),
           currentIndex: currentIndex.value,
           mode: mode.value,
           randomQueue: randomQueue.value,
@@ -266,6 +279,62 @@ export const usePlayerStore = defineStore('player', () => {
       player.loadSong(fullSong)
     } catch (err) {
       handleRestoreFailure(err)
+    }
+  }
+
+  /* ---------------- MV 背景 ---------------- */
+
+  /**
+   * 解析当前曲的 MV（`mvid` 与 `mvUrl`），供 FullPageBackground 使用。
+   *
+   * 只在 `background.enableMvBackground` 打开时才发请求 —— 默认是关的，
+   * 所以对默认用户这是**零额外请求**的。开关打开后，换歌或切开关都会重跑。
+   *
+   * 分两步拿（两个接口），每个 await 之后都要确认 `currentSong` 还是同一个对象：
+   * 换歌后迟到的结果不许写回去。判据用**对象引用**而非 id —— 每次换歌都会给
+   * currentSong 换一个新对象（见 playByIndex / loadRestoredCurrentSong），
+   * 引用比较能识别出来。
+   *
+   * 全程 try/catch：MV 是锦上添花，任何一步失败都只回退流体背景，
+   * 绝不能让异常冒成未处理的 Promise 拒绝。
+   */
+  const resolveMv = async () => {
+    try {
+      const song = currentSong.value
+      if (song === null) return
+      if (!settings.background.enableMvBackground) return
+
+      // 1) 没查过就先查一次。mvid 不在搜索 / 歌单 / 专辑的载荷里，只能单独问。
+      let mvid = song.mvid
+      if (mvid === undefined) {
+        mvid = await getSongMvId(song.id)
+        if (currentSong.value !== song) return
+
+        // 0 也要记下来 —— 它表示「查过了，这首歌没有 MV」。
+        // 不记的话每次换回这首歌都会再查一次。
+        song.mvid = mvid
+      } else if (mvid === 0) {
+        return // 已经确认过没有 MV
+      }
+
+      if (!mvid) return // 查不到 MV id → 交给流体背景
+
+      // 2) 拿 MV 播放地址（带时效的直链，只在内存里活，不进持久化快照）
+      const mvUrl = await getMvUrl(mvid)
+      if (currentSong.value !== song) return
+
+      if (mvUrl === undefined) {
+        // 拿不到地址（VIP / 版权 / 下架）→ 回退流体背景。
+        // 不弹 toast：与项目现有播放失败的风格一致。
+        console.warn('[playerStore] 该 MV 拿不到播放地址，回退流体背景:', mvid)
+        return
+      }
+
+      song.mvUrl = mvUrl
+    } catch (err) {
+      // 接口报错 / 超时。**不要**把 mvid 写成 0 —— 那会让这首歌永远不再查 MV，
+      // 一次网络抖动就变成永久失效。保持 undefined，下次换回来会重试。
+      console.warn('[playerStore] 解析 MV 失败，回退流体背景:', err)
     }
   }
 
@@ -633,6 +702,17 @@ export const usePlayerStore = defineStore('player', () => {
     }),
     persistQueue,
     { debounce: 300 },
+  );
+
+  // 换歌、或者切换 enableMvBackground，都要重新解析 MV。
+  // immediate 是为了「刷新恢复队列时开关本来就是开的情况」——
+  // 那时 currentSong 由 loadQueue() 同步填上，不会再触发一次换歌。
+  watch(
+    () => [currentSong.value?.id, settings.background.enableMvBackground] as const,
+    () => {
+      void resolveMv()
+    },
+    { immediate: true },
   );
 
   return {
