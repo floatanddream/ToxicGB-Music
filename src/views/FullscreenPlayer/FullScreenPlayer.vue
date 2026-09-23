@@ -3,9 +3,7 @@ import { ref, computed, onBeforeUnmount, onMounted, shallowRef, watch } from 'vu
 import { usePlayerStore } from '@/stores/playerStore'
 import { storeToRefs } from 'pinia'
 import type { Song } from '@/types/player'
-import {
-  X,
-} from 'lucide-vue-next'
+import { X } from 'lucide-vue-next'
 import SongControl from './components/SongControl.vue'
 import AlbumCover from './components/AlbumCover.vue'
 import UpNextQueue from './components/UpNextQueue.vue'
@@ -14,11 +12,11 @@ import { EVENTS } from '@/constants/events'
 import { type LyricLine } from '@applemusic-like-lyrics/lyric'
 import { getSongLyric, getTTMLLyric } from '@/api/lyric'
 import { LyricPlayer } from '@applemusic-like-lyrics/vue'
-import "@applemusic-like-lyrics/core/style.css";
+import '@applemusic-like-lyrics/core/style.css'
 import { extractLeagcyLyrics, extractTTMLLyrics } from '@/utils/misc'
 
 const playerStore = usePlayerStore()
-const lyricData = shallowRef<LyricLine[]>([]);
+const lyricData = shallowRef<LyricLine[]>([])
 const { currentSong, playing, currentTime, duration, playlist, currentIndex, mode, volume } =
   storeToRefs(playerStore)
 
@@ -30,7 +28,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 }
 
 const handleSeek = (time: number) => {
-  playerStore.seek(time / 1000);
+  playerStore.seek(time / 1000)
 }
 
 const handleClose = () => {
@@ -60,35 +58,38 @@ const fetchLyric = async () => {
     // 同时发起两个请求
     const [ttmlLyricRes, lyricRes] = await Promise.all([
       getTTMLLyric(playerStore.currentSong?.id!),
-      getSongLyric(playerStore.currentSong?.id!)
-    ]);
+      getSongLyric(playerStore.currentSong?.id!),
+    ])
 
     // 优先使用 TTML 歌词
     if (ttmlLyricRes) {
-      lyricData.value = extractTTMLLyrics(ttmlLyricRes);
-      console.log('TTML歌词:', extractTTMLLyrics(ttmlLyricRes));
+      lyricData.value = extractTTMLLyrics(ttmlLyricRes)
+      console.log('TTML歌词:', extractTTMLLyrics(ttmlLyricRes))
     } else {
       // TTML 为空时使用普通歌词
-      lyricData.value = extractLeagcyLyrics(lyricRes);
-      console.log('普通歌词:', extractLeagcyLyrics(lyricRes));
+      lyricData.value = extractLeagcyLyrics(lyricRes)
+      console.log('普通歌词:', extractLeagcyLyrics(lyricRes))
     }
   } catch (error) {
     // TTML 请求失败（如404），回退到普通歌词
-    console.warn('TTML歌词获取失败，使用普通歌词:', error);
+    console.warn('TTML歌词获取失败，使用普通歌词:', error)
 
     try {
-      const lyricRes = await getSongLyric(playerStore.currentSong?.id!);
-      lyricData.value = extractLeagcyLyrics(lyricRes);
-      console.log('回退到普通歌词:', extractLeagcyLyrics(lyricRes));
+      const lyricRes = await getSongLyric(playerStore.currentSong?.id!)
+      lyricData.value = extractLeagcyLyrics(lyricRes)
+      console.log('回退到普通歌词:', extractLeagcyLyrics(lyricRes))
     } catch (lyricError) {
       // 连普通歌词也获取失败
-      console.error('所有歌词获取失败:', lyricError);
+      console.error('所有歌词获取失败:', lyricError)
     }
   }
 }
-watch(() => playerStore.currentSong?.id, () => {
-  fetchLyric()
-});
+watch(
+  () => playerStore.currentSong?.id,
+  () => {
+    fetchLyric()
+  },
+)
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
@@ -103,17 +104,34 @@ onBeforeUnmount(() => {
   <div class="fullscreen-player glass-component">
     <!-- Left Panel: Album Cover -->
     <div class="left-panel">
-      <AlbumCover :cover="currentSong?.cover || 'https://picsum.photos/400/400?random=1'"
-        :title="currentSong?.title || 'Album Cover'" :playing="playing" />
-      <SongControl :duration="duration" :current-time="currentTime" :is-playing="playing" @seek="handleSeek" />
+      <AlbumCover
+        :cover="currentSong?.cover || 'https://picsum.photos/400/400?random=1'"
+        :title="currentSong?.title || 'Album Cover'"
+        :playing="playing"
+      />
+      <SongControl
+        :duration="duration"
+        :current-time="currentTime"
+        :is-playing="playing"
+        @seek="handleSeek"
+      />
     </div>
 
     <!-- Right Panel: Song Info & Queue -->
     <div class="right-panel">
       <UpNextQueue :songs="upNextSongs" @switch-song="handleSwitchSong" v-if="false" />
-      <LyricPlayer @line-click="(e) => { handleSeek(e.line?.lyricLine?.startTime) }" class="lyric-player"
-        :lyric-lines="lyricData" :current-time="currentTime * 1000"
-        :playing="playerStore.playing && playerStore.isFullScreen" :align-position="0.3" />
+      <LyricPlayer
+        @line-click="
+          (e) => {
+            handleSeek(e.line?.lyricLine?.startTime)
+          }
+        "
+        class="lyric-player"
+        :lyric-lines="lyricData"
+        :current-time="currentTime * 1000"
+        :playing="playerStore.playing && playerStore.isFullScreen"
+        :align-position="0.3"
+      />
     </div>
 
     <!-- Close Button -->
