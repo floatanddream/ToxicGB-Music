@@ -2,76 +2,65 @@
 import TheHeader from './TheHeader.vue'
 import TheSidebar from './TheSidebar.vue'
 import TheFooter from './TheFooter.vue'
-import FullScreenPlayer from '@/views/FullscreenPlayer/FullScreenPlayer.vue';
-import { BackgroundRender } from '@applemusic-like-lyrics/vue';
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { MeshGradientRenderer } from '@applemusic-like-lyrics/core';
-import emitter from '@/utils/eventBus';
-import {EVENTS} from '@/constants/events'
-import { useUserStore } from '@/stores/user';
-import { storeToRefs } from 'pinia';
-import { usePlayerStore } from '@/stores/playerStore';
+import FullScreenPlayer from '@/views/FullscreenPlayer/FullScreenPlayer.vue'
+import FullPageBackground from './FullPageBackground.vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import emitter from '@/utils/eventBus'
+import { EVENTS } from '@/constants/events'
+import { storeToRefs } from 'pinia'
+import { usePlayerStore } from '@/stores/playerStore'
 import 'vue-sonner/style.css'
 import { Toaster } from '@/components/ui/sonner'
-import Menu from '../misc/Menu.vue';
-import CollectSongToPlaylistDialog from '../common/musicComponents/collectSongToPlaylistDialog.vue';
+import Menu from '../misc/Menu.vue'
+import CollectSongToPlaylistDialog from '../common/musicComponents/collectSongToPlaylistDialog.vue'
 
-const userStore = useUserStore();
-const playerStore = usePlayerStore();
-const { currentSong, playing, isFullScreen } = storeToRefs(playerStore);
-
-const imageUrl = computed(()=>{
-  return playing.value ? currentSong.value?.cover : userStore.user?.avatarUrl
-});
+const playerStore = usePlayerStore()
+const { isFullScreen } = storeToRefs(playerStore)
 
 //拿到main元素ref
-const mainRef = ref<HTMLElement | null>(null);
+const mainRef = ref<HTMLElement | null>(null)
 
 //滚到top
 const handleScrollTop: () => void = () => {
-  if(mainRef.value){
+  if (mainRef.value) {
     mainRef.value.scrollTo({
       top: 0,
       behavior: 'smooth',
-    });
+    })
   }
 }
 
 // Dark mode initialization
 onMounted(() => {
-  emitter.on(EVENTS.SCROOL_TOP,handleScrollTop);
-  emitter.on(EVENTS.TOGGLE_FULLSCREEN,(val) => {
-    isFullScreen.value = val as boolean;
-    
-  });
-  const savedTheme = localStorage.getItem('theme');
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  emitter.on(EVENTS.SCROOL_TOP, handleScrollTop)
+  emitter.on(EVENTS.TOGGLE_FULLSCREEN, (val) => {
+    isFullScreen.value = val as boolean
+  })
+  const savedTheme = localStorage.getItem('theme')
+  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
   if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.add('dark')
   } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove('dark')
   }
-});
-onUnmounted(()=>{
-  emitter.off(EVENTS.SCROOL_TOP);
-  emitter.off(EVENTS.TOGGLE_FULLSCREEN);
-});
+})
+onUnmounted(() => {
+  emitter.off(EVENTS.SCROOL_TOP)
+  emitter.off(EVENTS.TOGGLE_FULLSCREEN)
+})
 </script>
 
 <template>
-
   <div class="layout-container">
     <Toaster :duration="3000" :position="'top-center'" />
-    <div class="full-page-background">
-      <BackgroundRender :renderer="MeshGradientRenderer" :fps="90" :render-scale="1" :album="imageUrl" />
-    </div>
+    <FullPageBackground />
     <TheHeader v-if="!isFullScreen" class="header" />
     <TheSidebar v-if="!isFullScreen" class="sidebar" />
-      <main v-show="!isFullScreen" ref="mainRef" class="main  " style="border-radius: 0%;">
-          <Menu>
-            <slot />
-          </Menu>
+    <main v-show="!isFullScreen" ref="mainRef" class="main" style="border-radius: 0%">
+      <Menu>
+        <slot />
+      </Menu>
     </main>
     <TheFooter v-if="!isFullScreen" class="footer" />
     <CollectSongToPlaylistDialog />
@@ -85,8 +74,8 @@ onUnmounted(()=>{
 .layout-container {
   display: grid;
   grid-template-areas:
-    "header header"
-    "sidebar main";
+    'header header'
+    'sidebar main';
   grid-template-rows: auto 1fr;
   grid-template-columns: auto 1fr;
   height: 100vh;
@@ -95,21 +84,6 @@ onUnmounted(()=>{
   overflow: hidden;
   position: relative;
 }
-
-.full-page-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.dark .full-page-background {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, color-mix(in srgb, var(--primary-dark) 10%, transparent) 100%);
-}
-
 
 .header {
   grid-area: header;
