@@ -1,8 +1,21 @@
 {
   "name": "toxicgb-music",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "网易云音乐第三方播放器，基于 Vue 3 + TypeScript，苹果音乐风格 UI",
+  "license": "MIT",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floatanddream/ToxicGB-Music.git"
+  },
+  "keywords": [
+    "vue3",
+    "typescript",
+    "music-player",
+    "netease-cloud-music",
+    "applemusic-like-lyrics"
+  ],
   "scripts": {
     "dev": "vite",
     "devHost": "vite --host",
