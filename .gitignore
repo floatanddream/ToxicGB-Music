@@ -43,3 +43,7 @@ rename.py
 
 # 本地提示词 / 需求草稿，不进版本库
 docs/prompt/
+
+# 本地环境变量覆盖（.env.example 是模板，.env.development 有可用默认值）
+.env.local
+.env.*.local
