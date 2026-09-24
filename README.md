@@ -45,7 +45,7 @@ npx NeteaseCloudMusicApi
 | 样式 | Tailwind CSS v4 |
 | UI 基础 | reka-ui + shadcn-vue 风格栈（`class-variance-authority` / `tailwind-merge` / `clsx`） |
 | HTTP | ky |
-| 歌词与背景 | [@applemusic-like-lyrics](https://github.com/Steve-xmh/applemusic-like-lyrics)（TTML 歌词 + mesh 渐变渲染器） |
+| 歌词与背景 | [@applemusic-like-lyrics / amll](https://github.com/amll-dev/applemusic-like-lyrics)（TTML 歌词 + mesh 渐变渲染器，**AGPL-3.0** —— 见 [致谢](#致谢)） |
 | 变调 | @soundtouchjs/audio-worklet（WSOLA） |
 | 其他 | mitt（事件总线）、vue-sonner（Toast）、motion-v、@vueuse/core |
 
@@ -137,6 +137,22 @@ src/
 - `docs/superpowers/` —— 各功能的原始设计文档与实施计划
 - `docs/code-review/` —— 一次代码评审的产物
 
+## 致谢
+
+本项目**受 [Apple Music Like Lyrics（amll）](https://github.com/amll-dev/applemusic-like-lyrics) 启发** ——
+界面上最核心的那部分观感，逐字高亮的苹果风格歌词、跟随封面流动的 mesh 渐变背景，
+直接来自它的三个包：
+
+| 包 | 在本项目里负责 |
+| --- | --- |
+| `@applemusic-like-lyrics/core` | mesh 渐变背景渲染器（`MeshGradientRenderer`） |
+| `@applemusic-like-lyrics/lyric` | TTML 歌词解析 |
+| `@applemusic-like-lyrics/vue` | 上面两者的 Vue 封装（`BackgroundRender` / `LyricPlayer`） |
+
+没有 amll，这个项目的界面会是另一副样子。歌词数据本身来自网易云。
+
+> ⚠️ amll 以 **AGPL-3.0** 授权，本项目作为它的衍生作品也因此以 AGPL-3.0 发布。
+
 ## 免责声明
 
 本项目为**非官方**第三方客户端，仅供学习与技术交流使用。所有音乐、歌词、MV 等内容的
@@ -145,4 +161,13 @@ src/
 
 ## License
 
-[MIT](./LICENSE)
+[GNU Affero General Public License v3.0](./LICENSE)（AGPL-3.0）
+
+之所以是 AGPL-3.0 而不是更宽松的许可证：本项目运行时依赖 amll，而它是 AGPL-3.0，
+具有传染性 —— 包含它的作品必须整体以同一许可证分发。没有别的选择，除非把这个项目的
+歌词与背景渲染全部重写。
+
+这条许可证比 GPL 多一项要求（第 13 条，即「网络服务条款」）：如果你把**修改过的**
+版本部署成公开可访问的服务，需要向使用者提供你的源代码。自己本地跑、或者原样部署，
+都没有额外义务。
+
