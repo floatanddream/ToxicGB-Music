@@ -62,6 +62,13 @@ export class MusicController {
     this.audio.addEventListener('loadedmetadata', () => {
       this.emit('loaded', this.audio.duration)
     })
+
+    // 媒体加载失败（CDN 403/404、地址过期、CORS 被拒）。
+    // 这里**只负责透出事件** —— 重试 / 跳过 / 提示是播放策略，属于 store；
+    // 放进这个纯音频控制器会让它承担不该由它做的决策。
+    this.audio.addEventListener('error', () => {
+      this.emit('error', this.audio.error)
+    })
   }
 
   /* ---------------- MediaSession ---------------- */

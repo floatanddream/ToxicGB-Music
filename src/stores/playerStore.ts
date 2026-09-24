@@ -1,12 +1,14 @@
-import { defineStore } from 'pinia';
-import type { Song, PlayMode } from '@/types/player';
-import { MusicController } from '@/core/player/MusicController';
-import { getSong } from '@/core/player/MusicService';
-import { getSongMvId } from '@/api/song';
-import { getMvUrl } from '@/api/mv';
-import { useSettingsStore } from './settings';
-import { ref, watch } from 'vue';
-import { watchDebounced } from '@vueuse/core';
+import { defineStore } from 'pinia'
+import type { Song, PlayMode } from '@/types/player'
+import { MusicController } from '@/core/player/MusicController'
+import { getSong } from '@/core/player/MusicService'
+import { getSongMvId } from '@/api/song'
+import { getMvUrl } from '@/api/mv'
+import { useSettingsStore } from './settings'
+import emitter from '@/utils/eventBus'
+import { MESSAGE_TYPE } from '@/constants/messages'
+import { ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import {
   EQ_BANDS,
   EQ_PRESETS,
@@ -17,42 +19,42 @@ import {
   PITCH_MIN,
   PITCH_MAX,
   PITCH_DEFAULT,
-} from '@/constants/audioEffects';
+} from '@/constants/audioEffects'
 
-const player = new MusicController();
+const player = new MusicController()
 
 export const usePlayerStore = defineStore('player', () => {
   // MV 背景是应用级设置，存在 settings store 里；播放器只读它，不写。
-  const settings = useSettingsStore();
+  const settings = useSettingsStore()
 
-  const playlist = ref<Song[]>([]);
-  const currentSong = ref<Song | null>(null);
-  const currentIndex = ref<number>(0);
-  const isFullScreen = ref(false);
+  const playlist = ref<Song[]>([])
+  const currentSong = ref<Song | null>(null)
+  const currentIndex = ref<number>(0)
+  const isFullScreen = ref(false)
 
-  const mode = ref<PlayMode>('loop');
+  const mode = ref<PlayMode>('loop')
 
-  const playing = ref<boolean>(false);
-  const currentTime = ref<number>(0);
-  const duration = ref<number>(0);
+  const playing = ref<boolean>(false)
+  const currentTime = ref<number>(0)
+  const duration = ref<number>(0)
 
-  const loading = ref<boolean>(false);
-  const volume = ref<number>(0.5);
+  const loading = ref<boolean>(false)
+  const volume = ref<number>(0.5)
 
   // 音效
-  const eqPresetId = ref<string>('flat');
-  const eqGains = ref<number[]>(EQ_BANDS.map(() => 0));
-  const playbackRate = ref<number>(1);
-  const preservesPitch = ref<boolean>(true);
-  const pitchSemitones = ref<number>(PITCH_DEFAULT);
+  const eqPresetId = ref<string>('flat')
+  const eqGains = ref<number[]>(EQ_BANDS.map(() => 0))
+  const playbackRate = ref<number>(1)
+  const preservesPitch = ref<boolean>(true)
+  const pitchSemitones = ref<number>(PITCH_DEFAULT)
 
   // 随机播放队列
   // 随机顺序（存 song **id**，不是 playlist 下标 —— 理由见下方「随机队列管理」）
-  const randomQueue = ref<string[]>([]);
-  const randomIndex = ref<number>(0);
+  const randomQueue = ref<string[]>([])
+  const randomIndex = ref<number>(0)
 
   /* ---------------- 设置持久化 ---------------- */
-  const SETTINGS_KEY = 'player_settings';
+  const SETTINGS_KEY = 'player_settings'
 
   const persistSettings = () => {
     try {
@@ -66,11 +68,11 @@ export const usePlayerStore = defineStore('player', () => {
           preservesPitch: preservesPitch.value,
           pitchSemitones: pitchSemitones.value,
         }),
-      );
+      )
     } catch {
       // localStorage 不可用（隐私模式 / 配额）时静默忽略，不影响播放
     }
-  };
+  }
 
   /**
    * 逐字段校验后再落值。
@@ -79,13 +81,13 @@ export const usePlayerStore = defineStore('player', () => {
    */
   const loadSettings = () => {
     try {
-      const raw = localStorage.getItem(SETTINGS_KEY);
-      if (!raw) return;
+      const raw = localStorage.getItem(SETTINGS_KEY)
+      if (!raw) return
 
-      const s = JSON.parse(raw);
+      const s = JSON.parse(raw)
 
       if (typeof s.volume === 'number' && s.volume >= 0 && s.volume <= 1) {
-        volume.value = s.volume;
+        volume.value = s.volume
       }
       // eqGains 与 eqPresetId 必须「一起生效、一起放弃」。
       // 频段数变更（5 → 10）后，旧存储里的 eqGains 长度不匹配会被下面的校验拒绝；
@@ -93,11 +95,11 @@ export const usePlayerStore = defineStore('player', () => {
       const eqGainsAccepted =
         Array.isArray(s.eqGains) &&
         s.eqGains.length === EQ_BANDS.length &&
-        s.eqGains.every((g: unknown) => typeof g === 'number' && Number.isFinite(g));
+        s.eqGains.every((g: unknown) => typeof g === 'number' && Number.isFinite(g))
       if (eqGainsAccepted) {
-        eqGains.value = s.eqGains;
+        eqGains.value = s.eqGains
         if (typeof s.eqPresetId === 'string') {
-          eqPresetId.value = s.eqPresetId;
+          eqPresetId.value = s.eqPresetId
         }
       }
       if (
@@ -105,22 +107,22 @@ export const usePlayerStore = defineStore('player', () => {
         s.playbackRate >= PLAYBACK_RATE_MIN &&
         s.playbackRate <= PLAYBACK_RATE_MAX
       ) {
-        playbackRate.value = s.playbackRate;
+        playbackRate.value = s.playbackRate
       }
       if (typeof s.preservesPitch === 'boolean') {
-        preservesPitch.value = s.preservesPitch;
+        preservesPitch.value = s.preservesPitch
       }
       if (
         typeof s.pitchSemitones === 'number' &&
         s.pitchSemitones >= PITCH_MIN &&
         s.pitchSemitones <= PITCH_MAX
       ) {
-        pitchSemitones.value = s.pitchSemitones;
+        pitchSemitones.value = s.pitchSemitones
       }
     } catch {
       // 坏数据 / 旧版本结构 → 整体忽略，走默认值
     }
-  };
+  }
 
   /* ---------------- 队列快照持久化 ---------------- */
   const QUEUE_KEY = 'player_queue'
@@ -181,7 +183,11 @@ export const usePlayerStore = defineStore('player', () => {
       const list = s.playlist
       if (!Array.isArray(list) || list.length === 0) return
       if (!list.every((item) => item && typeof item.id === 'string')) return
-      if (!Number.isInteger(s.currentIndex) || s.currentIndex < 0 || s.currentIndex >= list.length) {
+      if (
+        !Number.isInteger(s.currentIndex) ||
+        s.currentIndex < 0 ||
+        s.currentIndex >= list.length
+      ) {
         return
       }
       if (s.mode !== 'loop' && s.mode !== 'single' && s.mode !== 'random') return
@@ -243,8 +249,7 @@ export const usePlayerStore = defineStore('player', () => {
     //                        currentSong，所以那段窗口里 isStale() 仍为假、槽位也还没动，
     //                        只有索引能证明用户动了手
     //   槽位易主           —— 整个队列被换掉（replaceList），此时索引可能恰好没变
-    const nothingHappened = () =>
-      !isStale() && currentIndex.value === restoredIndex && slotIsOurs()
+    const nothingHappened = () => !isStale() && currentIndex.value === restoredIndex && slotIsOurs()
 
     const handleRestoreFailure = (err: unknown) => {
       if (!nothingHappened()) return
@@ -340,45 +345,55 @@ export const usePlayerStore = defineStore('player', () => {
 
   /* ---------------- 初始化 ---------------- */
   const init = () => {
-    loadSettings();
-    loadQueue(); // 恢复上次的队列与当前曲（同步，界面立即到位）
+    loadSettings()
+    loadQueue() // 恢复上次的队列与当前曲（同步，界面立即到位）
 
-    player.setVolume(volume.value);
-    player.setEqGains(eqGains.value);
-    player.setPlaybackRate(playbackRate.value);
-    player.setPreservesPitch(preservesPitch.value);
-    player.setPitchSemitones(pitchSemitones.value);
+    player.setVolume(volume.value)
+    player.setEqGains(eqGains.value)
+    player.setPlaybackRate(playbackRate.value)
+    player.setPreservesPitch(preservesPitch.value)
+    player.setPitchSemitones(pitchSemitones.value)
 
     // 设置 MediaSession 控制
     player.setMediaSessionHandlers({
       onNext: () => next(),
       onPrevious: () => prev(),
-      onSeek: (time: number) => seek(time)
-    });
+      onSeek: (time: number) => seek(time),
+    })
 
     player.on('play', () => {
-      playing.value = true;
-    });
+      playing.value = true
+    })
 
     player.on('pause', () => {
-      playing.value = false;
-    });
+      playing.value = false
+    })
 
     player.on('timeupdate', (t: number) => {
-      currentTime.value = t;
-    });
+      currentTime.value = t
+    })
 
     player.on('loaded', (d: number) => {
-      duration.value = d;
-    });
+      duration.value = d
+      // 媒体真的加载出来了 —— 播放失败的重试计数归零
+      resetPlaybackFailureState()
+    })
 
     player.on('ended', () => {
-      handleEnded();
-    });
+      handleEnded()
+    })
+
+    // 媒体加载失败（CDN 403/404、地址过期、CORS 被拒）→ 重试一次，再失败就跳过。
+    // 打印 MediaError 是为了留证：它的 code 能区分「网络」(2) /「解码」(3) /
+    // 「源不支持」(4)，也是排查「有没有误报」的唯一依据。
+    player.on('error', (mediaError: MediaError | null) => {
+      console.warn('[playerStore] 媒体加载失败:', mediaError?.code, mediaError?.message)
+      handlePlaybackFailure()
+    })
 
     // 预装当前曲。不 await —— init() 保持同步，不能拖住 app.mount()
-    void loadRestoredCurrentSong();
-  };
+    void loadRestoredCurrentSong()
+  }
 
   /* ---------------- 🎲 随机队列管理 ----------------
    *
@@ -397,15 +412,15 @@ export const usePlayerStore = defineStore('player', () => {
    */
 
   /** 按 id 取 playlist 下标；歌已被删时返回 -1 */
-  const indexOfSongId = (id: string) => playlist.value.findIndex((s) => s.id === id);
+  const indexOfSongId = (id: string) => playlist.value.findIndex((s) => s.id === id)
 
   /** 把 randomIndex 对齐到「当前正在播的那首歌」在队列中的位置 */
   const syncRandomIndex = () => {
-    const id = currentSong.value?.id;
-    if (id === undefined) return;
-    const pos = randomQueue.value.indexOf(id);
-    if (pos !== -1) randomIndex.value = pos;
-  };
+    const id = currentSong.value?.id
+    if (id === undefined) return
+    const pos = randomQueue.value.indexOf(id)
+    if (pos !== -1) randomIndex.value = pos
+  }
 
   /**
    * 重新洗牌。队列就是 playlist 的纯随机排列。
@@ -415,152 +430,249 @@ export const usePlayerStore = defineStore('player', () => {
    * 现在当前曲在第几位就在第几位，由 syncRandomIndex() 对齐。
    */
   const generateRandomQueue = () => {
-    const ids = playlist.value.map((s) => s.id);
+    const ids = playlist.value.map((s) => s.id)
 
     // Fisher-Yates 洗牌
     for (let i = ids.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [ids[i], ids[j]] = [ids[j]!, ids[i]!];
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[ids[i], ids[j]] = [ids[j]!, ids[i]!]
     }
 
-    randomQueue.value = ids;
-    syncRandomIndex();
-  };
+    randomQueue.value = ids
+    syncRandomIndex()
+  }
 
   /** 按 id 播放。id 已失效（歌被删）时静默跳过，不会播错歌。 */
   const playBySongId = (id: string | undefined) => {
-    if (id === undefined) return;
-    const index = indexOfSongId(id);
-    if (index === -1) return;
-    playByIndex(index);
-  };
+    if (id === undefined) return
+    const index = indexOfSongId(id)
+    if (index === -1) return
+    playByIndex(index)
+  }
 
   /* ---------------- 🎵 播放控制 ---------------- */
+  /* ---------------- 播放失败的恢复 ---------------- */
+
+  /** 重试前等多久（毫秒）。给 CDN 抖动 / 地址刷新留点时间，但别让用户干等。 */
+  const PLAYBACK_RETRY_DELAY_MS = 2000
+  /** 同一首歌最多自动重试几次 */
+  const PLAYBACK_MAX_RETRY = 1
+
+  /** 当前这首已经重试了几次 */
+  let playbackRetryCount = 0
+  /**
+   * 连续多少首歌彻底放不出来。
+   * 整个队列都不可播时靠它刹车 —— 没有这个计数，「失败就切下一首」会变成
+   * 无限跳歌 + 无限 toast。
+   */
+  let consecutiveFailedSongs = 0
+  let playbackRetryTimer: ReturnType<typeof setTimeout> | undefined
+
+  const clearPlaybackRetryTimer = () => {
+    if (playbackRetryTimer !== undefined) {
+      clearTimeout(playbackRetryTimer)
+      playbackRetryTimer = undefined
+    }
+  }
+
+  /**
+   * 媒体真的加载出来了 → 清零失败计数。
+   *
+   * ⚠️ 刻意挂在 'loaded' 而不是 'play'：'play' 在数据到达**之前**就会触发，
+   * 挂在那里会变成「重试 → play 事件 → 计数清零 → 再次失败 → 又能重试」的无限循环。
+   */
+  const resetPlaybackFailureState = () => {
+    playbackRetryCount = 0
+    consecutiveFailedSongs = 0
+  }
+
+  /**
+   * 播放失败的统一出口：`<audio>` 的 error 事件、以及 getSong() 抛错，都走这里。
+   *
+   * 策略：等 2 秒重试一次（重试走 playByIndex → getSong，内含 HEAD 探活、
+   * 地址失效就重新取），还失败就跳过这首、播下一首。
+   */
+  const handlePlaybackFailure = () => {
+    const song = currentSong.value
+    if (song === null) return
+
+    clearPlaybackRetryTimer()
+
+    if (playbackRetryCount < PLAYBACK_MAX_RETRY) {
+      playbackRetryCount++
+      emitter.emit(MESSAGE_TYPE.TOAST_WARNING, `「${song.title}」加载失败，2 秒后重试`)
+      playbackRetryTimer = setTimeout(() => {
+        playbackRetryTimer = undefined
+        // 等待期间用户可能已经换歌 → 放弃，别把用户的操作顶掉
+        if (currentSong.value !== song) return
+        void playByIndex(currentIndex.value)
+      }, PLAYBACK_RETRY_DELAY_MS)
+      return
+    }
+
+    // 重试用尽 → 跳过这首
+    playbackRetryCount = 0
+    consecutiveFailedSongs++
+
+    // 刹车：连续失败数追平队列长度，说明整个队列都放不出来。
+    // 不刹车的话 next() 会一直走下去，无限循环。
+    if (consecutiveFailedSongs >= playlist.value.length) {
+      consecutiveFailedSongs = 0
+      emitter.emit(MESSAGE_TYPE.TOAST_ERROR, '队列里没有可播放的歌曲，已停止')
+      return
+    }
+
+    emitter.emit(MESSAGE_TYPE.TOAST_ERROR, `《${song.title}》无法播放，已跳过`)
+    next()
+  }
+
   const playByIndex = async (index: number) => {
-    if (index < 0 || index >= playlist.value.length) return;
+    if (index < 0 || index >= playlist.value.length) return
 
-    currentIndex.value = index;
-    const song = playlist.value[index]!;
-    const fullSong = await getSong(song);
-    playlist.value[index] = fullSong;
+    currentIndex.value = index
+    const song = playlist.value[index]!
+    // 先把 currentSong 指向它：失败路径要靠它认人（toast 报歌名、重试判断用户是否换了歌），
+    // 顺带让界面立刻显示「正要播哪首」。
+    currentSong.value = song
 
-    currentSong.value = fullSong;
-    player.playSong(fullSong);
+    let fullSong: Song
+    try {
+      fullSong = await getSong(song)
+    } catch (err) {
+      console.warn('[playerStore] 取歌曲播放地址失败:', err)
+      handlePlaybackFailure()
+      return
+    }
+
+    // await 期间用户可能已经点了别的歌 → 放弃，别用迟到的结果顶掉它
+    if (currentSong.value !== song) return
+
+    playlist.value[index] = fullSong
+    currentSong.value = fullSong
+    player.playSong(fullSong)
 
     if (mode.value === 'random') {
-      syncRandomIndex();
+      syncRandomIndex()
     }
-  };
+  }
 
   const next = () => {
-    if (playlist.value.length === 0) return;
+    if (playlist.value.length === 0) return
 
     if (mode.value === 'random') {
-      if (randomQueue.value.length === 0) generateRandomQueue();
+      if (randomQueue.value.length === 0) generateRandomQueue()
 
-      randomIndex.value++;
+      randomIndex.value++
 
       // 走到队列末尾 → 重新洗牌，并前进到「当前曲之后」的那一首。
       // generateRandomQueue 会把 randomIndex 对齐到当前曲，这里再 +1，
       // 否则回绕时会重播刚刚放完的那首。
       if (randomIndex.value >= randomQueue.value.length) {
-        generateRandomQueue();
-        randomIndex.value = (randomIndex.value + 1) % randomQueue.value.length;
+        generateRandomQueue()
+        randomIndex.value = (randomIndex.value + 1) % randomQueue.value.length
       }
 
-      playBySongId(randomQueue.value[randomIndex.value]);
+      playBySongId(randomQueue.value[randomIndex.value])
     } else {
-      let nextIndex = currentIndex.value + 1;
-      if (nextIndex >= playlist.value.length) nextIndex = 0;
-      playByIndex(nextIndex);
+      let nextIndex = currentIndex.value + 1
+      if (nextIndex >= playlist.value.length) nextIndex = 0
+      playByIndex(nextIndex)
     }
-  };
+  }
 
   const prev = () => {
-    if (playlist.value.length === 0) return;
+    if (playlist.value.length === 0) return
 
     if (mode.value === 'random') {
-      if (randomQueue.value.length === 0) generateRandomQueue();
+      if (randomQueue.value.length === 0) generateRandomQueue()
 
-      randomIndex.value--;
+      randomIndex.value--
 
       // 走到队列开头 → 重新洗牌，并退到「当前曲之前」的那一首
       if (randomIndex.value < 0) {
-        generateRandomQueue();
+        generateRandomQueue()
         randomIndex.value =
-          (randomIndex.value - 1 + randomQueue.value.length) % randomQueue.value.length;
+          (randomIndex.value - 1 + randomQueue.value.length) % randomQueue.value.length
       }
 
-      playBySongId(randomQueue.value[randomIndex.value]);
+      playBySongId(randomQueue.value[randomIndex.value])
     } else {
-      let prevIndex = currentIndex.value - 1;
-      if (prevIndex < 0) prevIndex = playlist.value.length - 1;
-      playByIndex(prevIndex);
+      let prevIndex = currentIndex.value - 1
+      if (prevIndex < 0) prevIndex = playlist.value.length - 1
+      playByIndex(prevIndex)
     }
-  };
+  }
 
   const setMode = (modeValue: PlayMode) => {
-    if (mode.value === modeValue) return;
+    if (mode.value === modeValue) return
 
-    mode.value = modeValue;
+    mode.value = modeValue
 
     if (modeValue === 'random') {
-      generateRandomQueue();
+      generateRandomQueue()
     }
-  };
+  }
 
   const handleEnded = () => {
     if (mode.value === 'single') {
-      player.play();
+      player.play()
     } else {
-      next();
+      next()
     }
-  };
+  }
 
   /* ---------------- 播放列表操作 ---------------- */
   const replaceList = async (list: Song[], index = 0) => {
-    loading.value = true;
+    loading.value = true
     try {
-      playlist.value = [...list];
-      currentIndex.value = index;
+      playlist.value = [...list]
+      currentIndex.value = index
       // 整个列表被换掉了，旧的随机顺序不再有意义 —— 清空，让 next() 惰性重建
-      randomQueue.value = [];
-      randomIndex.value = 0;
-      await preloadNextSong();
-      playByIndex(index);
+      randomQueue.value = []
+      randomIndex.value = 0
+      await preloadNextSong()
+      playByIndex(index)
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
   const playSong = async (song: Song) => {
-    const fullSong = await getSong(song);
-    playlist.value = [fullSong];
-    currentIndex.value = 0;
-    currentSong.value = fullSong;
+    let fullSong: Song
+    try {
+      fullSong = await getSong(song)
+    } catch (err) {
+      // 播单曲：没有队列可跳（下面的 playlist 会被整个替换成这一首），所以只提示不重试
+      console.warn('[playerStore] 取歌曲播放地址失败:', err)
+      emitter.emit(MESSAGE_TYPE.TOAST_ERROR, `「${song.title}」无法播放`)
+      return
+    }
+    playlist.value = [fullSong]
+    currentIndex.value = 0
+    currentSong.value = fullSong
     // 播放列表缩成一首，旧的随机顺序作废
-    randomQueue.value = [];
-    randomIndex.value = 0;
-    player.playSong(fullSong);
-  };
+    randomQueue.value = []
+    randomIndex.value = 0
+    player.playSong(fullSong)
+  }
 
   const insertNext = async (song: Song) => {
     if (playlist.value.length === 0) {
-      await playSong(song);
-      return;
+      await playSong(song)
+      return
     }
 
-    const existingIndex = playlist.value.findIndex(s => s.id === song.id);
+    const existingIndex = playlist.value.findIndex((s) => s.id === song.id)
     if (existingIndex !== -1) {
-      playlist.value.splice(existingIndex, 1);
+      playlist.value.splice(existingIndex, 1)
       if (existingIndex < currentIndex.value) {
-        currentIndex.value--;
+        currentIndex.value--
       }
     }
 
-    const insertIndex = currentIndex.value + 1;
-    const fullSong = await getSong(song);
-    playlist.value.splice(insertIndex, 0, fullSong);
+    const insertIndex = currentIndex.value + 1
+    const fullSong = await getSong(song)
+    playlist.value.splice(insertIndex, 0, fullSong)
 
     // 随机模式下要让「刚插入的这首」成为下一首。
     // 队列存的是 id，所以上面 playlist 的增删本身不影响队列 —— 只需把新歌 id
@@ -568,113 +680,113 @@ export const usePlayerStore = defineStore('player', () => {
     // currentPos === -1（当前曲不在队列里）时新歌落到队首、randomIndex 置 -1，
     // 下一次 next() 的 ++ 正好落在它上面。
     if (mode.value === 'random' && randomQueue.value.length > 0) {
-      const currentId = currentSong.value?.id;
-      const rest = randomQueue.value.filter((id) => id !== fullSong.id);
-      const currentPos = currentId === undefined ? -1 : rest.indexOf(currentId);
-      rest.splice(currentPos + 1, 0, fullSong.id);
-      randomQueue.value = rest;
-      randomIndex.value = currentPos;
+      const currentId = currentSong.value?.id
+      const rest = randomQueue.value.filter((id) => id !== fullSong.id)
+      const currentPos = currentId === undefined ? -1 : rest.indexOf(currentId)
+      rest.splice(currentPos + 1, 0, fullSong.id)
+      randomQueue.value = rest
+      randomIndex.value = currentPos
     }
-  };
+  }
 
   const insertNextAndPlay = async (song: Song) => {
-    await insertNext(song);
-    next();
-  };
+    await insertNext(song)
+    next()
+  }
 
   const switchSong = async (song: Song) => {
-    const index = playlist.value.findIndex(s => s.id === song.id);
+    const index = playlist.value.findIndex((s) => s.id === song.id)
     if (index !== -1) {
       // 如果歌曲没有 URL，先获取
       if (!playlist.value[index]?.url) {
-        const fullSong = await getSong(playlist.value[index]!);
-        playlist.value[index] = fullSong;
+        const fullSong = await getSong(playlist.value[index]!)
+        playlist.value[index] = fullSong
       }
-      playByIndex(index);
-    };
-  };
+      playByIndex(index)
+    }
+  }
 
   /* ---------------- 基础控制 ---------------- */
   const play = () => {
-    player.play();
-  };
+    player.play()
+  }
 
   const pause = () => {
-    player.pause();
-  };
+    player.pause()
+  }
 
   const toggle = () => {
-    player.toggle();
-  };
+    player.toggle()
+  }
 
   const seek = (time: number) => {
-    player.seek(time);
-  };
+    player.seek(time)
+  }
 
   const setVolume = (v: number) => {
-    v = v / 100;
-    player.setVolume(v);
-    volume.value = v;
-  };
+    v = v / 100
+    player.setVolume(v)
+    volume.value = v
+  }
 
   /* ---------------- 音效 ---------------- */
   const setEqPreset = (id: string) => {
-    const preset = EQ_PRESETS.find((p) => p.id === id);
-    if (!preset) return;
-    eqPresetId.value = id;
-    eqGains.value = [...preset.gains];
-    player.setEqGains(eqGains.value);
-  };
+    const preset = EQ_PRESETS.find((p) => p.id === id)
+    if (!preset) return
+    eqPresetId.value = id
+    eqGains.value = [...preset.gains]
+    player.setEqGains(eqGains.value)
+  }
 
   const setBandGain = (index: number, gain: number) => {
     // 越界 index 会让数组膨胀，持久化后又被 loadSettings 的长度校验整体拒绝，
     // 症状是「下次进入页面整个 EQ 静默回退默认值」—— 直接拦掉。
-    if (index < 0 || index >= EQ_BANDS.length) return;
-    const clamped = Math.max(EQ_GAIN_MIN, Math.min(EQ_GAIN_MAX, gain));
-    const next = [...eqGains.value];
-    next[index] = clamped;
-    eqGains.value = next;
-    eqPresetId.value = ''; // 手动改动后脱离预设，所有预设按钮取消高亮
-    player.setEqGains(next);
-  };
+    if (index < 0 || index >= EQ_BANDS.length) return
+    const clamped = Math.max(EQ_GAIN_MIN, Math.min(EQ_GAIN_MAX, gain))
+    const next = [...eqGains.value]
+    next[index] = clamped
+    eqGains.value = next
+    eqPresetId.value = '' // 手动改动后脱离预设，所有预设按钮取消高亮
+    player.setEqGains(next)
+  }
 
   const setPlaybackRate = (rate: number) => {
-    const clamped = Math.max(PLAYBACK_RATE_MIN, Math.min(PLAYBACK_RATE_MAX, rate));
-    playbackRate.value = clamped;
-    player.setPlaybackRate(clamped);
-  };
+    const clamped = Math.max(PLAYBACK_RATE_MIN, Math.min(PLAYBACK_RATE_MAX, rate))
+    playbackRate.value = clamped
+    player.setPlaybackRate(clamped)
+  }
 
   const setPreservesPitch = (enabled: boolean) => {
-    preservesPitch.value = enabled;
-    player.setPreservesPitch(enabled);
-  };
+    preservesPitch.value = enabled
+    player.setPreservesPitch(enabled)
+  }
 
   const setPitchSemitones = (semitones: number) => {
-    const clamped = Math.max(PITCH_MIN, Math.min(PITCH_MAX, semitones));
-    pitchSemitones.value = clamped;
-    player.setPitchSemitones(clamped);
-  };
+    const clamped = Math.max(PITCH_MIN, Math.min(PITCH_MAX, semitones))
+    pitchSemitones.value = clamped
+    player.setPitchSemitones(clamped)
+  }
 
   /* ---------------- 预加载 ---------------- */
   const preloadNextSong = async () => {
-    for(let i = currentIndex.value; i < currentIndex.value + 3; i++){
-      if (i < playlist.value.length){
-        if (playlist.value[i]?.url) continue;
-        let songWithUrl: Song = await getSong(playlist.value[i]!);
-        playlist.value[i] = songWithUrl;
+    for (let i = currentIndex.value; i < currentIndex.value + 3; i++) {
+      if (i < playlist.value.length) {
+        if (playlist.value[i]?.url) continue
+        let songWithUrl: Song = await getSong(playlist.value[i]!)
+        playlist.value[i] = songWithUrl
       } else {
-        break;
-      };
-    };
-  };
+        break
+      }
+    }
+  }
 
-  const setFullPlayer = (e : boolean) =>{
-    isFullScreen.value = e;
+  const setFullPlayer = (e: boolean) => {
+    isFullScreen.value = e
   }
 
   watch(currentIndex, () => {
-    preloadNextSong();
-  });
+    preloadNextSong()
+  })
 
   watchDebounced(
     () => ({
@@ -687,7 +799,7 @@ export const usePlayerStore = defineStore('player', () => {
     }),
     persistSettings,
     { debounce: 300 },
-  );
+  )
 
   // 队列快照比播放设置变化少得多（换歌 / 换队列 / 换模式），但 preloadNextSong()
   // 会给队列里的歌补 url，也会触发它 —— 300ms 的防抖正好把这类冗余写入吃掉。
@@ -702,7 +814,7 @@ export const usePlayerStore = defineStore('player', () => {
     }),
     persistQueue,
     { debounce: 300 },
-  );
+  )
 
   // 换歌、或者切换 enableMvBackground，都要重新解析 MV。
   // immediate 是为了「刷新恢复队列时开关本来就是开的情况」——
@@ -713,7 +825,7 @@ export const usePlayerStore = defineStore('player', () => {
       void resolveMv()
     },
     { immediate: true },
-  );
+  )
 
   return {
     isFullScreen,
@@ -752,7 +864,7 @@ export const usePlayerStore = defineStore('player', () => {
     setPitchSemitones,
     switchSong,
     setFullPlayer,
-  };
-});
+  }
+})
 
-export type playerStore = ReturnType<typeof usePlayerStore>;
+export type playerStore = ReturnType<typeof usePlayerStore>
