@@ -1,31 +1,33 @@
-import ky, { HTTPError } from 'ky'
+import ky from 'ky'
+
 const baseURL = import.meta.env.VITE_GLOB_API_URL
-
-
-/**
- * 自定义类型（适配你的后端）
- */
-interface ApiResponse<T = any> {
-  success: boolean
-  data: T
-  errorMsg: string
-  code: number
-}
 
 /**
  * 拦截器类型（模拟 axios）
  */
-type RequestInterceptor = (config: Request) => Promise<Request> | Request
-type ResponseInterceptor<T = any> = (data: T) => T | Promise<T>
-type ErrorInterceptor = (error: any) => any
+type RequestInterceptor = (request: Request) => Promise<Request> | Request
+type ErrorInterceptor = (error: Error) => Promise<Error> | Error
 
 /**
- * 核心类（类 axios）
+ * ky 封装。
+ *
+ * 后端是 **NeteaseCloudMusicApi**（网易云音乐 NodeJS 版 API），它**直接返回网易云的
+ * 原始载荷**（`{ code, data }` / `{ songs, privileges, code }` 这类），外面没有任何
+ * 信封。所以这里不做解包 —— `request.get('/song/url/v1', …)` 拿到的就是那个对象，
+ * 调用方按 `res.data[0].url` 这样直接读。
+ *
+ * ⚠️ 勿重犯 —— 这个文件里曾经有一整套 `{ success, data, errorMsg }` 信封处理
+ * （业务错误抛出、401 自动刷新 token、响应解包）。那是为一套**这个后端并不存在**的
+ * 契约写的；而且 ky 2.0 把 hook 签名从位置参数改成了单个 state 对象之后，那些 hook
+ * 从来没真正执行过（`response.clone()` 抛的 TypeError 被 `catch { return response }`
+ * 静默吞掉，ky 收到 undefined 就回退用原始响应）。
+ *
+ * 换句话说：它一直「坏着但能用」，而**把它「修好」反而会让 app 全线报错误** ——
+ * 因为后端根本不会返回 `success`。要加响应处理，先确认后端真的会那样返回。
  */
 class HttpClient {
   private instance
   private requestInterceptors: RequestInterceptor[] = []
-  private responseInterceptors: ResponseInterceptor[] = []
   private errorInterceptors: ErrorInterceptor[] = []
 
   constructor(options: any = {}) {
@@ -36,80 +38,35 @@ class HttpClient {
 
       hooks: {
         /**
-         * 请求拦截器链
+         * 请求拦截器链。
+         *
+         * ky 2.0 起 hook 收到的是**单个 state 对象**（不再是 `(request, options, …)`
+         * 位置参数），且只有返回 `Request` / `Response` 才会被采纳。
          */
         beforeRequest: [
-          async (request) => {
+          async ({ request }) => {
+            let next: Request = request
             for (const interceptor of this.requestInterceptors) {
-              request = await interceptor(request)
+              next = await interceptor(next)
             }
+            return next
           },
         ],
 
         /**
-         * 响应拦截器链
-         */
-        afterResponse: [
-          async (request, options, response, state) => {
-            let data: ApiResponse
-
-            try {
-              data = await response.clone().json()
-            } catch {
-              return response
-            }
-
-            /**
-             * 🔥 401 自动刷新 token
-             */
-            if (data.code === 401 && state.retryCount === 0) {
-              const newToken = await this.refreshToken()
-
-              if (newToken) {
-                const newRequest = new Request(request, {
-                  headers: {
-                    ...Object.fromEntries(request.headers),
-                    Authorization: newToken,
-                  },
-                })
-
-                return ky.retry({
-                  request: newRequest,
-                  code: 'TOKEN_REFRESH',
-                })
-              }
-            }
-
-            /**
-             * 业务错误
-             */
-            if (!data.success) {
-              throw new Error(data.errorMsg || '业务错误')
-            }
-
-            let result = data.data
-
-            /**
-             * 响应拦截器链
-             */
-            for (const interceptor of this.responseInterceptors) {
-              result = await interceptor(result)
-            }
-
-            return new Response(JSON.stringify(result), response)
-          },
-        ],
-
-        /**
-         * 错误拦截器
+         * 错误拦截器链。
+         *
+         * 同样收 state（错误在 `state.error`），而且**必须返回一个 `Error` 才会被
+         * 采纳** —— 返回 state 本身会被 ky 忽略（`if (hookResult instanceof Error)`），
+         * 那样写会静默失效。
          */
         beforeError: [
-          async (error) => {
+          async ({ error }) => {
+            let next: Error = error
             for (const interceptor of this.errorInterceptors) {
-              error = await interceptor(error)
+              next = await interceptor(next)
             }
-
-            return error
+            return next
           },
         ],
       },
@@ -123,10 +80,6 @@ class HttpClient {
     this.requestInterceptors.push(interceptor)
   }
 
-  useResponse(interceptor: ResponseInterceptor) {
-    this.responseInterceptors.push(interceptor)
-  }
-
   useError(interceptor: ErrorInterceptor) {
     this.errorInterceptors.push(interceptor)
   }
@@ -135,7 +88,7 @@ class HttpClient {
    * 获取 cookie 值
    */
   private getCookie(): string {
-    return localStorage.getItem('cookie') || '';
+    return localStorage.getItem('cookie') || ''
   }
 
   /**
@@ -143,63 +96,41 @@ class HttpClient {
    * signal 可放在 params / data 内部透传给 ky，用于 AbortController 取消请求
    */
   async get<T = any>(url: string, params?: any): Promise<T> {
-    const { sendCookie, signal, ...restParams } = params || {};
+    const { sendCookie, signal, ...restParams } = params || {}
     const searchParams = sendCookie
       ? { ...restParams, cookie: encodeURIComponent(this.getCookie()) }
-      : restParams;
-    return this.instance.get(url, { searchParams, signal }).json();
+      : restParams
+    return this.instance.get(url, { searchParams, signal }).json()
   }
 
   async post<T = any>(url: string, data?: any): Promise<T> {
-    const { sendCookie, signal, ...restData } = data || {};
-    const jsonData = sendCookie
-      ? { ...restData, cookie: this.getCookie() }
-      : restData;
-    return this.instance.post(url, { json: jsonData, signal }).json();
+    const { sendCookie, signal, ...restData } = data || {}
+    const jsonData = sendCookie ? { ...restData, cookie: this.getCookie() } : restData
+    return this.instance.post(url, { json: jsonData, signal }).json()
   }
 
   async put<T = any>(url: string, data?: any): Promise<T> {
-    const { signal, ...restData } = data || {};
+    const { signal, ...restData } = data || {}
     return this.instance.put(url, { json: restData, signal }).json()
   }
 
   async delete<T = any>(url: string, data?: any): Promise<T> {
-    const { signal, ...restData } = data || {};
+    const { signal, ...restData } = data || {}
     return this.instance.delete(url, { json: restData, signal }).json()
   }
 
-  async head(url: string, params?: any, signal?: AbortSignal): Promise<Response> {
-    const searchParams = params || {};
-    return ky.head(url, { searchParams, signal });
-  }
-
   /**
-   * 🔥 token 刷新逻辑
+   * 注意：这里刻意用裸 `ky.head` 而不是 `this.instance` —— 调用方传的是 CDN 的
+   * **绝对 URL**（校验歌曲直链是否还有效），不需要也不该套上 `prefix`。
    */
-  private async refreshToken(): Promise<string | null> {
-    try {
-      const res = await ky.post('/auth/refresh').json<any>()
-      const token = res.data?.token
-
-      if (token) {
-        localStorage.setItem('authToken', token)
-        return token
-      }
-
-      return null
-    } catch {
-      //   localStorage.removeItem('authToken')
-      //   window.location.href = '/login'
-      return null
-    }
+  async head(url: string, params?: any, signal?: AbortSignal): Promise<Response> {
+    const searchParams = params || {}
+    return ky.head(url, { searchParams, signal })
   }
 }
+
 export function createClient(options?: any) {
   const client = new HttpClient(options)
-
-  /**
-   * 默认拦截器（你项目用）
-   */
 
   // 全局错误提示
   client.useError((error) => {
@@ -209,8 +140,6 @@ export function createClient(options?: any) {
 
   return client
 }
-
-
 
 /**
  * 默认实例
