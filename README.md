@@ -25,6 +25,36 @@ npx NeteaseCloudMusicApi
 
 ---
 
+## 项目状态：早期
+
+**功能不完整，请不要期待一个成品。** 两个具体的例子：
+
+### 登录只支持扫码
+
+账号密码登录 / 注册 / 找回密码的**界面是有的**，但后端调用从来没写 ——
+`components/common/AuthModal.vue` 里那三个提交处理函数只是 `setTimeout` + `console.log`，
+点「登录」既不发请求也不会发生任何事。`src/api/` 里根本没有登录相关的接口。
+
+真正能用的是**扫码登录**（`components/common/Auth/QRCodeLoginForm.vue`，调
+`/login/qr/key` → `/login/qr/create` → `/login/qr/check`）。
+
+### 没有设置界面
+
+设置项存在 `stores/settings.ts` 里并会持久化，但**只能手动改**。例如 MV 背景开关
+（歌曲有 MV 时，用 MV 代替流体渐变背景）：
+
+```js
+// F12 控制台执行，然后刷新页面
+localStorage.setItem(
+  'app_settings',
+  JSON.stringify({ background: { enableMvBackground: true } })
+)
+```
+
+音频相关的设置（均衡器 / 变速 / 变调）**是有界面的** —— 在底部播放器右侧的滑块图标里。
+
+---
+
 ## 功能
 
 - **浏览** —— 首页（轮播 / 热门歌手 / 推荐歌单 / 榜单 / 最新音乐）、搜索（综合 · 歌曲 · 专辑 · 歌手 · 歌单 · 用户）、歌单页、歌手页、专辑页、用户主页
