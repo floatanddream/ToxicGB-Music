@@ -14,25 +14,25 @@ async function fetchSong(song: Song): Promise<CachedSong> {
   }
 }
 
-export async function checkUrlValidity(url : string) {
+export async function checkUrlValidity(url: string) {
   try {
-    const response = await checkUrl(url);
+    const response = await checkUrl(url)
     if (response.ok || response.status === 304) {
-      console.log(response)
-      return true;
+      // console.log(response)
+      return true
     } else {
-      console.log('URL 无效，状态码:', response.status);
-      return false;
+      console.log('URL 无效，状态码:', response.status)
+      return false
     }
   } catch (error) {
-    console.log('请求失败，URL 无法访问:', error.message);
-    return false;
+    console.log('请求失败，URL 无法访问:', error.message)
+    return false
   }
 }
 
 export async function getSong(song: Song): Promise<Song> {
   const cached = cache.get(song.id)
-  if (cached?.song.url && await checkUrlValidity(cached.song.url)) {
+  if (cached?.song.url && (await checkUrlValidity(cached.song.url))) {
     return cached.song
   }
   const songWithUrl = await fetchSong(song)
