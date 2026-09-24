@@ -191,6 +191,7 @@ watch(playbackRate, (rate) => {
  * 而这里不接音频图，设了反而要求 CDN 返回 CORS 头，白白多一个失败面。
  */
 .mv-video {
+  transform: scale(1.08); /* 轻微放大，避免边缘黑边 */
   position: absolute;
   top: 0;
   left: 0;
