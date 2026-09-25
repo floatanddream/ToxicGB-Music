@@ -27,6 +27,8 @@ export class MusicController {
   private pitchNode: SoundTouchNode | null = null
   private pitchReady = false
   private pitchSemitones = 0
+  /** 逐帧上报进度用的 rAF 句柄，0 表示没在跑 */
+  private rafId = 0
 
   constructor() {
     this.audio = new Audio();
@@ -39,23 +41,65 @@ export class MusicController {
     this.initMediaSession()
   }
 
+  /* ---------------- 进度上报 ---------------- */
+
+  /** 把当前进度广播出去。抽出来是因为「停表」的那几处都要补一次，见 pause / ended / seek / load。 */
+  private reportCurrentTime() {
+    this.emit('timeupdate', this.audio.currentTime)
+  }
+
+  /**
+   * 逐帧上报播放进度。
+   *
+   * ⚠️ 刻意**不**监听 `<audio>` 的 `timeupdate` 事件 —— 它的触发频率由浏览器决定
+   * （通常 ~250ms 一次）且不稳定，喂给 `LyricPlayer` 会让逐字高亮的**起点**偏掉，
+   * amll 内部再怎么插值也救不回来。它的文档明确要求改用逐帧同步，官方 demo 就是
+   * 在 rAF 里读 `audio.currentTime` 再传给组件的。
+   *
+   * 放在这里而不是歌词组件里：本项目里 `<audio>` 是这个单例的私有成员，而
+   * `currentTime` 同时被底部进度条、MV 背景同步消费 —— 只能由持有 audio 的人喂。
+   *
+   * 代价可控：`LyricPlayer.setCurrentTime` 只在**换行**时才 `calcLayout()`（那一步
+   * 会重排布局），正常逐帧调用只是遍历当前渲染的几行，不做布局计算。
+   *
+   * 已知代价：标签页切到后台时 rAF 会被节流甚至暂停，进度随之停更。此时 UI 不可见，
+   * 无影响；MV 那边还有 0.3s 的漂移纠偏兜底。
+   */
+  private startTimeSync() {
+    this.stopTimeSync()
+    const tick = () => {
+      this.reportCurrentTime()
+      this.rafId = requestAnimationFrame(tick)
+    }
+    this.rafId = requestAnimationFrame(tick)
+  }
+
+  private stopTimeSync() {
+    if (this.rafId !== 0) {
+      cancelAnimationFrame(this.rafId)
+      this.rafId = 0
+    }
+  }
+
   /* ---------------- 初始化 ---------------- */
   private initEvents() {
-    this.audio.addEventListener('timeupdate', () => {
-      this.emit('timeupdate', this.audio.currentTime)
-    })
-
     this.audio.addEventListener('play', () => {
       this.emit('play')
       this.updateMediaSessionPlaybackState()
+      this.startTimeSync()
     })
 
     this.audio.addEventListener('pause', () => {
       this.emit('pause')
       this.updateMediaSessionPlaybackState()
+      // 停表后补一次，否则 UI 会停在最后一次 tick 的位置上（最多差一帧）
+      this.stopTimeSync()
+      this.reportCurrentTime()
     })
 
     this.audio.addEventListener('ended', () => {
+      this.stopTimeSync()
+      this.reportCurrentTime()
       this.emit('ended')
     })
 
@@ -272,6 +316,8 @@ export class MusicController {
     this.audio.load()
     this.updateMediaSessionMetadata(song)
     this.emit('songchange', song)
+    // 换源后时间轴归零，补一次上报 —— 否则暂停状态下换歌，进度条会停在上一首的位置
+    this.reportCurrentTime()
   }
 
   /**
@@ -308,6 +354,8 @@ export class MusicController {
 
   seek(time: number) {
     this.audio.currentTime = time
+    // 暂停状态下 seek 不会触发任何事件（rAF 循环也停着），进度条会纹丝不动 —— 补一次上报
+    this.reportCurrentTime()
   }
 
   setVolume(volume: number) {
