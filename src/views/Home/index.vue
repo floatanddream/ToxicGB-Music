@@ -6,7 +6,7 @@ import UserCard from './components/userCard.vue';
 import Carousel from './components/carousel.vue';
 import PopularSinger from './components/popularSinger.vue';
 import PlaylistSection from './components/PlaylistSection.vue';
-import MusicRankingList from './components/musicRankingList.vue';
+import MusicRankingList from './components/MusicRankingList.vue';
 
 </script>
 
