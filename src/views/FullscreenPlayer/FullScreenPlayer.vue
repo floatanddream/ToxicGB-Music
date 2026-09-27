@@ -62,47 +62,71 @@ const handleSwitchSong = (song: Song) => {
   playerStore.switchSong(song)
 }
 
-const fetchLyric = async () => {
-  try {
-    // 同时发起两个请求
-    const [ttmlLyricRes, lyricRes] = await Promise.all([
-      getTTMLLyric(playerStore.currentSong?.id!),
-      getSongLyric(playerStore.currentSong?.id!),
-    ])
+/**
+ * 自增序号，用于丢弃迟到的响应。
+ * 快速切歌时「先发后到」的旧请求会覆盖新歌的歌词 —— 靠它拦掉。
+ */
+let lyricRequestSeq = 0
 
-    // 优先使用 TTML 歌词
-    if (ttmlLyricRes) {
-      lyricData.value = extractTTMLLyrics(ttmlLyricRes)
-      console.log('TTML歌词:', extractTTMLLyrics(ttmlLyricRes))
-    } else {
-      // TTML 为空时使用普通歌词
-      lyricData.value = extractLeagcyLyrics(lyricRes)
-      console.log('普通歌词:', extractLeagcyLyrics(lyricRes))
-    }
-  } catch (error) {
-    // TTML 请求失败（如404），回退到普通歌词
-    console.warn('TTML歌词获取失败，使用普通歌词:', error)
+/**
+ * 取歌词。两种来源**各到各显示**，不是等齐了再显示：
+ *
+ * 1. 普通歌词（LRC/YRC，走自家后端）—— 到了立刻显示
+ * 2. TTML（外部源，通常慢得多，还可能没有）—— 到了且非空就**升级替换**
+ *
+ * 原来的实现是 `await Promise.all([...])`：两个请求确实是并行发的，但**两个都回来
+ * 之前什么都不赋值**。于是快的那份被慢的那份拖住 —— TTML 慢或没有时，打开全屏播放器
+ * 会有一段时间一条歌词都不显示。现在把「等待」拆开，就不存在这个空窗了。
+ */
+const fetchLyric = async (songId: string) => {
+  const seq = ++lyricRequestSeq
+  /** 已经换歌 / 已有更新的请求 → 本次结果作废 */
+  const isStale = () => seq !== lyricRequestSeq
 
+  /**
+   * 是否已经用上 TTML。**TTML 一旦生效就不许普通歌词再覆盖它** ——
+   * 两个请求是并行的，普通歌词完全可能后到。
+   */
+  let ttmlApplied = false
+
+  const legacy = (async () => {
     try {
-      const lyricRes = await getSongLyric(playerStore.currentSong?.id!)
-      lyricData.value = extractLeagcyLyrics(lyricRes)
-      console.log('回退到普通歌词:', extractLeagcyLyrics(lyricRes))
-    } catch (lyricError) {
-      // 连普通歌词也获取失败
-      console.error('所有歌词获取失败:', lyricError)
+      const res = await getSongLyric(songId)
+      if (isStale() || ttmlApplied) return
+      lyricData.value = extractLeagcyLyrics(res)
+    } catch (err) {
+      console.warn('普通歌词获取失败:', err)
     }
-  }
+  })()
+
+  const ttml = (async () => {
+    try {
+      const res = await getTTMLLyric(songId)
+      if (isStale()) return
+      // 拿不到（404 / 这首歌没有 TTML）→ 什么都不做，保留已经显示出来的普通歌词
+      const lines = res ? extractTTMLLyrics(res) : []
+      if (lines.length === 0) return
+      ttmlApplied = true
+      lyricData.value = lines
+    } catch (err) {
+      console.warn('TTML 歌词获取失败，保留普通歌词:', err)
+    }
+  })()
+
+  await Promise.all([legacy, ttml])
 }
 watch(
   () => playerStore.currentSong?.id,
-  () => {
-    fetchLyric()
+  (songId) => {
+    if (songId !== undefined) fetchLyric(songId)
   },
 )
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
-  fetchLyric()
+  // 播放器可能在「已经在放歌」时才被打开 —— 这时 watch 不会触发，得自己拉一次
+  const songId = playerStore.currentSong?.id
+  if (songId !== undefined) fetchLyric(songId)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
