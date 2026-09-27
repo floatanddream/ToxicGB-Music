@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
+import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
 import type { Song } from '@/types/player'
 import { X } from 'lucide-vue-next'
@@ -16,6 +17,7 @@ import '@applemusic-like-lyrics/core/style.css'
 import { extractLeagcyLyrics, extractTTMLLyrics } from '@/utils/misc'
 
 const playerStore = usePlayerStore()
+const settings = useSettingsStore()
 const lyricData = shallowRef<LyricLine[]>([])
 const { currentSong, playing, currentTime, duration, playlist, currentIndex, mode, volume } =
   storeToRefs(playerStore)
@@ -28,6 +30,15 @@ const { currentSong, playing, currentTime, duration, playlist, currentIndex, mod
  * 实测核心库不强制取整，但按它声明的契约来更稳妥。
  */
 const lyricCurrentTime = computed(() => Math.round(currentTime.value * 1000))
+
+/**
+ * 副歌词（翻译 / 音译）的显示开关，从 settings 现读出来传给提取函数。
+ * 提取函数保持纯函数（不 import store），所以由调用方把值递进去。
+ */
+const lyricSubOptions = () => ({
+  showTranslation: settings.lyrics.showTranslation,
+  showRomanization: settings.lyrics.showRomanization,
+})
 
 // Esc监听器
 const handleKeydown = (e: KeyboardEvent) => {
@@ -93,7 +104,7 @@ const fetchLyric = async (songId: string) => {
     try {
       const res = await getSongLyric(songId)
       if (isStale() || ttmlApplied) return
-      lyricData.value = extractLeagcyLyrics(res)
+      lyricData.value = extractLeagcyLyrics(res, lyricSubOptions())
     } catch (err) {
       console.warn('普通歌词获取失败:', err)
     }
@@ -104,7 +115,7 @@ const fetchLyric = async (songId: string) => {
       const res = await getTTMLLyric(songId)
       if (isStale()) return
       // 拿不到（404 / 这首歌没有 TTML）→ 什么都不做，保留已经显示出来的普通歌词
-      const lines = res ? extractTTMLLyrics(res) : []
+      const lines = res ? extractTTMLLyrics(res, lyricSubOptions()) : []
       if (lines.length === 0) return
       ttmlApplied = true
       lyricData.value = lines
@@ -118,6 +129,16 @@ const fetchLyric = async (songId: string) => {
 watch(
   () => playerStore.currentSong?.id,
   (songId) => {
+    if (songId !== undefined) fetchLyric(songId)
+  },
+)
+
+// 开关改了立刻重取。不重取的话要等换歌 / 重开播放器才生效 ——
+// 将来设置界面就在旁边，拨了开关没反应会很像 bug。
+watch(
+  () => [settings.lyrics.showTranslation, settings.lyrics.showRomanization],
+  () => {
+    const songId = playerStore.currentSong?.id
     if (songId !== undefined) fetchLyric(songId)
   },
 )

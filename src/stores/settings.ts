@@ -26,9 +26,26 @@ export const useSettingsStore = defineStore('settings', () => {
     enableMvBackground: false,
   })
 
+  /** 歌词显示。与 background 一样暂时没有设置界面，改值走 store / DevTools。 */
+  const lyrics = ref({
+    /** 翻译（常规副行）。默认开 */
+    showTranslation: true,
+    /**
+     * 罗马音 / 音译（**更小更淡的第三行**）。默认关 ——
+     * 日文 / 韩文歌「原文 + 翻译 + 罗马音」叠三行实测太挤。
+     *
+     * 关着时是「干脆不填那些字段」，而不是「填了但不显示」：amll 没有这类显示开关
+     * （它的全部 props 里与显隐有关的只有 `hidePassedLines`），详见 `utils/misc.ts`。
+     */
+    showRomanization: false,
+  })
+
   const persist = () => {
     try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ background: background.value }))
+      localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ background: background.value, lyrics: lyrics.value }),
+      )
     } catch {
       // localStorage 不可用（隐私模式 / 配额）时静默忽略，不影响其余功能
     }
@@ -45,6 +62,12 @@ export const useSettingsStore = defineStore('settings', () => {
       if (typeof s?.background?.enableMvBackground === 'boolean') {
         background.value.enableMvBackground = s.background.enableMvBackground
       }
+      if (typeof s?.lyrics?.showTranslation === 'boolean') {
+        lyrics.value.showTranslation = s.lyrics.showTranslation
+      }
+      if (typeof s?.lyrics?.showRomanization === 'boolean') {
+        lyrics.value.showRomanization = s.lyrics.showRomanization
+      }
     } catch {
       // 坏 JSON → 保留默认值
     }
@@ -52,9 +75,9 @@ export const useSettingsStore = defineStore('settings', () => {
 
   load()
 
-  // 必须 deep —— background 是个对象，改其中的字段不会换掉 .value 的引用，
+  // 必须 deep —— 这两个都是对象，改其中的字段不会换掉 .value 的引用，
   // 浅监听收不到通知。
-  watchDebounced(background, persist, { debounce: 300, deep: true })
+  watchDebounced([background, lyrics], persist, { debounce: 300, deep: true })
 
-  return { background }
+  return { background, lyrics }
 })

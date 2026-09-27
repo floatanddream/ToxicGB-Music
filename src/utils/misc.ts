@@ -64,11 +64,25 @@ const mergeSubLyric = (
 }
 
 /**
- * 提取歌词数据：逐字（yrc）优先，否则普通（lrc），并把翻译与音译一并合上。
+ * 副歌词（翻译 / 音译）的显示开关。
+ *
+ * 由**调用方**从设置里读了传进来 —— 这两个提取函数保持纯函数、不 import store：
+ * `utils/` 是工具层，让它依赖 Pinia 会把「能不能单独用 / 单独测」这件事毁掉。
+ */
+export interface SubLyricOptions {
+    /** 翻译（常规副行） */
+    showTranslation: boolean;
+    /** 罗马音 / 音译（更小更淡的第三行） */
+    showRomanization: boolean;
+}
+
+/**
+ * 提取歌词数据：逐字（yrc）优先，否则普通（lrc），并按开关合并翻译与音译。
  * @param {Object} data - 包含歌词数据的对象
+ * @param {SubLyricOptions} options - 翻译 / 音译的显示开关
  * @returns {LyricLine[]} 解析后的歌词数据
  */
-export const extractLeagcyLyrics = (data :any):LyricLine[] => {
+export const extractLeagcyLyrics = (data :any, options: SubLyricOptions):LyricLine[] => {
     // ⚠️ 副歌词必须**跟着原文的来源配对**，不能混用 —— 响应里是两套平行数据：
     //     逐字原文 yrc  ←→ 逐字翻译 ytlrc、逐字音译 yromalrc
     //     普通原文 lrc  ←→ 普通翻译 tlyric、普通音译 romalrc
@@ -79,16 +93,16 @@ export const extractLeagcyLyrics = (data :any):LyricLine[] => {
     // 逐字歌词优先（信息量更大）
     if (data?.yrc?.lyric && data.yrc.version > 0) {
         const lines = parseYrc(data.yrc.lyric);
-        mergeSubLyric(lines, data?.ytlrc?.lyric, 'translatedLyric');
-        mergeSubLyric(lines, data?.yromalrc?.lyric, 'romanLyric');
+        if (options.showTranslation) mergeSubLyric(lines, data?.ytlrc?.lyric, 'translatedLyric');
+        if (options.showRomanization) mergeSubLyric(lines, data?.yromalrc?.lyric, 'romanLyric');
         return lines;
     }
 
     // 回退到普通歌词
     if (data?.lrc?.lyric && data.lrc.version > 0) {
         const lines = parseLrc(data.lrc.lyric);
-        mergeSubLyric(lines, data?.tlyric?.lyric, 'translatedLyric');
-        mergeSubLyric(lines, data?.romalrc?.lyric, 'romanLyric');
+        if (options.showTranslation) mergeSubLyric(lines, data?.tlyric?.lyric, 'translatedLyric');
+        if (options.showRomanization) mergeSubLyric(lines, data?.romalrc?.lyric, 'romanLyric');
         return lines;
     }
 
@@ -96,6 +110,19 @@ export const extractLeagcyLyrics = (data :any):LyricLine[] => {
     return [];
 }
 
-export const extractTTMLLyrics = (data :any):LyricLine[] => {
-    return parseTTML(data).lines || [];
+export const extractTTMLLyrics = (data :any, options: SubLyricOptions):LyricLine[] => {
+    const lines: LyricLine[] = parseTTML(data).lines || [];
+
+    // TTML **自带**翻译与音译（它的格式里就编码了），不像普通歌词那样需要外部合并。
+    // 但要「不显示」时同样得自己动手：amll 没有这类开关，只能把字段清掉。
+    for (const line of lines) {
+        if (!options.showTranslation) line.translatedLyric = '';
+        if (!options.showRomanization) {
+            line.romanLyric = '';
+            // 逐字音译挂在每个词上，只清行级字段不够
+            for (const word of line.words) word.romanWord = '';
+        }
+    }
+
+    return lines;
 }
