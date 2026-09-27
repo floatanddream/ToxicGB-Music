@@ -187,11 +187,22 @@ watch(playbackRate, (rate) => {
 
 /*
  * MV 铺满背景层。
+ *
+ * `brightness(.7)` 是**为了白字可读**，不是为了好看：歌词由 amll 渲染，它用的是
+ * `mix-blend-mode: plus-lighter`（加性混合，结果 = 背景 + 文字）。碰到纯白画面时
+ * 白 + 白 会钳到白 —— 整片歌词连同未播行的灰调白字一起看不见。全屏播放器里的
+ * 歌名、时间、按钮也是白字，同样受影响。压暗 MV 是通行做法，也保住了 amll 那种
+ * 「亮到发光」的观感（如果改成关掉加性混合 + 文字阴影，就等于把这套视觉核心换掉了）。
+ *
+ * **只压 MV，不压 mesh 渐变** —— 后者是从专辑封面生成的，通常是中深色调，白字够用；
+ * 压它只会平白牺牲观感。
+ *
  * 不设 crossOrigin —— 歌曲的 <audio> 设它是为了接 Web Audio（EQ / 变调），
  * 而这里不接音频图，设了反而要求 CDN 返回 CORS 头，白白多一个失败面。
  */
 .mv-video {
   transform: scale(1.08); /* 轻微放大，避免边缘黑边 */
+  filter: brightness(0.7);
   position: absolute;
   top: 0;
   left: 0;
