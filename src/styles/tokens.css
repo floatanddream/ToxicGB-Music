@@ -14,6 +14,7 @@
   --bg-tertiary: #f3f4f6;
   --bg-card: rgba(255, 255, 255, 0.7);
   --bg-hover: rgba(243, 244, 246, 0.7);
+  --bg-options-hover: rgba(201, 201, 201, 0.5);
 
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
@@ -86,6 +87,7 @@
   --bg-tertiary: #262626;
   --bg-card: rgba(31, 41, 55, 0.6);
   --bg-hover: rgba(55, 65, 81, 0.5);
+  --bg-options-hover: rgba(255, 255, 255, 0.06);
 
   --text-primary: #ffffff;
   --text-secondary: #d1d5db;

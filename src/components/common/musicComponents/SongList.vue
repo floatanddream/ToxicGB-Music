@@ -228,17 +228,9 @@ const handleAddSongToUserPlaylist = (song: Song) => {
 
 /* 浅色模式 - 透明毛玻璃效果 */
 .song-item:hover .p-3 {
-  background: rgba(201, 201, 201, 0.5);
+  background: var(--bg-options-hover);
 
   /* backdrop-filter: blur(10px) saturate(200%) brightness(1.05);
   -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.05); */
-}
-
-/* 暗色模式 - 透明毛玻璃效果 */
-.dark .song-item:hover .p-3 {
-  background: rgba(255, 255, 255, 0.06);
-
-  /* backdrop-filter: blur(10px) saturate(180%) brightness(1.5);
-  -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.5); */
 }
 </style>

@@ -83,7 +83,7 @@ const addSongToPlaylist = async (playlist : Playlist) => {
           <button
             v-for="playlist in userCreatePlaylist"
             :key="playlist.id"
-            class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
+            class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-(--bg-options-hover) transition-colors disabled:opacity-50"
             :disabled="loading"
             @click="addSongToPlaylist(playlist)"
           >
