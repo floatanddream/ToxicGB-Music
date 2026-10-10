@@ -760,6 +760,40 @@ export const usePlayerStore = defineStore('player', () => {
     playByIndex(index >= playlist.value.length ? 0 : index)
   }
 
+  /**
+   * 把队列里的第 `from` 首挪到插入位 `to`。用于列表拖拽排序。
+   *
+   * ⚠️ `to` 是**移除之前**的插入位（取值 0..n，n = 队列长度），与拖拽落点的几何换算
+   * 同坐标系 —— 所以 `to === from` 与 `to === from + 1` 都表示「拖回原位」。
+   * 别改成「移除之后的最终下标」，那样这两种 no-op 的判据会变形。
+   */
+  const moveSong = (from: number, to: number) => {
+    const n = playlist.value.length
+    if (from < 0 || from >= n || to < 0 || to > n) return
+    if (to === from || to === from + 1) return
+
+    const currentId = currentSong.value?.id
+    const moved = playlist.value[from]
+    if (!moved) return
+
+    playlist.value.splice(from, 1)
+    // 被挪走的项自己占掉一格，落点在它后面时插入位要减 1
+    playlist.value.splice(to > from ? to - 1 : to, 0, moved)
+
+    // currentIndex 按 **id 重算**，不跟踪增量 ——
+    // 「被拖的是当前曲 / 跨过当前曲 / 与当前曲无关」用增量写要分三种分支，
+    // 任何一处算错都会静默播错歌；重算一行就够且天然正确（与 removeFromPlaylist 同源）。
+    // 用 id 不用对象引用：preloadNextSong 会往槽位写「同 id 的新对象」。
+    if (currentId !== undefined) {
+      const i = playlist.value.findIndex((s) => s.id === currentId)
+      if (i !== -1) currentIndex.value = i
+    }
+
+    // 刻意**不动 randomQueue**：它存的是 song id，随机模式下「下一首」由那份洗好的
+    // 序列决定，重排列表不会、也不应该立刻改变它（否则拖一下顺序「下一首」就跳了）。
+    // 代价是随机模式下拖完看不出「下一首」的变化，要等下次重新洗牌才反映 —— 已知且接受。
+  }
+
   /* ---------------- 基础控制 ---------------- */
   const play = () => {
     player.play()
@@ -824,12 +858,26 @@ export const usePlayerStore = defineStore('player', () => {
   /* ---------------- 预加载 ---------------- */
   const preloadNextSong = async () => {
     for (let i = currentIndex.value; i < currentIndex.value + 3; i++) {
-      if (i < playlist.value.length) {
-        if (playlist.value[i]?.url) continue
-        let songWithUrl: Song = await getSong(playlist.value[i]!)
+      const target = playlist.value[i]
+      if (!target) break
+      if (target.url) continue
+
+      let songWithUrl: Song
+      try {
+        songWithUrl = await getSong(target)
+      } catch (err) {
+        // 预加载失败不该冒成未处理的 Promise 拒绝 —— 反正 playByIndex 到时会自己重取
+        console.warn('[playerStore] 预加载失败:', err)
+        continue
+      }
+
+      // ⚠️ 竞态守卫：await 期间队列可能被重排 / 删除（拖拽排序、removeFromPlaylist）。
+      // 此时 playlist[i] 已经是别人了，直接写回就等于**把 A 的音源写进 B 的槽位** ——
+      // 点 B 播出来是 A，而且这个污染会一直留在内存里。
+      // 槽位不再是同一首就丢弃这次结果：漏一次预加载只是点的时候多等一下，
+      // 比播错歌轻得多。（不用 findIndex 重新定位 —— 那会多出一条写路径，风险更大。）
+      if (playlist.value[i]?.id === target.id) {
         playlist.value[i] = songWithUrl
-      } else {
-        break
       }
     }
   }
@@ -918,6 +966,7 @@ export const usePlayerStore = defineStore('player', () => {
     setPitchSemitones,
     switchSong,
     removeFromPlaylist,
+    moveSong,
     setFullPlayer,
   }
 })
