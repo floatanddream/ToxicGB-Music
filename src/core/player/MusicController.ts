@@ -336,6 +336,28 @@ export class MusicController {
     this.play()
   }
 
+  /**
+   * 卸掉当前音源，回到「什么都没装载」的状态。
+   *
+   * 用途：把最后一首从播放列表里删掉后队列空了 —— 只 pause() 的话 `audio.src`
+   * 还指着那首已经不在列表里的歌，用户点 ▶ 会把它重新播出来，而界面上又找不到它。
+   *
+   * 顺带清 MediaSession 的 metadata：锁屏 / 硬件媒体键读的是它，
+   * 留着会显示一首已经不存在的歌。
+   */
+  clearSource() {
+    this.audio.pause()
+
+    // 必须 removeAttribute + load()，不能写 src = ''：空字符串会被解析成
+    // 当前页面地址，反而触发一次真正的加载失败。
+    this.audio.removeAttribute('src')
+    this.audio.load()
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = null
+    }
+  }
+
   play() {
     // 必须保持同步，不能改成 async + await ctx.resume()：
     // 自动播放策略要求 audio.play() 发生在用户手势的同步路径上，

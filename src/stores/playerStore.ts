@@ -706,6 +706,60 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
+  /**
+   * 从当前播放列表里删掉一首歌。
+   *
+   * 整个播放器都建立在 **`playlist[currentIndex]` 就是 `currentSong`** 这条不变量上
+   * （`next()` / `prev()` / 全屏播放器的「接下来播放」全靠它定位），删除必须维持它。
+   * 三种情形：
+   *   删的是**前面**的歌 → 索引整体前移一格，当前曲的槽位不动
+   *   删的是**后面**的歌 → 当前曲槽位没受影响，什么都不用管
+   *   删的是**正在播**的歌 → 播「顶上来」的那首；它是末尾则回绕到队首；删空了就停止
+   *
+   * 按 **id** 而不是对象引用匹配：preloadNextSong() 会往槽位上写「同 id 的新对象」
+   * （`playlist.value[i] = songWithUrl`），引用匹配在那之后就会失效。
+   *
+   * 队列里同 id 重复出现时只删第一处 —— 与 insertNext 的去重、switchSong 的定位
+   * 取的是同一个 first-match 语义，不额外区分。
+   */
+  const removeFromPlaylist = (song: Song) => {
+    const index = playlist.value.findIndex((s) => s.id === song.id)
+    if (index === -1) return
+
+    // 删前面的歌 → 索引跟着前移，否则 currentIndex 会指到隔壁那首上
+    //（与 insertNext 的去重分支同源）
+    if (index < currentIndex.value) {
+      playlist.value.splice(index, 1)
+      currentIndex.value--
+      return
+    }
+
+    // 删后面的歌 → 当前曲的槽位没动
+    if (index > currentIndex.value) {
+      playlist.value.splice(index, 1)
+      return
+    }
+
+    // 删的就是正在播的这首
+    playlist.value.splice(index, 1)
+
+    if (playlist.value.length === 0) {
+      // 队列空了，没有可跳的下一首。先清 currentSong 再卸音源 ——
+      // audio 的 error 事件会走到 handlePlaybackFailure()，它靠 currentSong
+      // 判空决定要不要动作，顺序反了会让它对着已经删掉的歌做重试。
+      currentIndex.value = 0
+      currentSong.value = null
+      currentTime.value = 0
+      duration.value = 0
+      player.clearSource()
+      return
+    }
+
+    // splice 之后「顶上来」的那首正好还在 index 位置；若 index 已经越界
+    //（删的是最后一首）则回绕到队首，与 next() 的回绕规则一致
+    playByIndex(index >= playlist.value.length ? 0 : index)
+  }
+
   /* ---------------- 基础控制 ---------------- */
   const play = () => {
     player.play()
@@ -863,6 +917,7 @@ export const usePlayerStore = defineStore('player', () => {
     setPreservesPitch,
     setPitchSemitones,
     switchSong,
+    removeFromPlaylist,
     setFullPlayer,
   }
 })

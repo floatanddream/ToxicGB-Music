@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { X, ListMusic } from 'lucide-vue-next'
 import { usePlayerStore } from '@/stores/playerStore'
 import ArtistDivider from './musicComponents/artistDivider.vue'
+import SongContextMenu from '../misc/SongContextMenu.vue'
 import emitter from '@/utils/eventBus'
 import { EVENTS } from '@/constants/events'
 
@@ -110,21 +111,26 @@ watch(
     <div ref="scrollRef" class="playlist-viewport custom-scrollbar" @scroll="onScroll">
       <div class="playlist-spacer" :style="{ height: `${totalHeight}px` }">
         <div class="playlist-visible" :style="{ transform: `translateY(${offsetY}px)` }">
-          <div
-            v-for="song in visibleItems"
-            :key="song.id"
-            class="playlist-item"
-            :class="{ 'playlist-item-active': currentSong?.id === song.id }"
-            @dblclick="emitter.emit(EVENTS.SWITCH_SONG, song)"
-          >
-            <img :src="song.cover" :alt="song.title" class="playlist-cover" />
-            <div class="playlist-info">
-              <span class="playlist-song-title">{{ song.title }}</span>
-              <!-- <span class="playlist-artist">{{ song.artist[0]?.name }}</span> -->
-              <ArtistDivider :artists="song.artist" />
+          <!--
+            v-for 挂在菜单组件上而不是行 div 上：SongContextMenu 用触发器的 as-child
+            把右键监听合到行上，渲染出来仍是每行一个 68px 的盒子，
+            虚拟滚动的 ITEM_HEIGHT 不受影响。
+          -->
+          <SongContextMenu v-for="song in visibleItems" :key="song.id" :song="song">
+            <div
+              class="playlist-item"
+              :class="{ 'playlist-item-active': currentSong?.id === song.id }"
+              @dblclick="emitter.emit(EVENTS.SWITCH_SONG, song)"
+            >
+              <img :src="song.cover" :alt="song.title" class="playlist-cover" />
+              <div class="playlist-info">
+                <span class="playlist-song-title">{{ song.title }}</span>
+                <!-- <span class="playlist-artist">{{ song.artist[0]?.name }}</span> -->
+                <ArtistDivider :artists="song.artist" />
+              </div>
+              <span class="playlist-duration">{{ song.duration }}</span>
             </div>
-            <span class="playlist-duration">{{ song.duration }}</span>
-          </div>
+          </SongContextMenu>
         </div>
       </div>
     </div>
@@ -303,7 +309,7 @@ watch(
 
 .playlist-duration {
   font-size: 12px;
-  color: #999;
+  /* color: #999; */
   flex-shrink: 0;
 }
 
