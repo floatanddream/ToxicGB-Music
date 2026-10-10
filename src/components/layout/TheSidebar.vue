@@ -33,8 +33,8 @@ const isPlaylistActive = (playlistId: string | number) => {
 }
 
 // 歌单折叠状态
-const myPlaylistsCollapsed = ref(true)
-const subPlaylistsCollapsed = ref(true)
+const myPlaylistsCollapsed = ref(false)
+const subPlaylistsCollapsed = ref(false)
 
 const toggleMyPlaylists = () => {
   myPlaylistsCollapsed.value = !myPlaylistsCollapsed.value
